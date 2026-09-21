@@ -1,0 +1,23 @@
+{
+  "extraKnownMarketplaces": {
+    "jsdotnet-devbook": {
+      "source": { "source": "github", "repo": "JSdotNet/devbook" }
+    },
+    "jsdotnet-ai-plugins": {
+      "source": { "source": "github", "repo": "JSdotNet/ai-plugins" }
+    }
+  },
+  "enabledPlugins": {
+    "devbook@jsdotnet-devbook": true,
+    "devbook-config@jsdotnet-devbook": true,
+    "delivery@jsdotnet-devbook": true,
+    "delivery-schedule@jsdotnet-devbook": true,
+    "architecture@jsdotnet-ai-plugins": true,
+    "qa@jsdotnet-ai-plugins": true,
+    "domain-design@jsdotnet-ai-plugins": true,
+    "ux-design@jsdotnet-ai-plugins": true,
+    "documentation@jsdotnet-ai-plugins": true,
+    "csharp-coding@jsdotnet-ai-plugins": true,
+    "github@jsdotnet-ai-plugins": true
+  }
+}
