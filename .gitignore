@@ -55,3 +55,9 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# devbook:begin
+# Machine-scope, never committed. See AGENTS.md.
+AGENTS.local.md
+.devbook/config.local.json
+# devbook:end

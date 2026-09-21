@@ -1,0 +1,274 @@
+{
+  "id": "finance",
+  "bindings": {
+    "delivery.tracker": {
+      "provider": "github"
+    },
+    "delivery.roles": {
+      "architecture": "architecture",
+      "qa": "qa",
+      "domain": "domain-design",
+      "ux": "ux-design",
+      "docs": "documentation",
+      "product": null,
+      "security": null
+    }
+  },
+  "extensions": {
+    "session.start": [
+      "devbook:check"
+    ],
+    "implement": "csharp-coding:coding",
+    "validate": "csharp-coding:coding",
+    "verify": "devbook:verify-change",
+    "flow.end": [
+      "devbook:install"
+    ]
+  },
+  "policy": {
+    "commit.at": "gate"
+  },
+  "gates": [
+    {
+      "at": "app.start",
+      "when": "before",
+      "purpose": "resource",
+      "prompt": "Only one runtime instance runs here. OK to start?",
+      "unattended": "block"
+    }
+  ],
+  "components": {
+    "devbook": {
+      "pluginVersion": "1.2.0",
+      "contractVersion": 11,
+      "adopted": [
+        "arc42",
+        "domain",
+        "tech",
+        "design",
+        "ai"
+      ],
+      "materialized": {
+        ".devbook/_tools/devbook-meta": {
+          "from": "1.2.0",
+          "hash": "sha256:cb1c497fd8ccb440a7b147d00d7858384357c25755f7c5b1eced851bae3bf82a",
+          "managed": true
+        },
+        ".devbook/_tools/devbook-tech": {
+          "from": "1.2.0",
+          "hash": "sha256:d52189a981045b3da2f381e878a9aee1b42847dea1f10556f4225757d5a22fd5",
+          "managed": true
+        },
+        ".github/workflows/devbook-meta.yml": {
+          "from": "1.2.0",
+          "hash": "sha256:e34e16641f832a26b1b792cd745a66f72a8953b3b148e7b206783fd88c8831f7",
+          "managed": true
+        },
+        "AGENTS.md#devbook": {
+          "from": "1.2.0",
+          "hash": "sha256:04cc9322a9b76085d12443e55790b3dd78cdd09901cefa017866754f0d71a37d",
+          "managed": true
+        },
+        ".gitignore#devbook": {
+          "from": "1.2.0",
+          "hash": "sha256:9436c77487edb076796440bf207183acf53cd96e12d390e7bb49e18cfb58cc27",
+          "managed": true
+        },
+        "CLAUDE.md": {
+          "from": "1.2.0",
+          "hash": "sha256:242ac502dac96ce4c2750924b37ffb24dbc6632f0e4dd505a40e5669f8714854",
+          "managed": false
+        },
+        ".github/copilot-instructions.md": {
+          "from": "1.2.0",
+          "hash": "sha256:76f5995d1cd64752e1d7fd534912a779803de089883e11d5658f56d34f3d3201",
+          "managed": false
+        },
+        ".agents/rules/devbook-ai.md": {
+          "from": "1.2.0",
+          "hash": "sha256:9f230b967ee63360ddd08f7d07016f53dce81190274f8be47807781d75039dec",
+          "managed": true
+        },
+        ".claude/rules/devbook-ai.md": {
+          "from": "1.2.0",
+          "hash": "sha256:71565ce2531437853a08501a5631f5ee2ae0d17b012e499bf0d0a8f42a829b58",
+          "managed": true
+        },
+        ".github/instructions/devbook-ai.instructions.md": {
+          "from": "1.2.0",
+          "hash": "sha256:f9ba3ab598b46ea959fed6fe2ae2a7438fa63ce18cd0210cd61fb5c6131d6265",
+          "managed": true
+        },
+        ".agents/rules/devbook-annotations.md": {
+          "from": "1.2.0",
+          "hash": "sha256:81bf05f8e9ce94d0eabbc3c1aa1ad743777c204114928f5f79c2f4247f86e820",
+          "managed": true
+        },
+        ".claude/rules/devbook-annotations.md": {
+          "from": "1.2.0",
+          "hash": "sha256:f5373d9b68b55ee44dc7879eb34a3c054fd4d45989e0c97616275bd89c86c008",
+          "managed": true
+        },
+        ".github/instructions/devbook-annotations.instructions.md": {
+          "from": "1.2.0",
+          "hash": "sha256:2f2d0faae5ae5c4e73fb0d321cde73d86f6864e3fd43b3e1cbd07c01b9fb5685",
+          "managed": true
+        },
+        ".agents/rules/devbook-arc42.md": {
+          "from": "1.2.0",
+          "hash": "sha256:f7de63072c3c96eae8059e4b9fd18ea312aefd614639f9441c38a765f2a7d9be",
+          "managed": true
+        },
+        ".claude/rules/devbook-arc42.md": {
+          "from": "1.2.0",
+          "hash": "sha256:a8a60911deea32f3e0e33bb7d81aef93d3c2db7cb6e06d637b9e2014b16e9af9",
+          "managed": true
+        },
+        ".github/instructions/devbook-arc42.instructions.md": {
+          "from": "1.2.0",
+          "hash": "sha256:52047a3e078a538a6be9becb04605244c6bcc5fba45e1a71f8e5fcc1ae35d188",
+          "managed": true
+        },
+        ".agents/rules/devbook-chapter-metadata.md": {
+          "from": "1.2.0",
+          "hash": "sha256:04d46fad875e6a596fab0163b935a09923e21ae816644a4e2e8c8570c0701618",
+          "managed": true
+        },
+        ".claude/rules/devbook-chapter-metadata.md": {
+          "from": "1.2.0",
+          "hash": "sha256:5f317ca4e0c59cdae8dd2dfe99566115cabf6955e998e2e9fa3148dbd6d63a54",
+          "managed": true
+        },
+        ".github/instructions/devbook-chapter-metadata.instructions.md": {
+          "from": "1.2.0",
+          "hash": "sha256:53c59c4667424b4d201fe9a76c5b61ffac0a9369423b84d329d7e47b31e257d1",
+          "managed": true
+        },
+        ".agents/rules/devbook-design.md": {
+          "from": "1.2.0",
+          "hash": "sha256:5946a73c11dab16bc528f4e69dd71f37279cbff197d4f830413dbf0251359c25",
+          "managed": true
+        },
+        ".claude/rules/devbook-design.md": {
+          "from": "1.2.0",
+          "hash": "sha256:83b34973226befcf2a37e5d1b35f57548188159cf4d4e3be1d0bb9ae2de53408",
+          "managed": true
+        },
+        ".github/instructions/devbook-design.instructions.md": {
+          "from": "1.2.0",
+          "hash": "sha256:06e93d3fbf4d512948e6a75c030cc174210db186ac5dcd7820da9451340adb51",
+          "managed": true
+        },
+        ".agents/rules/devbook-domain.md": {
+          "from": "1.2.0",
+          "hash": "sha256:91f3ec86456d23967260ecec98fc59067f3fddb874a3a007b3707b38edfb364a",
+          "managed": true
+        },
+        ".claude/rules/devbook-domain.md": {
+          "from": "1.2.0",
+          "hash": "sha256:43f1051607d73f810b9e4340f4ad90efb2c473e4b46f331c443bec64af529288",
+          "managed": true
+        },
+        ".github/instructions/devbook-domain.instructions.md": {
+          "from": "1.2.0",
+          "hash": "sha256:9955a3f9bca503c60b3dbbfd0fc7c2f04aaf8ef122f3cfc802b3ce6124b8ff09",
+          "managed": true
+        },
+        ".agents/rules/devbook-naming.md": {
+          "from": "1.2.0",
+          "hash": "sha256:7880a6da617a2c400db10df2234fb416584269038305f145f359a1134132bad6",
+          "managed": true
+        },
+        ".claude/rules/devbook-naming.md": {
+          "from": "1.2.0",
+          "hash": "sha256:21e942583e0cdcac06f8840f12faab65c1e7a2568707f227fc4607fb4c45059f",
+          "managed": true
+        },
+        ".github/instructions/devbook-naming.instructions.md": {
+          "from": "1.2.0",
+          "hash": "sha256:38652f1e267cbb7da51e6b026d5dc81d61ddd9af19b7d40ec5eeb3f0c1bddbc4",
+          "managed": true
+        },
+        ".agents/rules/devbook-tech.md": {
+          "from": "1.2.0",
+          "hash": "sha256:5a3142b87a13cef7bdda52cb3717d907ab76e742497213f3ce887a923aa23a0f",
+          "managed": true
+        },
+        ".claude/rules/devbook-tech.md": {
+          "from": "1.2.0",
+          "hash": "sha256:6e8ad7dcafeb8fe02cb344761641e2123794195ec7e6cf9405760928e6d39e55",
+          "managed": true
+        },
+        ".github/instructions/devbook-tech.instructions.md": {
+          "from": "1.2.0",
+          "hash": "sha256:b5e876e4851849a2f9dc75fabb595cde1fb1a9e7eeb5d509a5bfa7fc0586ec97",
+          "managed": true
+        }
+      },
+      "migrations": [
+        {
+          "id": "010-terms-live-in-domain-md",
+          "applied": "2026-09-21"
+        },
+        {
+          "id": "011-context-md",
+          "applied": "2026-09-21"
+        }
+      ]
+    },
+    "delivery": {
+      "pluginVersion": "1.2.0",
+      "materialized": {
+        ".agents/skills/start.md": {
+          "from": "1.2.0",
+          "hash": "sha256:ebf42db1905de688c0850330124ed69c57ce9b8fb224b07ff1b75f0eda3b4be5",
+          "managed": true
+        },
+        ".claude/skills/start/SKILL.md": {
+          "from": "1.2.0",
+          "hash": "sha256:d45ca0e93be05e0a6968515c6c37570439667d91549f7f35b52e669bad33f196",
+          "managed": true
+        },
+        ".github/skills/start/SKILL.md": {
+          "from": "1.2.0",
+          "hash": "sha256:d45ca0e93be05e0a6968515c6c37570439667d91549f7f35b52e669bad33f196",
+          "managed": true
+        },
+        ".agents/skills/capture.md": {
+          "from": "1.2.0",
+          "hash": "sha256:6cd8cd33dabeff486e128ecd49627a9902f68a8491eaf1da38b3c0e6876241d0",
+          "managed": true
+        },
+        ".claude/skills/capture/SKILL.md": {
+          "from": "1.2.0",
+          "hash": "sha256:f50ccbdda29d36c12bd60a834dd83747fd10f50a1bf413b2984841f6b7a5c558",
+          "managed": true
+        },
+        ".github/skills/capture/SKILL.md": {
+          "from": "1.2.0",
+          "hash": "sha256:f50ccbdda29d36c12bd60a834dd83747fd10f50a1bf413b2984841f6b7a5c558",
+          "managed": true
+        }
+      }
+    },
+    "schedule": {
+      "pluginVersion": "1.2.0",
+      "enabled": [
+        "devbook-check",
+        "merge-review",
+        "package-update",
+        "tech-update",
+        "prose-check",
+        "weekly-update"
+      ],
+      "overrides": {
+        "package-update": {
+          "cron": "0 4 * * 6"
+        },
+        "tech-update": {
+          "cron": "0 4 * * 0"
+        }
+      }
+    }
+  }
+}
