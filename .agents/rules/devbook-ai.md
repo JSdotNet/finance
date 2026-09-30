@@ -30,7 +30,7 @@ Code, an MCP server, a model provider, a CI agent — is registered as a `tech/`
 chapter like any other technology, with `tech/`'s `status` recording its maturity
 as a technology in this project.
 
-`ai/` never re-registers it. A `ai/` chapter names the **usage**: the practice,
+`ai/` never re-registers it. An `ai/` chapter names the **usage**: the practice,
 the agent persona, the skill, the guardrail — the thing that exists only because
 of how we chose to work — and points at the registered technology with
 `depends-on`.
@@ -44,7 +44,7 @@ of how we chose to work — and points at the registered technology with
 | "Every agent-authored change is reviewed by a human before merge" | `ai/` |
 
 The test: **if it has a vendor and a version, it is a `tech/` chapter.** If it is
-a decision about how we work, it is a `ai/` chapter. A `ai/` chapter whose
+a decision about how we work, it is an `ai/` chapter. An `ai/` chapter whose
 `depends-on` points at nothing in `tech/` is usually fine — most practices,
 concepts, and guardrails have no product behind them.
 
@@ -101,15 +101,15 @@ nothing in the picture.
     two never disagree.
   - Explains the status ladder and how to read and extend the folder.
   - Its `##` sections do **not** carry per-chapter metadata blocks; the file
-    carries a file-level block only — the same rule as `.domain/context-map.md`
-    and `.tech/technology-graph.md`.
+    carries a file-level block only — the same rule as `.devbook/domain/context-map.md`
+    and `.devbook/tech/technology-graph.md`.
 - **`<nn>-<part>.md`** — One `## <Chapter Name>` chapter per usage. Each chapter
   is an addressable node in the graph, carries a chapter metadata block, and
   says its stages with `stage`.
 - **concepts.md** — The ideas the practices rest on. A concept carries `stage`
   where it applies at particular stages and omits it when it applies throughout.
 - **`_meta/*.json`** — Derived, generated indexes for this folder. Never
-  hand-edited; see `devbook-derived-artifacts.md`.
+  hand-edited; the rule for them comes with the layered plugin that commits the index.
 
 ## The loop picture
 
@@ -182,10 +182,11 @@ learns one adoption vocabulary and applies it in both folders:
 | `hold` | Kept, but no longer expanded; avoid new usage. |
 | `retired` | No longer used. Kept because knowing what we stopped doing, and why, is the most useful record in this folder. |
 
-On top of this ladder sits the shared `approved` rung, defined once in
-`devbook-chapter-metadata.md`: a person approved this chapter,
-recorded with `approved-by` and `approved-at`. It is written explicitly and
-comes off the moment the content changes.
+A repository may narrow this ladder per file in `.devbook/statuses.json`, and
+never add to it — see `devbook-chapter-metadata.md`.
+
+There is no `approved` or `accepted` rung here. The two decision rungs are
+`domain/`'s alone — see `devbook-domain.md`.
 
 **`status` is required on every `ai/` block, with no resting value to omit** —
 for the same reason as `tech/`, whose ladder this is: the value is a rating, and
@@ -293,4 +294,5 @@ domain chapter beside it.
 
 - `devbook-chapter-metadata.md` — required `meta` block fields.
 - `devbook-tech.md` — the technology registry `ai/` links into.
-- `devbook-derived-artifacts.md` (a layered plugin's rule) — rules for `_meta/`.
+- The rule for `_meta/` — delivered by the layered plugin that commits the index, where
+  a repository has adopted it.

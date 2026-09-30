@@ -1,7 +1,11 @@
 // metadata.mjs — parsing and validation for the chapter/file `meta` YAML
 // blocks defined in devbook-chapter-metadata.md.
 //
-// The schema used across .domain/.arc42/.tech/.design/.ai is intentionally small and
+// Dependency-free ESM against node built-ins, like everything else executable
+// here: `node:crypto` is what fingerprints an approved chapter's content.
+import { createHash } from "node:crypto";
+//
+// The schema used across .devbook/{arc42,domain,tech,design,ai} is intentionally small and
 // flat (single-line scalars, null, or bracket lists), so we parse it with a
 // tiny hand-written reader instead of pulling in a YAML dependency.
 
@@ -20,7 +24,7 @@
  * one of them lives under the one `.devbook/` parent: `.devbook/arc42`,
  * `.devbook/domain`, and so on. The parent already carries the "hidden support
  * directory" signal, so the subfolders drop the dot. There is no other layout
- * (record 80); five root-level dot-folders are reported, never indexed.
+ * (the chapter-schema decision); five root-level dot-folders are reported, never indexed.
  */
 export const DEVBOOK_FOLDER_NAMES = ["arc42", "domain", "tech", "design", "ai"];
 
@@ -28,34 +32,125 @@ export const DEVBOOK_FOLDER_NAMES = ["arc42", "domain", "tech", "design", "ai"];
 export const DEVBOOK_ROOT = ".devbook";
 export const DEVBOOK_PREFIX = `${DEVBOOK_ROOT}/`;
 
+/**
+ * The change folder: where a proposed change to the devbook lives until it is
+ * merged. It sits outside `.devbook/` because OpenSpec, whose change lane it
+ * is, resolves `changes/` only under a folder literally named `openspec/` —
+ * the spike recorded in the repository's devbook-openspec building block. The
+ * names are OpenSpec's and fixed. A repository adopts it like any folder, by
+ * having it; `archive/` inside it is history and never indexed.
+ *
+ * Of each change, `proposal.md` and every file under `devbook-delta/` are
+ * devbook chapters. `solution.md` and `tasks.md` are the change's own working
+ * files, and nothing in them lands in the devbook.
+ */
+export const CHANGES_FOLDER = "changes";
+export const CHANGES_ROOT = "openspec/changes";
+export const CHANGES_ARCHIVE = `${CHANGES_ROOT}/archive`;
+export const DELTA_FOLDER = "devbook-delta";
+
+/**
+ * Where a path sits in the change folder, or null outside it and inside
+ * `archive/`. `part` is `proposal`, `delta`, or `other`; a delta's `target` is
+ * the devbook file it changes — its path under `devbook-delta/`, re-rooted at
+ * `.devbook/`.
+ */
+export function changePathParts(relPath) {
+    const normalized = String(relPath).replace(/\\/g, "/");
+    if (!normalized.startsWith(`${CHANGES_ROOT}/`)) return null;
+    const [name, ...rest] = normalized.slice(CHANGES_ROOT.length + 1).split("/");
+    if (!name || name === "archive") return null;
+    const inner = rest.join("/");
+    if (inner === "proposal.md") return { name, part: "proposal", target: null };
+    if (rest[0] === DELTA_FOLDER && rest.length > 1) {
+        return { name, part: "delta", target: `${DEVBOOK_PREFIX}${rest.slice(1).join("/")}` };
+    }
+    return { name, part: "other", target: null };
+}
+
 const APPROVED_STATUS = "approved";
 
+// One rung above `approved`, and the two are a stack rather than a choice:
+// `approved` says the specification is right, `accepted` says what was built
+// satisfies it. They are usually stated by different people on different days,
+// which is why the acceptance never replaces the approval record — a chapter
+// at `accepted` carries both. Acceptance is of the chapter's content, not of a
+// commit; which pull request delivered it is the tracker's business.
+const ACCEPTED_STATUS = "accepted";
+
+// The two decision rungs sit on `domain/`'s ladder and on a change's
+// `proposal.md`, and on no other. What they record is that a person agreed the
+// model — or a change to the devbook — and then that what was built satisfies
+// it. The other four ladders rate content or a technology, and a rung on them
+// was surface nothing used.
 const STATUS_BY_FOLDER = {
-    domain: ["draft", "proposed", "active", "deprecated", APPROVED_STATUS],
-    arc42: ["draft", "proposed", "active", "deprecated", APPROVED_STATUS],
-    tech: ["candidate", "trial", "adopted", "hold", "retired", APPROVED_STATUS],
-    design: ["draft", "active", "deprecated", APPROVED_STATUS],
+    domain: ["draft", "proposed", "active", "deprecated", APPROVED_STATUS, ACCEPTED_STATUS],
+    arc42: ["draft", "proposed", "active", "deprecated"],
+    tech: ["candidate", "trial", "adopted", "hold", "retired"],
+    design: ["draft", "active", "deprecated"],
     // `.ai` deliberately reuses `.tech`'s ladder: a reader learns one
     // adoption vocabulary. What is on the ladder differs — `.tech` rates a
     // technology, `.ai` rates a way of working with one.
-    ai: ["candidate", "trial", "adopted", "hold", "retired", APPROVED_STATUS],
+    ai: ["candidate", "trial", "adopted", "hold", "retired"],
+    // A change's `proposal.md` is the one block in the change folder with a
+    // status, and it carries the two decision rungs for the whole change: the
+    // change is reviewed and decided as one, so the decision is recorded once.
+    // A chapter a delta merges into gets no rung from it — its `change`
+    // provenance points at the archived proposal, which holds the record.
+    [CHANGES_FOLDER]: ["proposed", APPROVED_STATUS, ACCEPTED_STATUS],
 };
+
+/**
+ * The built-in ladder of a folder — what `status` may hold where the
+ * repository's `.devbook/statuses.json` declares nothing (see statuses.mjs).
+ */
+export const builtInStatuses = (folder) => [...(STATUS_BY_FOLDER[folder] ?? [])];
+
+/** The two decision rungs, which no repository configuration adds or removes. */
+export const DECISION_STATUSES = [APPROVED_STATUS, ACCEPTED_STATUS];
 
 // Who approved, and on what day. The gate writes both; they exist so the
 // decision travels with the content and lands in the git history, rather than
 // living in flow configuration or in someone's memory.
 const APPROVAL_FIELDS = ["approved-by", "approved-at"];
 
-// Where a chapter's review stands, who owes the next move, and since when. The
-// triad mirrors the approval triad on purpose — a chapter reads the same way on
-// its way to a decision as it does past one — and, like it, is devbook's
-// vocabulary written by the review workflow layered on top (record 77). Each
-// state names who is waiting: `requested` the reviewer, `changes-requested`
-// the author, `cleared` nobody. The notes in the chapter body are the evidence
-// a state stands on, so the two are checked against each other below.
-const REVIEW_FIELD = "review";
-const REVIEW_STATES = ["requested", "changes-requested", "cleared"];
-const REVIEW_FIELDS = [REVIEW_FIELD, "reviewer", "review-at"];
+// What was approved, as a fingerprint of the content itself. Deliberately
+// *not* in APPROVAL_FIELDS: those two are written together and are missing
+// together, while this one is optional everywhere. A repository that omits it
+// keeps the rule "the rung comes off when the content changes" as something a
+// person remembers; a repository that writes it has the checker say so.
+//
+// The rung already claimed the content had not changed since `approved-at`,
+// and nothing could establish it: git answers per file, not per chapter, so a
+// chapter in a busy file reads as stale and a chapter in a quiet one reads as
+// current whatever either actually is. A fingerprint of the chapter needs no
+// git and is exact.
+const CONTENT_HASH_FIELD = "approved-hash";
+
+// Who accepted the built work against this chapter, and on what day — the
+// approval triad's shape, one rung up, for the same reason: the statement
+// travels with the content instead of living in a tracker this repository
+// cannot read. `accepted-hash` is the same fingerprint as `approved-hash`,
+// computed by the same function, and the two are equal whenever both are
+// written — an acceptance is of the approved content.
+const ACCEPTANCE_FIELDS = ["accepted-by", "accepted-at"];
+const ACCEPTED_HASH_FIELD = "accepted-hash";
+
+// The rungs' six record fields, scoped to `domain/` with them. Kept as one
+// list so the folder that has the rungs and the folder that has the fields can
+// never drift apart.
+const DECISION_FIELDS = [
+    ...APPROVAL_FIELDS,
+    CONTENT_HASH_FIELD,
+    ...ACCEPTANCE_FIELDS,
+    ACCEPTED_HASH_FIELD,
+];
+
+// `sha256:` names the algorithm so a later one can be told apart, and eight
+// hex characters is the whole digest a reader ever compares: this detects an
+// edit, it does not defend against one, and nobody is forging a chapter past
+// their own approval gate.
+const CONTENT_HASH_PATTERN = /^sha256:[0-9a-f]{8}$/;
 
 // The value a folder's content settles on, which is therefore *omitted* rather
 // than written. A folder listed here makes `status` optional: absence means the
@@ -83,16 +178,16 @@ const RESTING_STATUS_BY_FOLDER = {
 // the name alone, so anchors are slugs of the bare name.
 //
 // A folder whose lists are empty defines no kind distinction of its own: in
-// `.arc42` and `.design` the only such distinction (chapter vs section) is
-// already carried by heading level, so inventing
-// values there would restate the document structure. `type` is omitted in those
-// folders and reported when used.
+// `.arc42` the only such distinction (chapter vs section) is already carried
+// by heading level, so inventing values there would restate the document
+// structure. `type` is omitted there and reported when used. `.design` is the
+// same apart from its one `requirement` kind.
 const TYPE_BY_FOLDER = {
     domain: {
         chapter: [
             // `context-map.md`'s own sections: one per bounded context. The
             // strategic view names contexts, so a chapter elsewhere can address
-            // one — `.domain/context-map.md#order-management` — the same way it
+            // one — `.devbook/domain/context-map.md#order-management` — the same way it
             // addresses an aggregate.
             "bounded-context",
             "aggregate",
@@ -106,6 +201,19 @@ const TYPE_BY_FOLDER = {
             "domain-event",
             "feature",
             "sub-feature",
+            // `requirements.md` and `domain.invariants.md`: behaviour, one rule per
+            // chapter, out of the prose the rest of the context is written in.
+            // The plural is the per-feature or per-aggregate grouping chapter,
+            // whose `related` names the prose chapter it belongs to; the
+            // singular is one rule. A `requirement` promises something to
+            // someone outside the model and keeps OpenSpec's word along with
+            // its `### Requirement:` / `#### Scenario:` heading shape; an
+            // `invariant` is what a type guarantees no matter who calls it and
+            // takes DDD's, because the aggregate is what answers for it.
+            "requirements",
+            "requirement",
+            "invariants",
+            "invariant",
             // `actors.md`: who works with this context. An actor is the
             // EventStorming and Domain Storytelling actor — the one that issues
             // a command — and never a persona, which is a UX archetype and
@@ -134,6 +242,11 @@ const TYPE_BY_FOLDER = {
             "actors",
             "features",
             "skills",
+            // The same two words at file level, meaning the same thing one
+            // scope up: the file holds a context's, a `##` chapter holds one
+            // feature's or one aggregate's.
+            "requirements",
+            "invariants",
             "model",
             "flow",
             "dependencies",
@@ -170,8 +283,20 @@ const TYPE_BY_FOLDER = {
         file: ["adoption-map", "stage", "concepts"],
     },
     arc42: { chapter: [], file: [] },
-    design: { chapter: [], file: [] },
+    // `.design` defines one kind and nothing else: a rule a component either
+    // keeps or breaks is a `### Requirement:` under the component's chapter,
+    // typed so a tool that reads OpenSpec reads it. Every other `.design`
+    // chapter is a guideline and stays untyped — see `OPTIONAL_TYPE_FOLDERS`.
+    design: { chapter: ["requirement"], file: [] },
+    // A change's `proposal.md` is a `change`. Its sections are sections, and a
+    // delta's chapters are typed by the folder they land in, never by this one.
+    [CHANGES_FOLDER]: { chapter: [], file: ["change"] },
 };
+
+// Folders whose value set marks out a few chapters rather than classifying
+// every one. A block there may omit `type`, and a declared one must still be
+// in the set.
+const OPTIONAL_TYPE_FOLDERS = ["design"];
 
 // `.tech` spelled this concept `kind` before `type` was unified across folders.
 // The old name keeps working so an existing repository is not broken by a
@@ -184,7 +309,7 @@ const LEGACY_TYPE_FIELD_BY_FOLDER = { tech: "kind" };
 // validates none of it, and produces no edges from it. That is the whole point.
 // Without it, every extension would force a devbook schema bump and a migration
 // in every consuming repository. Reserved and currently unused: the first
-// extension's state became schema fields instead (record 77).
+// extension's state became schema fields instead (the annotations decision).
 //
 // The block grammar is flat single-line scalars, so the namespace is spelled
 // with dotted keys — `ext.<plugin>.<key>: <value>` — rather than by nesting.
@@ -209,8 +334,9 @@ const COMMON_OPTIONAL_FIELDS = [
     "roadmap",
     "date",
     "tests",
-    ...APPROVAL_FIELDS,
-    ...REVIEW_FIELDS,
+    // Provenance: the change whose merge last touched this chapter. Written by
+    // the delta merge, never by hand, and valid in every folder.
+    "change",
 ];
 
 // A feature flag is a switch, so its `default` is one of two words. A setting's
@@ -220,6 +346,19 @@ const FLAG_DEFAULTS = ["on", "off"];
 // Who may change a setting at runtime: the person it belongs to, an
 // administrator for the whole tenant, or an operator for the whole system.
 const SETTING_SCOPES = ["user", "tenant", "system"];
+
+// What kind of change a proposal is, named once because it decides which flow
+// applies a step: new functionality, a change to behaviour that exists, or a
+// defect. OpenSpec's `devbook` schema asks for it in the same three words.
+export const CHANGE_CATEGORIES = ["feature", "behaviour-change", "defect"];
+
+// A change's name as its folder spells it, and so as `change` spells it on a
+// delta and, after the merge, on every chapter the delta touched.
+const CHANGE_NAME_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+
+// How a bounded context ships: as its own deployable `service`, or as a
+// `module` inside a modular monolith that hosts other contexts beside it.
+const CONTEXT_DEPLOYMENTS = ["service", "module"];
 
 // `roadmap` entries are lowercase kebab-case tag slugs, not chapter references.
 const ROADMAP_TAG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -287,6 +426,47 @@ const TEST_RUNNERS = {
 // because the author's intent is obvious and the fix is to move it to `related`.
 const DEVBOOK_PATH_PREFIX = /^\.(?:domain|arc42|tech|design|ai)\//;
 
+// What proves a behaviour chapter, by the file it sits in. The level of proof
+// follows the kind of promise: a requirement is made to someone outside the
+// model, so what proves it is the product driven the way that someone drives
+// it; an invariant is what the type guarantees, so a test that has to start
+// the product to reach it is asserting something else.
+//
+// This is the one place the schema reads `tests` against the chapter's `type`.
+// Everywhere else the field is a record of what asserts a chapter and carries
+// no expectation, and that stays true: these two kinds are checked because the
+// file they live in *is* the claim about their level, so a mismatch means one
+// of the two is wrong.
+//
+// Keyed by folder, then type: `.design`'s `requirement` is a rule a component
+// keeps or breaks on screen, so it is held to a different level than a
+// bounded context's.
+const BEHAVIOUR_TEST_LEVELS = {
+    domain: {
+        requirement: {
+            levels: ["e2e", "integration"],
+            reason:
+                "a requirement is proved `e2e` — it promises something to someone outside the model, so what proves it is the product driven the way that someone drives it — or `integration` where it is a policy no user triggers",
+        },
+        invariant: {
+            levels: ["unit"],
+            reason:
+                "an invariant is proved `unit` — it is what the type guarantees no matter who calls it, and a test that has to start the product to reach it is not asserting the guarantee",
+        },
+    },
+    design: {
+        requirement: {
+            levels: ["e2e"],
+            reason:
+                "a design requirement is proved `e2e` — a component keeps or breaks it in what the user sees and operates, so what proves it is the rendered component driven by keyboard or pointer, or compared by a visual test",
+        },
+    },
+};
+
+// The cases that prove one rule. They are structural headings one level under
+// the rule's own, so they are found by their text rather than by a block.
+const SCENARIO_HEADING = /^Scenario:/i;
+
 // Fields that steer how this document appears in the generated outline, and so
 // describe the document's place in its directory rather than a chapter inside
 // it. Valid on the file-level block only.
@@ -321,14 +501,30 @@ const REMOVED_FIELDS = {
         "not what you want, give the documents a `number` or mark the directory's " +
         "entry point with `index: root`. See " +
         "devbook-chapter-metadata.md.",
+    // A review in progress is workflow state: the rung says the chapter is
+    // waiting, the open annotation fences say on what, and who owes the next
+    // move belongs to the pull request or the tracker. Contract 21.
+    ...Object.fromEntries(
+        ["review", "reviewer", "review-at"].map((field) => [
+            field,
+            "a review in progress is the chapter's `status` rung plus its open annotation " +
+                "fences, and who owes the next move lives in the pull request or the tracker. " +
+                "Run the `021-no-review-triad` migration, which deletes it.",
+        ])
+    ),
 };
 
 const FOLDER_EXTRA_FIELDS = {
-    domain: ["depends-on", "aliases", "feature-flag", "setting", "role", "key", "default", "scope"],
+    domain: [
+        "depends-on", "aliases", "feature-flag", "setting", "role", "key", "default", "scope",
+        "deployment",
+        ...DECISION_FIELDS,
+    ],
     arc42: [],
     tech: ["kind", "version", "depends-on", "alternatives"],
     design: [],
     ai: ["depends-on", "stage"],
+    [CHANGES_FOLDER]: ["category", ...DECISION_FIELDS],
 };
 
 /**
@@ -357,6 +553,7 @@ const CHAPTER_ONLY_EXTRA_FIELDS = [
     "key",
     "default",
     "scope",
+    "deployment",
     "version",
     "alternatives",
     "stage",
@@ -397,15 +594,33 @@ const FIELD_TYPE_SCOPE = {
         key: ["feature-flag", "setting"],
         default: ["feature-flag", "setting"],
         scope: ["setting"],
+        // How the context ships is the context's own: `context-map.md`'s
+        // `bounded-context` chapter stands for it on the map, and the
+        // context's `context.md` carries it on its file-level block (see
+        // `FILE_FIELD_TYPE_SCOPE`). The graph build holds the two equal.
+        deployment: ["bounded-context"],
     },
     arc42: {},
     tech: {},
     design: {},
     ai: {},
+    [CHANGES_FOLDER]: {},
+};
+
+// The exceptions to `CHAPTER_ONLY_EXTRA_FIELDS`: a chapter-only field a file
+// may carry after all, on the file-level block of the `type` values named.
+// `context.md` is the one document that *is* its subject — the bounded context
+// as a whole — so how the context ships describes that document, not a chapter
+// missing from it.
+const FILE_FIELD_TYPE_SCOPE = {
+    domain: {
+        deployment: ["context"],
+    },
 };
 
 /** Determine which devbook folder a repo-relative path belongs to. */
 export function folderKindForPath(relPath) {
+    if (changePathParts(relPath)) return CHANGES_FOLDER;
     const normalized = String(relPath).replace(/\\/g, "/");
     // An address is just a repository path, and every devbook path starts with
     // the one parent. Nothing else in the schema knows about the layout.
@@ -686,7 +901,7 @@ export function documentDigest(markdown) {
  * prefix its own subject. Shared by the document lint and by graph
  * construction, so the canvas, the CLI, and CI all report the same thing.
  */
-export function typeIssues(folder, blockLevel, meta) {
+export function typeIssues(folder, blockLevel, meta, fileBase = null) {
     const issues = [];
     if (!meta) return issues;
 
@@ -694,15 +909,31 @@ export function typeIssues(folder, blockLevel, meta) {
     const declared = resolveType(folder, meta);
     if (allowed.length) {
         if (declared === null) {
+            if (OPTIONAL_TYPE_FOLDERS.includes(folder)) return issues;
             issues.push({
                 severity: "error",
                 message: `is missing required \`type\`. Expected one of: ${allowed.join(", ")}.`,
             });
         } else if (!allowed.includes(declared)) {
-            issues.push({
-                severity: "error",
-                message: `has type "${declared}", expected one of: ${allowed.join(", ")}.`,
-            });
+            // A bounded context may carry a file the convention does not name —
+            // whatever that context has to record and no other file holds. The
+            // listed values are the files with documented responsibilities, not
+            // the only files permitted, so an unlisted one is accepted on the
+            // rule every listed one already follows: a file's `type` is its
+            // filename. That still catches the typo, which is what the closed
+            // list was actually buying.
+            if (folder === "domain" && blockLevel === "file" && fileBase && declared === fileBase) {
+                // An additional page, named for itself. Nothing to report.
+            } else {
+                issues.push({
+                    severity: "error",
+                    message: `has type "${declared}", expected one of: ${allowed.join(", ")}${
+                        folder === "domain" && blockLevel === "file"
+                            ? `, or "${fileBase}" to match this file's own name`
+                            : ""
+                    }.`,
+                });
+            }
         }
     } else if (declared !== null) {
         issues.push({
@@ -828,6 +1059,89 @@ export function testIssues(meta) {
                 message: `has \`tests\` entry "${entry}" naming runner "${parsed.runner}", which this tooling has no command mapping for (known: ${Object.keys(TEST_RUNNERS).join(", ")}), so nothing can offer to run it. The entry is kept as written.`,
             });
         }
+    }
+
+    return issues;
+}
+
+/**
+ * How many `#### Scenario:` headings sit under the chapter at `index`.
+ *
+ * A scenario belongs to the rule above it by position, exactly as an
+ * annotation does: the count stops at the first heading back at or above the
+ * rule's own level, and only headings one level deeper count — a scenario of a
+ * scenario is not a thing, and a `#####` under one is its own business.
+ */
+export function scenarioCount(chapters, index) {
+    const rule = chapters[index];
+    if (!rule) return 0;
+    let count = 0;
+    for (let i = index + 1; i < chapters.length; i++) {
+        if (chapters[i].level <= rule.level) break;
+        if (chapters[i].level === rule.level + 1 && SCENARIO_HEADING.test(chapters[i].text)) count++;
+    }
+    return count;
+}
+
+/**
+ * Whether the heading at `index` is a `Scenario:` one level under a
+ * `requirement` chapter — a case of that rule, found by its text, and so a
+ * section rather than a chapter that owes a block.
+ */
+function isScenarioOf(chapters, index, folder) {
+    const heading = chapters[index];
+    if (!SCENARIO_HEADING.test(heading.text)) return false;
+    for (let i = index - 1; i >= 0; i--) {
+        if (chapters[i].level < heading.level) {
+            return chapters[i].level === heading.level - 1 && resolveType(folder, chapters[i].meta) === "requirement";
+        }
+    }
+    return false;
+}
+
+/**
+ * Coverage warnings for one behaviour chapter — a `requirement` or an
+ * `invariant` in `.domain`, a `requirement` in `.design`. Every other type
+ * returns nothing.
+ *
+ * All of these are warnings, deliberately. Each reports a chapter that is
+ * incomplete rather than wrong, and an error would be counter-productive in
+ * the exact way this convention exists to avoid: refusing the document teaches
+ * people to leave `tests` off and to write the rule back into prose, where
+ * nothing reports it at all. A warning names the gap and leaves the rule
+ * recorded.
+ *
+ * Messages are sentence fragments beginning with a verb, matching `typeIssues`,
+ * so each caller can prefix its own subject.
+ */
+export function behaviourIssues(type, meta, scenarios = 0, folder = "domain") {
+    const expected = BEHAVIOUR_TEST_LEVELS[folder]?.[type];
+    if (!expected) return [];
+    const issues = [];
+
+    // Only a requirement is held to its scenarios. An invariant's claim is
+    // already the case and its `unit` test names it, so one with none is
+    // complete — and one an older chapter still carries is left alone.
+    if (type === "requirement" && scenarios === 0) {
+        issues.push({
+            severity: "warning",
+            message: `is a \`${type}\` chapter with no \`#### Scenario:\` under it — a promise with no case that exercises it is one nobody can tell has been broken, and a brief can derive no acceptance check from it.`,
+        });
+    }
+
+    // Absence still carries no claim: a chapter with no `tests` is one nobody
+    // has linked, which is the schema's standing rule for the field and is not
+    // narrowed here. Only a chapter that *does* claim coverage is held to the
+    // level its file implies.
+    const levels = toList(meta?.tests)
+        .map((entry) => parseTestReference(entry)?.level)
+        .filter((level) => TEST_LEVELS.includes(level));
+    if (levels.length && !levels.some((level) => expected.levels.includes(level))) {
+        const found = [...new Set(levels)].map((level) => `\`${level}\``).join(", ");
+        issues.push({
+            severity: "warning",
+            message: `is a \`${type}\` chapter whose \`tests\` reach only ${found}, where ${expected.reason}. Either the link is at the wrong level, or the rule is in the wrong file.`,
+        });
     }
 
     return issues;
@@ -1018,8 +1332,10 @@ export function fieldScopeIssues(folder, blockLevel, meta) {
     if (!folderFields) return issues;
 
     if (blockLevel === "file") {
+        const fileType = resolveType(folder, meta);
         for (const field of CHAPTER_ONLY_EXTRA_FIELDS) {
             if (!folderFields.includes(field) || meta[field] == null) continue;
+            if (FILE_FIELD_TYPE_SCOPE[folder]?.[field]?.includes(fileType)) continue;
             issues.push({
                 severity: "error",
                 message:
@@ -1056,10 +1372,14 @@ export function fieldScopeIssues(folder, blockLevel, meta) {
  * in the chapter is that the decision is auditable — a rung with nobody's name
  * on it, or a name with no rung, is the one shape that defeats that.
  */
-export function approvalIssues(meta) {
+export function approvalIssues(meta, contentHash = null) {
     if (!meta) return [];
     const issues = [];
-    const approved = meta.status === APPROVED_STATUS;
+    // `accepted` stands on the approval and keeps its record, so the approval
+    // fields are at home under either rung. This is the one place the orphan
+    // rule widens.
+    const accepted = meta.status === ACCEPTED_STATUS;
+    const approved = meta.status === APPROVED_STATUS || accepted;
 
     for (const field of APPROVAL_FIELDS) {
         const raw = meta[field];
@@ -1086,87 +1406,163 @@ export function approvalIssues(meta) {
         });
     }
 
+    // The fingerprint is optional, so its absence says nothing. Present, it is
+    // checked: a value that does not match the content is the one case the
+    // rung alone could never report, which is the reason the field exists.
+    const recorded = meta[CONTENT_HASH_FIELD];
+    if (recorded != null) {
+        if (Array.isArray(recorded) || String(recorded).trim() === "") {
+            issues.push({
+                severity: "error",
+                message: `has \`${CONTENT_HASH_FIELD}\` set to an empty or list value — it records one fingerprint of the content approved.`,
+            });
+        } else if (!CONTENT_HASH_PATTERN.test(String(recorded).trim())) {
+            issues.push({
+                severity: "error",
+                message: `has \`${CONTENT_HASH_FIELD}\` "${recorded}" — a content fingerprint is \`sha256:\` followed by eight lowercase hex characters, written by the approval gate and never by hand.`,
+            });
+        } else if (!approved) {
+            issues.push({
+                severity: "warning",
+                message: `carries \`${CONTENT_HASH_FIELD}\` without \`status: ${APPROVED_STATUS}\`. Either the approval is current, and the status says so, or it has lapsed and the record comes out with it.`,
+            });
+        } else if (contentHash != null && String(recorded).trim() !== contentHash) {
+            issues.push({
+                severity: "error",
+                message: `states \`status: ${APPROVED_STATUS}\` over content that has changed since \`approved-at\` — \`${CONTENT_HASH_FIELD}\` records ${recorded}, the content now fingerprints as ${contentHash}. Re-approve the chapter, or take the rung off.`,
+            });
+        }
+    }
+
     if (approved) {
         for (const field of APPROVAL_FIELDS) {
             if (meta[field] == null) {
                 issues.push({
                     severity: "warning",
-                    message: `states \`status: ${APPROVED_STATUS}\` without \`${field}\`. An approval nobody signed and dated is not a record of a decision.`,
+                    message: `states \`status: ${meta.status}\` without \`${field}\`. An approval nobody signed and dated is not a record of a decision.`,
                 });
             }
         }
     }
 
+    for (const issue of acceptanceIssues(meta, contentHash)) issues.push(issue);
+
     return issues;
 }
 
 /**
- * Lint the review record: `review`, `reviewer`, and `review-at`, written
- * together or not at all, against the open notes on the chapter.
+ * Lint the acceptance record: the `accepted` rung and its three fields.
  *
- * `openNotes` is how many unresolved annotation fences the chapter carries; the
- * fences are the evidence a verdict stands on, so `changes-requested` over none
- * and `cleared` over one are both a verdict written without its findings.
- * Review state never survives the decision: an approved chapter carries the
- * decision, not the road to it.
+ * The rung says a person saw the built work against this chapter and accepted
+ * it — a different statement from `approved`, which says the chapter itself is
+ * right, and usually made by a different person on a different day. So the two
+ * stack: an accepted chapter carries both records, and a content change drops
+ * both, because a build was accepted against the text that was approved.
+ *
+ * Called from `approvalIssues`, since every rule here is about how the two
+ * records sit together and splitting them across two callers would let a
+ * repository get one without the other.
  */
-export function reviewIssues(meta, openNotes = 0) {
-    if (!meta) return [];
+function acceptanceIssues(meta, contentHash = null) {
     const issues = [];
-    const present = REVIEW_FIELDS.filter((field) => meta[field] != null);
-    if (!present.length) return issues;
+    const accepted = meta.status === ACCEPTED_STATUS;
 
-    for (const field of present) {
+    for (const field of ACCEPTANCE_FIELDS) {
         const raw = meta[field];
+        if (raw == null) continue;
         if (Array.isArray(raw) || String(raw).trim() === "") {
             issues.push({
                 severity: "error",
-                message: `has \`${field}\` set to an empty or list value — a review names one state, one reviewer, and one day.`,
+                message: `has \`${field}\` set to an empty or list value — it records one acceptor and one day.`,
+            });
+            continue;
+        }
+        if (!accepted) {
+            issues.push({
+                severity: "warning",
+                message: `carries \`${field}\` without \`status: ${ACCEPTED_STATUS}\`. Either the acceptance is current, and the status says so, or it has lapsed and the record comes out with it.`,
             });
         }
     }
 
-    const missing = REVIEW_FIELDS.filter((field) => meta[field] == null);
-    if (missing.length) {
+    if (meta["accepted-at"] != null && !DATE_PATTERN.test(String(meta["accepted-at"]))) {
         issues.push({
             severity: "error",
-            message: `carries ${present.map((f) => `\`${f}\``).join(", ")} without ${missing.map((f) => `\`${f}\``).join(", ")} — the three are written together or not at all.`,
+            message: `has \`accepted-at\` "${meta["accepted-at"]}" — an acceptance date is a single calendar day in \`YYYY-MM-DD\` form.`,
         });
     }
 
-    const state = meta[REVIEW_FIELD];
-    if (state != null && !REVIEW_STATES.includes(String(state))) {
+    if (accepted) {
+        for (const field of ACCEPTANCE_FIELDS) {
+            if (meta[field] == null) {
+                issues.push({
+                    severity: "warning",
+                    message: `states \`status: ${ACCEPTED_STATUS}\` without \`${field}\`. An acceptance nobody signed and dated is not a record of a decision.`,
+                });
+            }
+        }
+
+        // The rung it stands on. Without the approval record there is nothing
+        // saying the chapter the build was accepted against was ever agreed.
+        for (const field of APPROVAL_FIELDS) {
+            if (meta[field] == null) {
+                issues.push({
+                    severity: "error",
+                    message: `states \`status: ${ACCEPTED_STATUS}\` without \`${field}\` — an acceptance stands on an approval. Record who approved the chapter and when, or write \`status: ${APPROVED_STATUS}\` first.`,
+                });
+            }
+        }
+    }
+
+    // A build cannot be accepted against a chapter before that chapter was
+    // approved, so the two dates are ordered whenever both are readable.
+    const approvedAt = meta["approved-at"];
+    const acceptedAt = meta["accepted-at"];
+    if (
+        approvedAt != null && acceptedAt != null &&
+        DATE_PATTERN.test(String(approvedAt)) && DATE_PATTERN.test(String(acceptedAt)) &&
+        String(acceptedAt) < String(approvedAt)
+    ) {
         issues.push({
             severity: "error",
-            message: `has \`review\` "${state}" — one of ${REVIEW_STATES.map((s) => `\`${s}\``).join(", ")}.`,
+            message: `has \`accepted-at\` ${acceptedAt} before \`approved-at\` ${approvedAt} — the build was accepted against a chapter that had not been approved yet. One of the two dates is wrong.`,
         });
     }
 
-    if (meta["review-at"] != null && !DATE_PATTERN.test(String(meta["review-at"]))) {
-        issues.push({
-            severity: "error",
-            message: `has \`review-at\` "${meta["review-at"]}" — a review date is a single calendar day in \`YYYY-MM-DD\` form.`,
-        });
-    }
-
-    if (meta.status === APPROVED_STATUS) {
-        issues.push({
-            severity: "error",
-            message: `states \`status: ${APPROVED_STATUS}\` while carrying review state — approval clears \`review\`, \`reviewer\`, and \`review-at\` in the same change, because the decision is the record.`,
-        });
-    }
-
-    if (state === "changes-requested" && openNotes === 0) {
-        issues.push({
-            severity: "error",
-            message: `states \`review: changes-requested\` with no open annotation — a verdict without its findings. Write the objections as fences, or set \`cleared\`.`,
-        });
-    }
-    if (state === "cleared" && openNotes > 0) {
-        issues.push({
-            severity: "error",
-            message: `states \`review: cleared\` over ${openNotes} open annotation${openNotes === 1 ? "" : "s"} — cleared means no open note remains. Resolve them, or set \`changes-requested\`.`,
-        });
+    const recorded = meta[ACCEPTED_HASH_FIELD];
+    if (recorded != null) {
+        if (Array.isArray(recorded) || String(recorded).trim() === "") {
+            issues.push({
+                severity: "error",
+                message: `has \`${ACCEPTED_HASH_FIELD}\` set to an empty or list value — it records one fingerprint of the content accepted.`,
+            });
+        } else if (!CONTENT_HASH_PATTERN.test(String(recorded).trim())) {
+            issues.push({
+                severity: "error",
+                message: `has \`${ACCEPTED_HASH_FIELD}\` "${recorded}" — a content fingerprint is \`sha256:\` followed by eight lowercase hex characters, written by the acceptance gate and never by hand.`,
+            });
+        } else if (!accepted) {
+            issues.push({
+                severity: "warning",
+                message: `carries \`${ACCEPTED_HASH_FIELD}\` without \`status: ${ACCEPTED_STATUS}\`. Either the acceptance is current, and the status says so, or it has lapsed and the record comes out with it.`,
+            });
+        } else {
+            const approvedHash = meta[CONTENT_HASH_FIELD];
+            if (
+                approvedHash != null && CONTENT_HASH_PATTERN.test(String(approvedHash).trim()) &&
+                String(approvedHash).trim() !== String(recorded).trim()
+            ) {
+                issues.push({
+                    severity: "error",
+                    message: `records \`${CONTENT_HASH_FIELD}\` ${approvedHash} and \`${ACCEPTED_HASH_FIELD}\` ${recorded} — an acceptance is of the approved content, so the two are one value. The chapter changed between the two decisions.`,
+                });
+            } else if (contentHash != null && String(recorded).trim() !== contentHash) {
+                issues.push({
+                    severity: "error",
+                    message: `states \`status: ${ACCEPTED_STATUS}\` over content that has changed since \`accepted-at\` — \`${ACCEPTED_HASH_FIELD}\` records ${recorded}, the content now fingerprints as ${contentHash}. Accept the chapter again, or take the rung off.`,
+                });
+            }
+        }
     }
 
     return issues;
@@ -1190,33 +1586,103 @@ export function removedFieldIssues(meta) {
 }
 
 /**
+ * What a `.domain` filename says about its file. `base` is the name before any
+ * split suffix — `context.md` is `context`, and `domain.order.md` is `domain`,
+ * because a split file is the kind of the file it is named after. A trailing
+ * `.invariants` makes the file an invariants subpage instead:
+ * `domain.invariants.md` and `domain.order.invariants.md` are `invariants`,
+ * and `page` names the domain page each belongs to. `legacy` marks the
+ * `invariants.md` and `invariants.<name>.md` of contract 16 and before.
+ */
+export function domainFileName(relPath) {
+    const name = (String(relPath).replace(/\\/g, "/").split("/").pop() ?? "").replace(/\.md$/i, "");
+    const segments = name.split(".");
+    if (segments.length > 1 && segments.at(-1) === "invariants") {
+        return { base: "invariants", page: `${segments.slice(0, -1).join(".")}.md`, legacy: false };
+    }
+    return { base: segments[0], page: null, legacy: segments[0] === "invariants" };
+}
+
+// The structural documents: files whose `##` sections are sections, not
+// chapters, and carry no block of their own — the file-level block is the only
+// metadata they need. Mirrors the folder instruction files that say so; change
+// one and change the other in the same edit. `context-map.md` is on the list
+// although a `bounded-context` section there takes a block: that section is
+// optional, so a section without one is structural, and one with one is still
+// validated like any chapter.
+const STRUCTURAL_ROOT_FILES = {
+    domain: "context-map.md",
+    tech: "technology-graph.md",
+    ai: "adoption-map.md",
+};
+const STRUCTURAL_DOMAIN_BASES = ["model", "flow", "dependencies"];
+
+/**
+ * Whether this document's headings are sections rather than chapters, so a
+ * heading without a `meta` block is expected, not a missing block.
+ */
+export function isStructuralDocument(relPath) {
+    const kind = folderKindForPath(relPath);
+    if (!kind) return false;
+    // A proposal's `## Why`, `## Scope`, and the rest are sections of one
+    // document; its file-level block is the change's only block.
+    if (kind === CHANGES_FOLDER) return changePathParts(relPath).part === "proposal";
+    const subject = String(relPath).replace(/\\/g, "/").slice(DEVBOOK_PREFIX.length + kind.length + 1);
+    if (subject === STRUCTURAL_ROOT_FILES[kind]) return true;
+    if (kind !== "domain" || subject.split("/").length !== 2) return false;
+    const { base, legacy } = domainFileName(relPath);
+    // An additional page is structural too: the rule names it beside model.md,
+    // and it is whatever file the convention does not prescribe.
+    return STRUCTURAL_DOMAIN_BASES.includes(base) || (!legacy && !TYPE_BY_FOLDER.domain.file.includes(base));
+}
+
+/**
  * Heuristic lint of a document's metadata blocks against
  * chapter-metadata.instructions.md. Not a full structural validator (it does
  * not know which headings are "addressable chapters" per folder — see that
  * folder's own instructions file) — it checks the blocks that *are* present
  * plus the file-level block, which covers the common authoring mistakes.
+ *
+ * `ladder` is the repository's own status ladder, from `loadStatusLadder` in
+ * statuses.mjs. Absent, or where it declares nothing for a block, the folder's
+ * built-in ladder applies.
  */
-export function validateDocument(relPath, markdown) {
+export function validateDocument(relPath, markdown, { ladder = null, changeHash: changeFingerprint = null } = {}) {
     const kind = folderKindForPath(relPath);
+    const named = domainFileName(relPath);
+    const fileBase = named.base;
     const issues = [];
     if (!kind) {
         issues.push({
             severity: "info",
-            message: `${relPath} is not under .domain/, .arc42/, .tech/, .design/, or .ai/ — no metadata rules apply.`,
+            message: `${relPath} is not under .devbook/arc42/, domain/, tech/, design/, or ai/ — no metadata rules apply.`,
+        });
+        return issues;
+    }
+
+    // A delta is checked against the chapter it targets, which only the delta
+    // merge can resolve; here, only its own header is in reach.
+    const changePart = changePathParts(relPath);
+    if (changePart?.part === "delta") return deltaHeaderIssues(relPath, markdown);
+    if (changePart && changePart.part !== "proposal") {
+        issues.push({
+            severity: "info",
+            message: `${relPath} is a change's own working file — only \`proposal.md\` and \`${DELTA_FOLDER}/\` hold devbook chapters, so no metadata rules apply.`,
         });
         return issues;
     }
 
     const { fileTitle, fileMeta, chapters } = parseDocument(markdown);
     for (const issue of escapeSequenceIssues(markdown)) {
-        issues.push({ severity: issue.severity, message: `${relPath} ${issue.message}` });
+        // graph.mjs prefixes every issue with the path; doing it here too printed it twice.
+        issues.push({ severity: issue.severity, message: issue.message });
     }
     // Annotations are authored Markdown in the same file, so they are linted
     // here rather than by a second pass a repository could forget to run.
     for (const issue of annotationIssues(markdown)) {
-        issues.push({ severity: issue.severity, message: `${relPath} ${issue.message}` });
+        // graph.mjs prefixes every issue with the path; doing it here too printed it twice.
+        issues.push({ severity: issue.severity, message: issue.message });
     }
-    const allowedStatus = STATUS_BY_FOLDER[kind];
     const resting = restingStatusFor(kind);
     const optionalFields = new Set([
         ...COMMON_OPTIONAL_FIELDS,
@@ -1236,29 +1702,52 @@ export function validateDocument(relPath, markdown) {
         });
     }
 
+    // Invariants are a subpage of the domain page whose aggregates enforce
+    // them. The name is the whole pairing, so a subpage of anything else, or
+    // one that declares another type, is a file nobody can place.
+    if (kind === "domain") {
+        const declared = fileMeta ? resolveType(kind, fileMeta) : null;
+        if (named.page && named.page.split(".")[0] !== "domain") {
+            issues.push({
+                severity: "error",
+                message: `${relPath} is an invariants subpage of ${named.page}, which is not a domain page — invariants sit beside the aggregates that enforce them, as \`domain.invariants.md\` or \`domain.<name>.invariants.md\`.`,
+            });
+        } else if (named.page && declared !== null && declared !== "invariants") {
+            issues.push({
+                severity: "error",
+                message: `${relPath} is an invariants subpage and has type "${declared}" — a \`*.invariants.md\` file is \`type: invariants\`.`,
+            });
+        }
+        if (named.legacy) {
+            issues.push({
+                severity: "warning",
+                message: `${relPath} is where invariants lived before contract 17. They are now a subpage of the domain page they belong to — \`domain.invariants.md\`, or \`domain.<name>.invariants.md\` beside a split \`domain.<name>.md\`. Run the \`017-invariants-under-domain\` migration.`,
+            });
+        }
+    }
+
     // Where an open question sits, keyed by the line of the heading it is
     // attached to. Position is the anchor, so a note under `### Sub` is Sub's
     // question and never its parent's — the same rule the annotation grammar
     // states, applied here rather than re-derived.
     const openQuestions = new Map();
-    // How many open notes each chapter carries, keyed the same way, so the
-    // review state can be held to the findings it claims to stand on.
-    const openNotes = new Map();
     for (const note of parseAnnotations(markdown)) {
         const fields = note.fields ?? {};
         const kindOf = fields.kind ?? "comment";
         const statusOf = fields.status ?? "open";
         if (statusOf !== "open" || !note.chapter) continue;
-        openNotes.set(note.chapter.line, (openNotes.get(note.chapter.line) ?? 0) + 1);
         if (kindOf !== "question" || openQuestions.has(note.chapter.line)) continue;
         openQuestions.set(note.chapter.line, note.line);
     }
 
-    for (const chapter of chapters) {
+    const structural = isStructuralDocument(relPath);
+    for (const [index, chapter] of chapters.entries()) {
         const label = `${"#".repeat(chapter.level)} ${chapter.text} (line ${chapter.line})`;
         if (!chapter.meta) {
-            // Level-1 heading already reported above as the file-level block.
-            if (chapter.level > 1) {
+            // Level-1 heading already reported above as the file-level block;
+            // a structural document's headings are sections by rule, and so
+            // is a `#### Scenario:` directly under a `requirement`.
+            if (chapter.level > 1 && !structural && !isScenarioOf(chapters, index, kind)) {
                 issues.push({
                     severity: "warning",
                     message: `${label} has no \`meta\` block. Add one if this heading is an addressable chapter for this folder.`,
@@ -1272,6 +1761,14 @@ export function validateDocument(relPath, markdown) {
         // omitted status is correct and the resting value written out is the
         // thing worth reporting — otherwise the corpus ends up with two
         // spellings of one state and neither reader knows which to expect.
+        //
+        // Which values are written is the repository's ladder where it declares
+        // one for this block, and the folder's built-in one otherwise. The
+        // resting value is checked first because a configured ladder never
+        // lists it: omission is devbook's mechanism, not a rung to choose.
+        const blockLevel = chapter.level === 1 ? "file" : "chapter";
+        const configured = ladder?.statusesFor(relPath, blockLevel) ?? null;
+        const allowedStatus = configured?.statuses ?? STATUS_BY_FOLDER[kind];
         const declaresStatus = "status" in chapter.meta;
         if (!declaresStatus || chapter.meta.status === null) {
             if (resting === null) {
@@ -1287,23 +1784,26 @@ export function validateDocument(relPath, markdown) {
                     message: `${label} sets \`status\` to a null value — omit the field instead to mean the resting value \`${resting}\`.`,
                 });
             }
-        } else if (!allowedStatus.includes(chapter.meta.status)) {
-            issues.push({
-                severity: "error",
-                message: `${label} has status "${chapter.meta.status}", expected one of: ${allowedStatus.join(", ")}.`,
-            });
         } else if (chapter.meta.status === resting) {
             issues.push({
                 severity: "warning",
                 message: `${label} states \`status: ${resting}\`, which is the resting value in .${kind} — omit the field instead, per the omit-when-empty rule.`,
             });
+        } else if (!allowedStatus.includes(chapter.meta.status)) {
+            const from = configured ? ` (${configured.source})` : "";
+            issues.push({
+                severity: "error",
+                message: allowedStatus.length
+                    ? `${label} has status "${chapter.meta.status}", expected one of: ${allowedStatus.join(", ")}${from}.`
+                    : `${label} has status "${chapter.meta.status}", and no status is written on this block${from} — omit the field.`,
+            });
         }
 
         // `type` records what kind of thing this chapter or file is, in the
         // vocabulary its folder defines. Folders that define no vocabulary
-        // (`.arc42`, `.design`) omit the field entirely.
-        const blockLevel = chapter.level === 1 ? "file" : "chapter";
-        for (const issue of typeIssues(kind, blockLevel, chapter.meta)) {
+        // (`.arc42`) omit the field entirely; `.design` types only its
+        // requirement chapters.
+        for (const issue of typeIssues(kind, blockLevel, chapter.meta, fileBase)) {
             issues.push({ severity: issue.severity, message: `${label} ${issue.message}` });
         }
 
@@ -1359,6 +1859,41 @@ export function validateDocument(relPath, markdown) {
                     });
                 }
             }
+        }
+
+        if (kind === "domain") {
+            const deployment = chapter.meta.deployment;
+            if (deployment != null && !CONTEXT_DEPLOYMENTS.includes(deployment)) {
+                issues.push({
+                    severity: "error",
+                    message: `${label} has \`deployment\` "${deployment}", expected one of: ${CONTEXT_DEPLOYMENTS.join(", ")}.`,
+                });
+            }
+        }
+
+        // A proposal names its change's category once, from a closed set,
+        // because the category is what picks the flow that applies a step.
+        if (kind === CHANGES_FOLDER && blockLevel === "file") {
+            const category = chapter.meta.category;
+            if (category == null) {
+                issues.push({
+                    severity: "error",
+                    message: `${label} is missing required \`category\`. Expected one of: ${CHANGE_CATEGORIES.join(", ")}.`,
+                });
+            } else if (!CHANGE_CATEGORIES.includes(category)) {
+                issues.push({
+                    severity: "error",
+                    message: `${label} has \`category\` "${Array.isArray(category) ? category.join(", ") : category}", expected one of: ${CHANGE_CATEGORIES.join(", ")}.`,
+                });
+            }
+        }
+
+        // `change` is the merge's provenance stamp, so it is one change name.
+        if (chapter.meta.change != null && !CHANGE_NAME_PATTERN.test(chapter.meta.change)) {
+            issues.push({
+                severity: "error",
+                message: `${label} has \`change\` "${chapter.meta.change}" — it names one change, as its folder under ${CHANGES_ROOT}/ spells it: lowercase kebab-case.`,
+            });
         }
 
         // `effort` is a story-point estimate, so it is a single non-negative
@@ -1436,16 +1971,41 @@ export function validateDocument(relPath, markdown) {
             issues.push({ severity: issue.severity, message: `${label} ${issue.message}` });
         }
 
-        // The approval gate writes into the chapter, so the chapter is where
-        // the record is checked.
-        for (const issue of approvalIssues(chapter.meta)) {
-            issues.push({ severity: issue.severity, message: `${label} ${issue.message}` });
+        // A rule chapter is one rule plus the cases that prove it, and the
+        // level of proof follows the file it sits in. Both are reported as
+        // coverage warnings — see `behaviourIssues`. Whether the chapter's
+        // `related` reaches the prose half it belongs to is the graph build's
+        // to say, since only it can resolve across files.
+        if (blockLevel === "chapter") {
+            for (const issue of behaviourIssues(
+                resolveType(kind, chapter.meta),
+                chapter.meta,
+                scenarioCount(chapters, index),
+                kind
+            )) {
+                issues.push({ severity: issue.severity, message: `${label} ${issue.message}` });
+            }
         }
 
-        // The review workflow writes into the chapter too, and its state is
-        // only consistent against the notes beside it.
-        for (const issue of reviewIssues(chapter.meta, openNotes.get(chapter.line) ?? 0)) {
-            issues.push({ severity: issue.severity, message: `${label} ${issue.message}` });
+        // The approval gate writes into the chapter, so the chapter is where
+        // the record is checked. The content is only fingerprinted when the
+        // chapter claims one — most do not, and hashing every block to learn
+        // that would be work for nothing.
+        // Only `domain/` and a proposal have the rungs, so only there is there a record to
+        // lint. Elsewhere the six fields are not in that folder's vocabulary at
+        // all, and the unrecognized-field check below reports each one once —
+        // running this too would report one mistake twice.
+        // A proposal's rungs are the whole change's, so its fingerprint covers
+        // every delta too — `changeHash`, which only a caller that can read the
+        // change folder supplies; without it the record is linted unhashed.
+        if (kind === "domain" || kind === CHANGES_FOLDER) {
+            const claimsHash =
+                chapter.meta[CONTENT_HASH_FIELD] != null || chapter.meta[ACCEPTED_HASH_FIELD] != null;
+            const contentHash =
+                kind === CHANGES_FOLDER ? changeFingerprint : claimsHash ? chapterHash(markdown, chapter.line) : null;
+            for (const issue of approvalIssues(chapter.meta, contentHash)) {
+                issues.push({ severity: issue.severity, message: `${label} ${issue.message}` });
+            }
         }
 
         // An open question means the chapter is not agreed, so an approval
@@ -1454,10 +2014,13 @@ export function validateDocument(relPath, markdown) {
         // here — an open question on any other rung is the state the fence
         // exists for, and a gate that warned on every one would be teaching
         // people to ignore it.
-        if (chapter.meta.status === APPROVED_STATUS && openQuestions.has(chapter.line)) {
+        if (
+            (chapter.meta.status === APPROVED_STATUS || chapter.meta.status === ACCEPTED_STATUS) &&
+            openQuestions.has(chapter.line)
+        ) {
             issues.push({
                 severity: "error",
-                message: `${label} states \`status: ${APPROVED_STATUS}\` while carrying an open \`kind: question\` annotation (line ${openQuestions.get(chapter.line)}) — an open question means the chapter is not agreed. Resolve and sweep the note, or take the approval off.`,
+                message: `${label} states \`status: ${chapter.meta.status}\` while carrying an open \`kind: question\` annotation (line ${openQuestions.get(chapter.line)}) — an open question means the chapter is not agreed. Resolve and sweep the note, or take the rung off.`,
             });
         }
 
@@ -1494,6 +2057,76 @@ export function validateDocument(relPath, markdown) {
         }
     }
 
+    return issues;
+}
+
+// ---------------------------------------------------------------------------
+// Deltas — a change's chapters, at the path of the file each one changes
+// ---------------------------------------------------------------------------
+
+/** The three things a delta does to the chapters it names. */
+export const DELTA_KINDS = ["added", "modified", "removed"];
+
+/** The three section headings under a targeted chapter, and what each does. */
+export const DELTA_SECTIONS = ["ADDED", "MODIFIED", "REMOVED"];
+
+/**
+ * A delta's own `meta` block — the one that opens the file, above any heading
+ * — and the line after its closing fence. `null` when the file does not open
+ * with one.
+ */
+export function parseDeltaHeader(markdown) {
+    const lines = markdown.split(/\r?\n/);
+    let i = 0;
+    while (i < lines.length && lines[i].trim() === "") i++;
+    if (i >= lines.length || !/^```meta\s*$/.test(lines[i].trim())) return null;
+    const body = [];
+    let k = i + 1;
+    while (k < lines.length && lines[k].trim() !== "```") body.push(lines[k++]);
+    if (k >= lines.length) return null;
+    return { meta: parseMetaBody(body.join("\n")), end: k + 1 };
+}
+
+/**
+ * The rules a delta's header answers on its own: it names its change, which is
+ * the folder it sits in, and one delta kind, and it carries nothing else — a
+ * delta has no status of its own and inherits everything through `change`.
+ */
+export function deltaHeaderIssues(relPath, markdown) {
+    const issues = [];
+    const where = changePathParts(relPath);
+    const header = parseDeltaHeader(markdown);
+    if (!header) {
+        issues.push({
+            severity: "error",
+            message: `opens with no \`meta\` block — a delta starts with one carrying \`change: ${where?.name ?? "<name>"}\` and \`delta\` (${DELTA_KINDS.join(", ")}).`,
+        });
+        return issues;
+    }
+    const { change, delta } = header.meta;
+    if (change == null) {
+        issues.push({ severity: "error", message: `is missing required \`change\` in its opening \`meta\` block.` });
+    } else if (where && change !== where.name) {
+        issues.push({
+            severity: "error",
+            message: `has \`change\` "${change}" but sits in the change folder \`${where.name}\` — a delta names the change it belongs to.`,
+        });
+    }
+    if (delta == null) {
+        issues.push({
+            severity: "error",
+            message: `is missing required \`delta\` in its opening \`meta\` block. Expected one of: ${DELTA_KINDS.join(", ")}.`,
+        });
+    } else if (!DELTA_KINDS.includes(delta)) {
+        issues.push({ severity: "error", message: `has \`delta\` "${delta}", expected one of: ${DELTA_KINDS.join(", ")}.` });
+    }
+    for (const key of Object.keys(header.meta)) {
+        if (key === "change" || key === "delta") continue;
+        issues.push({
+            severity: "error",
+            message: `carries \`${key}\` in its opening \`meta\` block, which holds only \`change\` and \`delta\` — a delta has no status of its own and inherits through its change.`,
+        });
+    }
     return issues;
 }
 
@@ -1685,6 +2318,106 @@ function parseAnnotationList(lines, start, end, indent) {
 }
 
 const FENCE_PATTERN = /^(\s*)(`{3,}|~{3,})\s*([^\s`~]*)\s*$/;
+
+/**
+ * The fingerprint of one block's content, for `approved-hash` and
+ * `accepted-hash`.
+ *
+ * What is hashed is the block a reader would say they read: its heading text
+ * and everything under it, down to the next heading at the same or a higher
+ * level. So a `#` file block covers the whole file, a `##` chapter covers its
+ * `###` subsections, and approving a nested chapter and its parent leaves two
+ * records that both lapse when the nested one is edited. Boundaries come from
+ * `parseDocument`, so they are the same boundaries every other check uses.
+ *
+ * Three things are excluded, each for its own reason. The `meta` blocks go
+ * because the hash lives in one, and a value cannot be part of what it
+ * fingerprints. The `annotation` fences go because a note written after the
+ * approval is not a change to the content — an open question standing over an
+ * approved chapter is already its own error, and lapsing the rung for a
+ * resolved note would report the sweep as an edit. Whitespace goes because a
+ * reflowed paragraph reads identically, and a rung that came off every time
+ * someone rewrapped a line would be taken off for good.
+ *
+ * Heading *text* is in, the `#` markers are not: renaming a chapter changes
+ * what it claims and should lapse the approval, while promoting one changes
+ * its address and not a word of what was read.
+ *
+ * `line` is the block's 1-based heading line, as `parseDocument` reports it.
+ */
+export function chapterHash(markdown, line = 1) {
+    const lines = markdown.split(/\r?\n/);
+    const { chapters } = parseDocument(markdown);
+
+    const index = chapters.findIndex((entry) => entry.line === line);
+    const start = index === -1 ? Math.max(0, line - 1) : chapters[index].line - 1;
+    const level = index === -1 ? 1 : chapters[index].level;
+
+    let end = lines.length;
+    if (index !== -1) {
+        const next = chapters.slice(index + 1).find((entry) => entry.level <= level);
+        if (next) end = next.line - 1;
+    }
+
+    const heading = /^#{1,6}\s+(.*)$/.exec(lines[start] ?? "");
+    const normalised = [heading ? heading[1] : "", hashedText(lines, start + 1, end, ["meta", "annotation"])]
+        .filter((entry) => entry !== "")
+        .join("\n");
+    return digest(normalised);
+}
+
+const digest = (text) => `sha256:${createHash("sha256").update(text, "utf8").digest("hex").slice(0, 8)}`;
+
+/** Lines `from` to `end`, minus the fences labelled in `dropped`, whitespace-normalised. */
+function hashedText(lines, from, end, dropped) {
+    const kept = [];
+    for (let i = from; i < end; i++) {
+        const fence = FENCE_PATTERN.exec(lines[i]);
+        if (fence) {
+            const marker = fence[2];
+            const label = fence[3].toLowerCase();
+            const closer = new RegExp(`^\\s*\\${marker[0]}{${marker.length},}\\s*$`);
+            let k = i + 1;
+            while (k < lines.length && !closer.test(lines[k])) k++;
+            if (dropped.includes(label)) {
+                i = k;
+                continue;
+            }
+            // Any other fence is content: a diagram or a code sample is part
+            // of what was approved, so it is kept whole, closer included.
+            for (let j = i; j <= k && j < end; j++) kept.push(lines[j]);
+            i = k;
+            continue;
+        }
+        kept.push(lines[i]);
+    }
+    return kept
+        .map((entry) => entry.replace(/\s+/g, " ").trim())
+        .filter((entry) => entry !== "")
+        .join("\n");
+}
+
+/**
+ * The content fingerprint of a whole change — what `approved-hash` and
+ * `accepted-hash` record on its `proposal.md`, the way `chapterHash` covers a
+ * chapter. A change is decided as one review, so the fingerprint is one value
+ * over the proposal and every delta: editing any of them lapses both rungs.
+ *
+ * The proposal is hashed as its file block is. A delta keeps its `meta`
+ * fences, because in a delta they are content — the header says what kind of
+ * change it is, and a `MODIFIED` block is the fields it sets — and drops only
+ * its annotation fences. Each delta is keyed by the devbook file it targets,
+ * so moving one to another target is an edit. `deltas` is a list of
+ * `{ target, markdown }`, in any order.
+ */
+export function changeHash(proposalMarkdown, deltas) {
+    const parts = [chapterHash(proposalMarkdown, parseDocument(proposalMarkdown).chapters.find((c) => c.level === 1)?.line ?? 1)];
+    for (const delta of [...deltas].sort((a, b) => (a.target < b.target ? -1 : a.target > b.target ? 1 : 0))) {
+        const lines = delta.markdown.split(/\r?\n/);
+        parts.push(`${delta.target}\n${hashedText(lines, 0, lines.length, ["annotation"])}`);
+    }
+    return digest(parts.join("\n"));
+}
 
 /**
  * Every annotation fence in a document, in reading order.

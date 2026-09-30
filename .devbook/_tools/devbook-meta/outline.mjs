@@ -7,8 +7,8 @@
 // Ordering rules, per directory:
 //   1. The directory's *root document* sorts first — the file declaring
 //      `index: root`, or failing that the entry point its folder convention
-//      names (`.domain/context-map.md`, a bounded context's `domain.md`,
-//      `.tech/technology-graph.md`, `.design/README.md`, `.ai/adoption-map.md`).
+//      names (`.devbook/domain/context-map.md`, a bounded context's `domain.md`,
+//      `.devbook/tech/technology-graph.md`, `.devbook/design/README.md`, `.devbook/ai/adoption-map.md`).
 //   2. If anything left carries a **number** — from a `number` field or from a
 //      numbered filename — the directory is a numbered set (arc42 chapters,
 //      ADRs, TDRs, `.ai` usage files) and sorts by that number ascending, unnumbered entries
@@ -64,7 +64,9 @@ function testList(meta) {
  * `last` pin the prescribed siblings around whatever else the directory holds.
  * `split` names the files a `<file>.<name>.md` may be split out of; such a
  * file sorts directly after its base, or in the base's slot when the base is
- * absent, never among the unprescribed rest.
+ * absent, never among the unprescribed rest. `subpage` names a suffix and the
+ * files that take it: `domain.invariants.md` and `domain.order.invariants.md`
+ * read directly after the page they belong to.
  *
  * This mirrors the structure block in each folder's own instructions file —
  * change one and change the other in the same edit.
@@ -83,7 +85,8 @@ const DIRECTORY_CONVENTION = {
             "dependencies.md",
         ],
         last: [],
-        split: ["domain.md", "features.md", "skills.md", "model.md", "flow.md"],
+        split: ["domain.md", "requirements.md", "features.md", "skills.md", "model.md", "flow.md"],
+        subpage: { suffix: "invariants", of: ["domain.md"] },
     },
     "tech": { root: "technology-graph.md", first: ["shared.md"], last: ["tooling.md"] },
     // `.ai` needs no `first`/`last`: its usage files are numbered, so the
@@ -122,7 +125,7 @@ function conventionFor(relDir) {
  * Which entry is this directory's root document.
  *
  * An authored `index: root` wins over the convention, so a folder the
- * convention says nothing about — `.arc42/adr/`, a repository's own
+ * convention says nothing about — `.devbook/arc42/adr/`, a repository's own
  * subdirectory — can still name its entry point. Two of them is an error:
  * a directory has one way in.
  */
@@ -198,9 +201,19 @@ function orderedSequence(relDir, names, numbers, rootName, problems) {
     // its slot when the base was dropped once every chapter moved out. `rest`
     // is filename-sorted, so a base's split files keep that order among
     // themselves.
+    const subpage = convention.subpage;
+    const isSubpage = (name) => Boolean(subpage) && name.endsWith(`.${subpage.suffix}.md`);
+    const subpageOf = (name) => {
+        if (!subpage?.of.includes(splitBase(name) ?? name)) return [];
+        const sub = name.replace(/\.md$/, `.${subpage.suffix}.md`);
+        return rest.includes(sub) ? [sub] : [];
+    };
     const splitsOf = (base) =>
-        convention.split?.includes(base) ? rest.filter((name) => splitBase(name) === base) : [];
-    const slot = (name) => [...(rest.includes(name) ? [name] : []), ...splitsOf(name)];
+        convention.split?.includes(base)
+            ? rest.filter((name) => !isSubpage(name) && splitBase(name) === base)
+            : [];
+    const slot = (name) =>
+        [...(rest.includes(name) ? [name] : []), ...splitsOf(name)].flatMap((page) => [page, ...subpageOf(page)]);
 
     const rootSplits = splitsOf(convention.root);
     const pinnedFirst = convention.first.flatMap(slot);
@@ -291,8 +304,8 @@ async function readDirectory(repoRoot, relDir, problems) {
     for (const name of sequence) {
         if (parsed.has(name)) {
             const doc = parsed.get(name);
-            // Titles are name-only, so every file in a `.domain` bounded context
-            // shares one title; `kind` is what tells them apart in a viewer.
+            // A title names what the page holds and may repeat across contexts
+            // or match a heading; `kind` is what a viewer groups and sorts by.
             const folder = folderKindForPath(doc.relPath);
             const fileKind = resolveType(folder, doc.meta);
             // Resolved, not passed through: a file that omits its status in an

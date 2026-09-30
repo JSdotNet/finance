@@ -1,6 +1,6 @@
 ---
 name: devbook-naming
-description: File and folder naming conventions inside devbook folders, including dot-prefixed specification areas and underscore-prefixed tool-interpreted data.
+description: File and folder naming conventions inside devbook folders, including the one dotted folder, .devbook/, and underscore-prefixed tool-interpreted data.
 ---
 
 # File and folder naming in devbook folders
@@ -35,22 +35,26 @@ marks tool-interpreted data inside it. The five folders under the parent carry n
 `domain` bare when it is the kind in a field or a stamp. See
 `devbook-chapter-metadata.md`.
 
+The change folder is the one devbook folder outside the parent: `openspec/changes/`, with
+`archive/` inside it, in OpenSpec's names, which its CLI fixes. Never spell it
+`.devbook/.changes/`, and never dot or prefix a folder inside it. See `devbook-changes.md`.
+
 ## No redundant suffixes
 
 A name should not repeat what its location already says.
 
 - Derived artifacts are named after what they are, not their scope:
-  `.tech/_meta/graph.json`, not `.tech/_meta/tech-graph.json`.
+  `.devbook/tech/_meta/graph.json`, not `.devbook/tech/_meta/tech-graph.json`.
 - Files within a bounded context are named after their role, not the context:
-  `.domain/ordering/features.md`, not `.domain/ordering/ordering-features.md`.
+  `.devbook/domain/ordering/features.md`, not `.devbook/domain/ordering/ordering-features.md`.
 
 ## Casing
 
-Use kebab-case for files and folders (`.domain/order-management/`,
+Use kebab-case for files and folders (`.devbook/domain/order-management/`,
 `technology-graph.md`). Keep any casing that an external tool requires, such as
 `README.md`.
 
 ## Reference
 
-- `devbook-derived-artifacts.md` (a layered plugin's rule) — placement, naming,
-  and envelope rules for generated artifacts under `_meta/`.
+- The rule for `_meta/` — placement, naming, and envelope rules for generated artifacts,
+  delivered by the layered plugin that commits the index, where a repository has adopted it.

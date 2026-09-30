@@ -1,5 +1,5 @@
 // graph.mjs — derives the cross-folder reference graph from the `meta` blocks
-// embedded in .arc42/, .domain/, .tech/, .design/, and .ai/.
+// embedded in .devbook/arc42/, domain/, tech/, design/, and ai/.
 //
 // Markdown stays canonical; this produces the *derived* index. Output shape is
 // Cytoscape.js `elements` JSON, which most graph libraries consume natively or
@@ -13,6 +13,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
     parseDocument,
+    domainFileName,
     folderKindForPath,
     resolveType,
     resolveStatus,
@@ -22,9 +23,15 @@ import {
     isExtensionField,
     parseAnnotations,
     resolveAnnotation,
+    parseDeltaHeader,
+    changePathParts,
+    changeHash,
     DEVBOOK_FOLDER_NAMES,
     DEVBOOK_ROOT,
+    CHANGES_ROOT,
 } from "./metadata.mjs";
+import { loadStatusLadder } from "./statuses.mjs";
+import { changeDecisionIssues, changeFiles, checkDelta, readChange } from "./delta.mjs";
 
 /**
  * Every devbook folder this convention recognizes, as the repository path it
@@ -33,7 +40,7 @@ import {
  */
 export const DEVBOOK_FOLDERS = DEVBOOK_FOLDER_NAMES.map((name) => `${DEVBOOK_ROOT}/${name}`);
 
-export { DEVBOOK_FOLDER_NAMES, DEVBOOK_ROOT };
+export { DEVBOOK_FOLDER_NAMES, DEVBOOK_ROOT, CHANGES_ROOT };
 // The repo-visible contract: one number covering the metadata schema a
 // repository authors and the derived artifacts a consumer reads. It moves only
 // when something repo-visible changes shape, which is why a plugin release
@@ -66,7 +73,103 @@ export { DEVBOOK_FOLDER_NAMES, DEVBOOK_ROOT };
 // `statusDeclared: false` marking the entries where that happened. Version 4
 // was additive over 3, adding the `tests` field carrying the
 // `<level>:<runner>:<selector>` test identifiers a chapter or file declares.
-export const CONTRACT_VERSION = 11;
+// Version 13 adds three things and takes one away. It adds the optional
+// `approved-hash` fingerprint, the `accepted` rung with
+// `accepted-by`/`accepted-at`/`accepted-hash` above `approved`, and a
+// `.domain` bounded context's freedom to carry a page the convention does not
+// name, whose file-level `type` is its own filename. It removes both decision
+// rungs, and their six record fields, from every folder but `.domain`: the
+// question they answer is asked of the model, and a rung on a chapter that
+// rates a technology put two unrelated statements in one field. That removal
+// is breaking — a chapter outside `.domain` holding `status: approved` stops
+// validating — so `migrations/013-decision-rungs-are-domains/` takes the
+// record off, and says which `.tech`/`.ai` chapters need a rating no script
+// can recover.
+// Version 12 changes no chapter shape: it retires the checkout layer of the
+// stack-config overlay and the `.gitignore` block devbook materialized for it,
+// so the stamp's `materialized` no longer carries `.gitignore#devbook`.
+// Version 14 gives a `.domain` bounded context `requirements.md` and
+// `invariants.md`, and with them four chapter types — `requirements` and
+// `invariants` for the per-feature and per-aggregate grouping chapters,
+// `requirement` and `invariant` for one rule — plus the two file types. A
+// `requirements`/`invariants` chapter's `related` is held to a
+// `feature`/`sub-feature` or `aggregate`/`domain-service` chapter, the way a
+// switch reference already is. Every part of it is an added value with a safe
+// default: nothing written under 13 stops validating, the aggregate's
+// `### Invariants` table is still a legal structural heading, and no state
+// exists for a script to move — so there is no `migrations/014-*`. Converting
+// a table into chapters is editorial work a repository does when it chooses to.
+// Version 15 changes no chapter shape: it renames the skill ids a stack config
+// binds — every `install` becomes `init` and `update`, `devbook:check` becomes
+// `devbook:validate`, `devbook-config:setup` becomes `devbook-config:init` —
+// and the `devbook-check` schedule. A config still naming an old id binds a
+// skill that no longer exists, so `migrations/015-openspec-verbs/` rewrites
+// the committed config and both overlay layers.
+// Version 16 gives `.domain`'s `bounded-context` chapter an optional
+// `deployment` — `service` or `module` — for how the context ships, and the
+// context's own `context.md` the same field on its file-level block; where a
+// chapter's `related` names that `context.md`, the two must agree. An added
+// field with no default to assume, so nothing written under 15 stops
+// validating and there is no `migrations/016-*`.
+// Version 17 moves a context's invariants out of their own `invariants.md` and
+// into a subpage of the domain page whose aggregates enforce them:
+// `domain.invariants.md`, and `domain.<name>.invariants.md` beside a split
+// `domain.<name>.md`. The old names still validate for one release, with a
+// warning, and `migrations/017-invariants-under-domain/` moves the files and
+// rewrites every reference into them — a moved path is broken in every
+// repository until a script moves it.
+// Version 18 takes the scenarios off invariants and retitles the behaviour
+// files by kind. An `### Invariant:` is a claim, its rejection code, and its
+// `Enforced at:` line, proved by the `unit` test in `tests`; only a
+// requirement is warned for having no `#### Scenario:`, and a scenario an older
+// invariant still carries is tolerated. `requirements.md` is titled
+// `# Requirements` and an invariants subpage `# Invariants`, so a menu listing
+// pages by title can tell them from the context's other pages; a
+// `requirements.<name>.md` split takes its feature's name, so the entries
+// under `requirements.md` differ. A file still
+// titled by its context validates; `migrations/018-behaviour-titles/`
+// retitles it, because reconcile never touches an authored file.
+//
+// Version 19 lets an invariants chapter pair with the `## Shared Value
+// Objects` or `## Shared Enums` grouping, so a shared type's own rules sit
+// beside it in `domain.invariants.md` instead of under an aggregate that
+// happens to use it. It only widens what `related` may name: nothing written
+// under 18 stops validating, and no migration is owed.
+//
+// Version 20 lets a repository declare its own `status` ladder per folder, file
+// glob, and block level in `.devbook/statuses.json` (statuses.mjs). The resting
+// value, the decision rungs, and a required rating stay devbook's; a folder or a
+// block the file does not name takes the built-in ladder, so a repository with
+// no file validates exactly as under 19 and no migration is owed.
+//
+// Version 21 removes the review triad — `review`, `reviewer`, `review-at`.
+// A review in progress is the chapter's `status` rung plus its open
+// annotation fences, and who owes the next move lives in the pull request
+// or the tracker. A leftover field is reported by name, and
+// `migrations/021-no-review-triad/` deletes it.
+//
+// Version 22 gives `.design` its one chapter type, `requirement`: a rule a
+// component keeps or breaks, as a `### Requirement:` with `#### Scenario:`
+// cases under the component's chapter, held to `e2e` by the coverage warning.
+// Every other `.design` chapter stays untyped, so nothing written under 21
+// stops validating, and no migration is owed.
+//
+// Version 23 adopts the change folder, `openspec/changes/`, as a folder kind:
+// each change's `proposal.md` is a `type: change` file at `status: proposed`
+// with a `category`, each file under its `devbook-delta/` is a delta checked by
+// the merge in delta.mjs, `archive/` is never indexed, and `change` is legal on
+// any chapter as the merge's provenance. A repository without the folder
+// validates exactly as under 22, and no migration is owed.
+//
+// Version 24 gives a change's `proposal.md` the two decision rungs, `approved`
+// and `accepted`, with the six record fields, for the whole change: its
+// fingerprint covers the proposal and every delta, an open question anywhere
+// in the change stands against a rung, and `delta.mjs --apply` merges only an
+// accepted change over its current fingerprint. The merge writes no rung onto
+// the chapters it lands in and lifts one it makes stale. `domain/`'s own rungs
+// are unchanged, so nothing written under 23 stops validating, and no
+// migration is owed.
+export const CONTRACT_VERSION = 24;
 
 // The oldest contract a reconcile still carries forward. A migration lives
 // for the major version it ships in: a major release raises this to the
@@ -128,6 +231,30 @@ const REFERENCE_FIELDS = {
 // The chapter `kind` each switch field must resolve to.
 const SWITCH_TARGET_KIND = { "feature-flag": "feature-flag", setting: "setting" };
 
+// The prose chapter each behaviour chapter pairs with, by the behaviour
+// chapter's own kind. `requirements.md` and `invariants.md` hold what a feature
+// promises and what an aggregate enforces; the prose half holds why it exists,
+// who works with it, where the boundary runs. `related` is the only thing
+// joining the two, so a behaviour chapter that names none is a half nobody can
+// reach from the other side — reported as an error, like a switch reference
+// landing on the wrong kind.
+//
+// A domain service is in the `invariants` row because it enforces rules of its
+// own; what it *reacts* to is a requirement of whatever reacts, and lands in
+// the `requirements` row through that feature. The `## Shared Value Objects`
+// and `## Shared Enums` groupings are there because they hold what belongs to
+// no single aggregate, and the rules a shared type enforces belong to it too:
+// pinned under one aggregate that uses the type they read as that aggregate's,
+// and copied under each they are the duplicate the prose side forbids. The
+// groupings live on `domain.md`, which never splits, so their rules land in
+// `domain.invariants.md` and the placement check below needs nothing more.
+// The check asks for one entry of the right kind and no more: a chapter may
+// link onward to anything else.
+const RELATED_TARGET_KINDS = {
+    requirements: ["feature", "sub-feature"],
+    invariants: ["aggregate", "domain-service", "shared-value-objects", "shared-enums"],
+};
+
 // The authored `type` field is emitted under the node key `kind`, because
 // `type` on a node is already the structural discriminator
 // (`file`/`chapter`/`heading`/`external`). `.tech` nodes have always carried
@@ -140,9 +267,22 @@ const ATTRIBUTE_FIELDS = [
     "key",
     "default",
     "scope",
+    "deployment",
     "date",
     "approved-by",
     "approved-at",
+    // Carried so a consumer can tell "approved, and the content has not moved"
+    // from a bare "approved" without re-reading the Markdown or asking git.
+    "approved-hash",
+    // The rung above it: who accepted the built work against this chapter, and
+    // when. The approval record stays beside it — the two are a stack.
+    "accepted-by",
+    "accepted-at",
+    "accepted-hash",
+    // The change folder's own: a proposal's category, and on any chapter the
+    // change whose merge last touched it.
+    "category",
+    "change",
 ];
 
 // Non-reference fields whose authored form may be a scalar or a bracket list,
@@ -229,10 +369,10 @@ function applyMeta(node, meta, folder) {
 /**
  * Compose a file node's display label.
  *
- * Heading text carries the name only, so every file in a `.domain` bounded
- * context is titled with the bare context name — six nodes sharing one label.
- * The file's `type` disambiguates them, and is left off when the title already
- * says it ("Context Map" + `context-map`).
+ * A `domain/` file is titled by what it holds, so a split file's title is its
+ * chapter's name and an older file's may still be the context's. The file's
+ * `type` says which kind of page it is, and is left off when the title already
+ * says it ("Domain" + `domain`, "Context Map" + `context-map`).
  */
 function composeFileLabel(title, type) {
     if (!type || slugify(title) === type) return title;
@@ -268,9 +408,18 @@ export async function buildGraph(repoRoot, folders = null) {
         });
     }
 
-    const files = (
-        await Promise.all(scanned.map((folder) => collectMarkdown(repoRoot, folder)))
-    ).flat();
+    // The repository's own status ladder, if it declares one. A configuration
+    // error is reported here, once, instead of on every block it would fail.
+    const { ladder, issues: ladderIssues } = await loadStatusLadder(repoRoot);
+    problems.push(...ladderIssues);
+
+    // The change folder is indexed beside the folders whenever it exists: its
+    // proposals and deltas are chapters, and a delta's references resolve like
+    // any other. Its `archive/` is history and is never read.
+    const files = [
+        ...(await Promise.all(scanned.map((folder) => collectMarkdown(repoRoot, folder)))).flat(),
+        ...(await changeFiles(repoRoot)),
+    ];
 
     for (const relPath of files) {
         const folder = folderKindForPath(relPath);
@@ -289,6 +438,7 @@ export async function buildGraph(repoRoot, folders = null) {
         }
 
         const fileMeta = chapters.find((c) => c.level === 1)?.meta ?? null;
+        const delta = changePathParts(relPath)?.part === "delta" ? parseDeltaHeader(raw)?.meta ?? {} : null;
         const fileNode = {
             id: relPath,
             label: composeFileLabel(
@@ -309,6 +459,13 @@ export async function buildGraph(repoRoot, folders = null) {
         if (number !== null) fileNode.number = number;
         // Omitted rather than emitted as 0, so adding this did not churn every
         // node of every existing index.
+        // A delta's own header says which change it belongs to and what it
+        // does; where it lands is its path, re-rooted at the devbook.
+        if (delta) {
+            if (delta.change) fileNode.change = delta.change;
+            if (delta.delta) fileNode.delta = delta.delta;
+            fileNode.target = changePathParts(relPath).target;
+        }
         const fileOpenNotes = [...openNotes.values()].reduce((a, b) => a + b, 0);
         if (fileOpenNotes) fileNode.openNotes = fileOpenNotes;
         nodes.set(fileNode.id, fileNode);
@@ -320,7 +477,21 @@ export async function buildGraph(repoRoot, folders = null) {
         // editor extension, which not every author has open. Each issue keeps
         // its own severity: a warning stays a warning, and only an error fails
         // the run.
-        for (const issue of validateDocument(relPath, raw)) {
+        // A delta is checked by the merge that would apply it: its header, its
+        // shape, every chapter it names resolved in its target, and the merged
+        // target through this same lint.
+        // A proposal's rungs decide the whole change, so its fingerprint and its
+        // open questions are read across the proposal and every delta.
+        const proposalOf = changePathParts(relPath)?.part === "proposal" ? await readChange(repoRoot, changePathParts(relPath).name) : null;
+        const fileIssues = delta
+            ? (await checkDelta(repoRoot, relPath, raw, { ladder })).issues
+            : proposalOf
+              ? [
+                    ...validateDocument(relPath, raw, { ladder, changeHash: changeHash(proposalOf.proposal, proposalOf.deltas) }),
+                    ...changeDecisionIssues(proposalOf),
+                ]
+              : validateDocument(relPath, raw, { ladder });
+        for (const issue of fileIssues) {
             problems.push({
                 severity: issue.severity,
                 path: relPath,
@@ -349,8 +520,10 @@ export async function buildGraph(repoRoot, folders = null) {
             // Only a collision with a chapter on either side is reported. A
             // chapter that cannot be addressed is the error; two structural
             // headings sharing an anchor is the ordinary shape of a chapter
-            // file (`### Invariants` under each aggregate), and those are
-            // materialized on demand, never referenced by accident.
+            // file (`#### Scenario: The order is already confirmed` under two
+            // rules in one `requirements.md`, `### Payload` under every event),
+            // and those are materialized on demand, never referenced by
+            // accident.
             if (headingIndex.has(id)) {
                 if (chapter.meta || nodes.has(id)) {
                     problems.push({
@@ -447,6 +620,15 @@ export async function buildGraph(repoRoot, folders = null) {
                         message: `${node.id} has \`${field}\` reference "${ref}" that resolves to a ${targetKind ? `\`${targetKind}\` chapter` : "heading or file"}, not a \`${expectedKind}\` chapter — point it at the switch's own chapter in the context's \`context.md\`.`,
                     });
                 }
+                // tech/ points depends-on at tech/ alone; a relation to another folder is
+                // `related`, per the tech rule.
+                if (field === "depends-on" && node.folder === "tech" && folderKindForPath(targetPath) !== "tech") {
+                    problems.push({
+                        severity: "warning",
+                        path: node.path,
+                        message: `${node.id} has \`depends-on\` reference "${ref}" outside tech/; tech/ uses \`related\` for a chapter in another folder.`,
+                    });
+                }
                 edges.push({
                     id: `${edgeType}:${node.id}->${ref}`,
                     source: node.id,
@@ -454,6 +636,64 @@ export async function buildGraph(repoRoot, folders = null) {
                     type: edgeType,
                 });
             }
+        }
+
+        // The behaviour half of a chapter has to name the prose half it
+        // belongs to. Only a `##` grouping chapter carries the pairing: the
+        // file-level block shares the same `type` word but covers every
+        // feature or aggregate in the context, so it has no one chapter to
+        // point at, and a `requirement`/`invariant` is paired through the
+        // grouping chapter that contains it.
+        const pairKinds = node.type === "chapter" ? RELATED_TARGET_KINDS[node.kind] : null;
+        if (pairKinds) {
+            const paired = asList(node.related)
+                .map((ref) => nodes.get(ref))
+                .filter((target) => pairKinds.includes(target?.kind));
+            if (!paired.length) {
+                problems.push({
+                    severity: "error",
+                    path: node.path,
+                    message: `${node.id} is a \`${node.kind}\` chapter whose \`related\` names no ${pairKinds
+                        .map((kind) => `\`${kind}\``)
+                        .join(" or ")} chapter — the behaviour half of a chapter points at the prose half it belongs to, and nothing else pairs the two.`,
+                });
+            } else if (node.kind === "invariants") {
+                // An invariants subpage belongs to one domain page: the
+                // aggregates it holds rules for are chapters of that page, so
+                // splitting an aggregate out moves its rules with it.
+                const { page } = domainFileName(node.path);
+                const pagePath = page && path.posix.join(path.posix.dirname(node.path), page);
+                if (pagePath && !paired.some((target) => target.path === pagePath)) {
+                    problems.push({
+                        severity: "warning",
+                        path: node.path,
+                        message: `${node.id} is in the invariants subpage of ${pagePath}, but pairs with ${paired
+                            .map((target) => target.id)
+                            .join(", ")} — an aggregate's invariants sit in the subpage of the page that holds the aggregate. Move the chapter there.`,
+                    });
+                }
+            }
+        }
+    }
+
+    // How a context ships is stated twice — on the map, by its
+    // `bounded-context` chapter, and by the context itself, on its
+    // `context.md` — so a reader of either sees it without opening the other.
+    // The pair is the chapter and the `context` file its `related` names, and
+    // the two have to agree: a context written as `module` on the map and
+    // `service` in its own folder has no answer at all.
+    for (const node of nodes.values()) {
+        if (node.type !== "chapter" || node.kind !== "bounded-context") continue;
+        for (const ref of asList(node.related)) {
+            const context = nodes.get(ref);
+            if (context?.type !== "file" || context.kind !== "context") continue;
+            if ((node.deployment ?? null) === (context.deployment ?? null)) continue;
+            const state = (value) => (value == null ? "no `deployment`" : `\`deployment: ${value}\``);
+            problems.push({
+                severity: "error",
+                path: node.path,
+                message: `${node.id} states ${state(node.deployment)} but ${context.id} states ${state(context.deployment)} — how a context ships is written the same on its \`bounded-context\` chapter and its \`context.md\`, or on neither.`,
+            });
         }
     }
 
@@ -551,7 +791,7 @@ export async function buildGraphDocument(
         schemaVersion: SCHEMA_VERSION,
         generatedBy: generatorPath(repoRoot),
         scope,
-        sources: scope === REPO_SCOPE ? folders : [scope],
+        sources: scope === REPO_SCOPE ? [...folders, ...(await hasChanges(repoRoot))] : [scope],
         // Deliberately no timestamp: the index is a deterministic function of
         // the Markdown, so re-running it produces a byte-identical file and CI
         // can diff it to detect a stale commit.
@@ -597,7 +837,7 @@ export async function discoverScopes(repoRoot) {
  *
  * `folders` holds the real repository paths under `.devbook/`. `stray` lists
  * any of the five spelled as a root-level dot-folder — the layout this
- * convention no longer supports (record 80). A stray folder is reported by the
+ * convention no longer supports (the chapter-schema decision). A stray folder is reported by the
  * graph build and never indexed, so a repository that has not moved yet learns
  * it from an error rather than from a quiet half-corpus.
  */
@@ -610,7 +850,14 @@ export async function discoverLayout(repoRoot) {
         }
         if (await isDirectory(path.join(repoRoot, `.${name}`))) stray.push(`.${name}`);
     }
-    return { folders, stray };
+    // The change folder is adopted the same way, by existing.
+    const changes = (await isDirectory(path.join(repoRoot, CHANGES_ROOT))) ? CHANGES_ROOT : null;
+    return { folders, stray, changes };
+}
+
+/** The change folder as a rollup source, when the repository has one. */
+async function hasChanges(repoRoot) {
+    return (await isDirectory(path.join(repoRoot, CHANGES_ROOT))) ? [CHANGES_ROOT] : [];
 }
 
 async function isDirectory(absolutePath) {
