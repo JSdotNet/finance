@@ -56,6 +56,7 @@ when a chapter has real content — do not scaffold empty placeholders):
   12-glossary.md
   adr/                           (decision records — one per technical concern)
   tdr/                           (technical debt records — one per item)
+  building-blocks/               (one whitebox per building block that outgrows chapter 5)
 ```
 
 ## Folder rules
@@ -66,8 +67,8 @@ instructions.
 
 - Keep the glossary aligned with the ubiquitous language defined per bounded
   context in `domain/`.
-- Prefer diagrams (Mermaid) over long prose for building-block and runtime
-  views.
+- Draw the building-block and runtime views as diagrams, per
+  `devbook-writing.md`.
 - Each file's top-level chapter, and any independently trackable ## section
   inside it, must carry the metadata block described in
   `devbook-chapter-metadata.md` (status — optional here, see
@@ -81,11 +82,13 @@ instructions.
   — do not add a second, duplicate block for the file.
 - The metadata block's `status` field uses `draft`, `proposed`, `active`, or
   `deprecated` in this folder. Architecture documentation describes a
-  standing decision/structure, not a task, so there is no `done`.
-- On top of that ladder sits the shared `approved` rung, defined once in
-  `devbook-chapter-metadata.md`: a person approved this chapter,
-  recorded with `approved-by` and `approved-at`. It is written explicitly, never
-  rested at, and comes off the moment the content changes.
+  standing decision/structure, not a task, so there is no `done`. That is
+  the built-in ladder; a repository replaces its transitional rungs per file
+  in `.devbook/statuses.json`, per `devbook-chapter-metadata.md`.
+- **There is no `approved` or `accepted` rung here.** The two decision rungs
+  are `domain/`'s alone — see `devbook-domain.md`. An architecture chapter
+  records a standing structure, and the question those rungs answer is asked of
+  the model, not of it.
 - **`active` is this folder's resting value, so it is written by omitting the
   field.** State `status` only while the chapter is in transition (`draft`,
   `proposed`) or carries a standing warning (`deprecated`). A standing structure
@@ -102,22 +105,23 @@ instructions.
   unpadded 10 still follows 7. Give each one a `date` for the day the debt was
   logged; it is content, not a modification timestamp. Decision records are not
   numbered; the next section says why.
-- **Give `adr/` and `tdr/` an index document.** Neither folder has a root
-  document by convention, so mark the one that introduces the set — usually
-  `README.md` — with `index: root` and it sorts first. Without it the folder is
-  a bare list.
+- **Give `adr/`, `tdr/`, and `building-blocks/` an index document.** None of
+  the three has a root document by convention, so mark the one that introduces
+  the set — usually `README.md` — with `index: root` and it sorts first. Without
+  it the folder is a bare list.
 
 ## Decision records (`adr/`)
 
-A decision record holds a **technical choice**: a storage engine, an API style,
-a messaging or integration protocol, a hosting or deployment model, a runtime or
-framework, how packages are managed and built. The test is what reversing it
-would cost. A choice that would take a migration of code, data, or
-infrastructure to reverse is a decision record; one a reader could reverse with
-a find-and-replace is not. Naming, folder layout, process rules, who owns what,
-and how a document is written are not architecture: the rule, chapter, or
-bounded context that states them carries the reason in a sentence, and no
-record is opened.
+A decision record holds a choice whose reversal would cost a **migration** — of
+code, of data, or of the model's language: a storage engine, an API style, a
+messaging or integration protocol, a hosting or deployment model, a runtime or
+framework, how packages are managed and built, and equally an aggregate
+boundary, a snapshot-versus-reference choice, a consistency boundary, or a
+contested term the model now depends on. The test is what reversing it would
+cost. A choice a reader could reverse with a find-and-replace is not a record.
+Naming, folder layout, process rules, who owns what, and how a document is
+written are not architecture: the rule, chapter, or bounded context that states
+them carries the reason in a sentence, and no record is opened.
 
 **One record per concern, not per decision.** The file is the concern —
 `adr/storage.md`, `adr/api.md`, `adr/package-management.md` — a kebab-case slug
@@ -180,6 +184,40 @@ PostgreSQL 16 through EF Core, one database per bounded context.
 | 2026-09-17 | SQL Server to PostgreSQL: the licence no longer covered the features in use. |
 | 2026-03-01 | SQL Server, because the team knew it. |
 ```
+
+## Building block records (`building-blocks/`)
+
+Chapter 5 holds what the whole system shares: the level 1 landscape, the shapes
+every block has in common, and the diagram of the edges between them. A block
+whose whitebox — its responsibility, the interfaces it exposes, its internal
+structure, and its dependencies — is read on its own more often than beside the
+landscape gets a file of its own under `building-blocks/`, for the same reason
+a concern gets one under `adr/`: a reader opens the block they work in, and a
+sync pass narrows to one file. Chapter 5 then links to the folder's index and
+restates nothing about a block that has a file.
+
+One file per block, `building-blocks/<slug>.md`, the slug being the block's
+name as the code spells it — a plugin folder, a project, a service. Each file,
+in this order:
+
+- The block's responsibility, in prose under the title, before any section:
+  what it owns, what is inside it, what is outside it and where that is answered.
+- `## Interfaces` — how the block is reached: the skills, agents, commands,
+  routes, contracts, or public API it exposes, one `###` per interface where
+  each needs its own words.
+- `## Structure` — the parts inside it that carry a distinct responsibility,
+  with the invariants each one guarantees where the block has any, and a Mermaid
+  diagram where the parts relate.
+- `## Runtime` — optional: the flows that cross the block, as diagrams. A
+  runtime scenario that crosses several blocks belongs in
+  `06-runtime-view.md`, which links here.
+- `## Dependencies` — what the block depends on and what depends on it, in
+  their actual direction, one table each, with the mechanism and the contract.
+
+The rules of the folder apply unchanged: no `type`, no `depends-on`, `related`
+for every cross-reference, and the top-level block doubling as the file-level
+one. The folder's index (`README.md`, `index: root`) lists every block with
+its responsibility in one line.
 
 ## Template
 

@@ -96,12 +96,11 @@ not to. A question about whether a rule still holds, ingested as context,
 becomes the rule. This is the one failure mode the convention did not have
 before, so the discipline is explicit, the same way `_meta/` has one:
 
-- A reader loading a chapter **for context skips every annotation fence**, and
-  the `review`, `reviewer`, and `review-at` fields beside it — a chapter someone
-  has queried has not thereby stopped saying what it says.
+- A reader loading a chapter **for context skips every annotation fence** — a
+  chapter someone has queried has not thereby stopped saying what it says.
 - A reader working **in review mode** — a review skill, a queue, the approval
   gate — reads them, and reads nothing else in the chapter as instruction.
-- `sync-specs` never writes one. `apply-change` never carries one into
+- `capture-specs` never writes one. `apply-change` never carries one into
   a change brief. An open question is a reason to stop at the gate, not a line
   item to implement.
 
@@ -122,6 +121,6 @@ question in it. Resolve and sweep the note, or take the approval off.
 ## Writing one
 
 Every write goes through `.devbook/_tools/devbook-meta/annotations.mjs` — `list`,
-`add`, `reply`, `resolve`. Nothing else writes a fence with a regular expression of
+`add`, `reply`, `resolve`, `sweep`. Nothing else writes a fence with a regular expression of
 its own. Adding a note changes a tracked file: say so, offer the
 commit, never push, and never auto-commit into someone's branch.

@@ -1,8 +1,9 @@
 # Devbook metadata tooling
 
-Derives machine-readable indexes from the `meta` blocks embedded in the
-devbook folders under `.devbook/` — `arc42/`, `domain/`, `tech/`, `design/`,
-and `ai/`, at `.devbook/arc42/` and so on:
+Checks the `meta` blocks embedded in the devbook folders under `.devbook/` —
+`arc42/`, `domain/`, `tech/`, `design/`, and `ai/`, at `.devbook/arc42/` and so
+on — plus a change's `proposal.md` and deltas under `openspec/changes/`, and,
+with `--write`, derives three machine-readable indexes from them:
 
 - **`graph.json`** — the reference graph between chapters and files.
 - **`index.json`** — the ordered reading outline of each area.
@@ -15,36 +16,39 @@ the `devbook-derived-artifacts` instructions.
 
 ## Usage
 
-Prefer the wrapper — it reports which index files actually moved, so a refresh
-that changed nothing is visibly a no-op:
-
-```powershell
-./build/Update-DevbookIndex.ps1                 # every adopted scope
-./build/Update-DevbookIndex.ps1 -Scope tech    # one scope only
-./build/Update-DevbookIndex.ps1 -Check          # validate, write nothing
-```
-
-The generator underneath, for CI and for anywhere pwsh is not available:
+The checker writes nothing unless asked:
 
 ```bash
-# Regenerate every adopted scope
-node .devbook/_tools/devbook-meta/build.mjs
+# Validate every reference and meta block, write nothing — the default; CI runs this
+node .devbook/_tools/devbook-meta/build.mjs --check
+
+# Refresh the derived indexes: the plugin that owns them runs this, never a session
+node .devbook/_tools/devbook-meta/build.mjs --write
 
 # One scope only
-node .devbook/_tools/devbook-meta/build.mjs --scope tech
-
-# Validate references without writing (exit 1 on a broken reference)
-node .devbook/_tools/devbook-meta/build.mjs --check
+node .devbook/_tools/devbook-meta/build.mjs --write --scope tech
 
 # Point at a repository other than the working directory
 node .devbook/_tools/devbook-meta/build.mjs --root ../other-repo
+
+# Resolve one change's deltas; merge them and archive the change
+node .devbook/_tools/devbook-meta/delta.mjs --check add-cache
+node .devbook/_tools/devbook-meta/delta.mjs --apply add-cache
+
+# Merge and leave the folder for another tool to move — `openspec archive` does
+node .devbook/_tools/devbook-meta/delta.mjs --apply add-cache --no-move
 ```
+
+The change folder, `openspec/changes/`, is indexed into the repository rollup
+only: it gets no scope and no `_meta/` of its own, because every folder under it
+is a change to OpenSpec.
 
 The repository root defaults to the working directory. Only devbook folders
 that actually exist under `.devbook/` produce a scope, so a repository that
 adopts just `domain/` and `arc42/` never grows `_meta/` folders for the rest.
 `--scope` takes `tech`, `tech/`, or `.devbook/tech` for the same scope. The
-generator exits `2` when no devbook folder is present at all, and a root-level
+generator exits `2` when no devbook folder is present at all or when `--scope` names one
+the repository has not adopted, and a root-level
 `tech/` is reported as an error and never indexed — the only layout is
 `.devbook/`.
 
@@ -53,12 +57,10 @@ generator exits `2` when no devbook folder is present at all, and a root-level
 **Not on every edit.** Regenerating the indexes in the same pull request that
 edits a chapter is what makes them conflict on merge: two branches that each
 touch one chapter both rewrite the same JSON, and the only way to resolve it is
-to re-run the generator. So refresh is deliberate and happens in two places:
-
-| Path | What it is | When |
-|---|---|---|
-| `./build/Update-DevbookIndex.ps1` | on demand | You want the indexes current in your own branch — before a release, or because something reads them locally. |
-| `.github/workflows/devbook-meta-nightly.yml` | scheduled | Reconciles the default branch, opening one pull request when the output drifted and nothing when it did not. |
+to re-run the generator. So refresh is deliberate and belongs to the plugin that owns
+the committed indexes, which ships a `build/Update-DevbookIndex.ps1` wrapper for a
+refresh on demand and a scheduled workflow that reconciles the default branch, opening
+one pull request when the output drifted and nothing when it did not.
 
 `.github/workflows/devbook-meta.yml` **fails** on a broken reference or a
 `meta` block that violates the schema — those are errors in the authored
@@ -95,11 +97,14 @@ followed, so a scoped graph stays about its own folder.
 |---|---|
 | `metadata.mjs` | Parses the `meta` blocks — the single implementation of the schema defined by the `devbook-chapter-metadata` instructions. Loaded by `devbook-derived`'s canvas from the materialized path. |
 | `graph.mjs` | Graph construction, scope discovery, and scope projection. Imported by the CLI and loaded by `devbook-derived`'s canvas from the materialized path, so the check, the written indexes, and the live view are one parser. |
+| `statuses.mjs` | Reads the repository's own `status` ladder from `.devbook/statuses.json`, reports a configuration error once on the file, and resolves which rungs a block may hold; absent, the built-in ladders in `metadata.mjs` apply. The graph build and the canvas lint both call it. |
 | `outline.mjs` | Outline generation: root-document resolution (`index: root`, else the `DIRECTORY_CONVENTION` table), numbered ordering, and the per-file lede and diagram count a list view needs. |
 | `annotations-index.mjs` | Derives `annotations.json` from the fences: the open-note index every reader comes off, so no reader needs the writer and no reader parses Markdown twice. |
 | `annotations.mjs` | The only writer of an annotation fence — `list`, `add`, `reply`, `resolve`, `sweep`, plus a CLI over the same five functions. Edits are surgical, so a field a later version adds survives a write by one that does not know it. `sweep` is the bulk half of `resolve --delete`: it takes every resolved fence in an addressed chapter, bottom-up, and no open one. |
 | `build.mjs` | CLI wrapper: writes all three artifacts per scope, prints stats, exits non-zero on errors. |
-| `escape-lint.test.mjs`, `tests-field.test.mjs`, `annotations.test.mjs`, `annotations-write.test.mjs`, `field-scope.test.mjs` | Self-contained checks — `node <file>` — over the escape-sequence lint, `tests` parsing and its run-command mapping, the annotation grammar and placement rule, the four write operations, and the field-scope sub-rules. |
+| `delta.mjs` | The change folder's merge. `--check <change>` resolves every delta under `openspec/changes/<change>/devbook-delta/` to its target file and heading and lints each merged result; `--apply <change>` does the same, then writes the merges, stamps `change` on every chapter block it touched, and moves the folder to `archive/<date>-<name>/`. The graph build imports `checkDelta`, so an indexed delta is checked exactly as a merge would check it. `gateCheck` is the empty seam before the merge where a check that the change may be merged goes. |
+| `chapter-hash.mjs` | CLI over `metadata.mjs`'s `chapterHash`: prints the content fingerprint of an addressed chapter, the value `approved-hash` records. The approval gate calls it so the value written and the value checked come from one function. |
+| `*.test.mjs` | Self-contained checks, one per rule that was worth pinning: run one with `node <file>`, all of them with `node --test "*.test.mjs"`. Each prints `PASS`/`FAIL` per case and exits non-zero on the first failure, so no framework is installed to read them. `behaviour-files.test.mjs` covers the `requirements.md` and invariants-subpage types, the subpage naming and placement checks, the three coverage warnings, and the typed `related` pairing; `design-requirements.test.mjs` covers `design/`'s `requirement` type and its `e2e` level; `change-folder.test.mjs` runs a fixture change through the index, `--check`, and `--apply`. |
 
 This folder is self-contained — copy it into a repository as
 `.devbook/_tools/devbook-meta/` and it runs with no other files installed.
@@ -182,20 +187,23 @@ the canvas and the committed `graph.json` never disagree about it.
 
 ### File node labels
 
-Heading text carries the name only, so all six files of a `domain/` bounded
-context are titled with the bare context name. A file node's label is therefore
-composed as `<title> (<kind>)`, and the suffix is dropped when the title
-already slugifies to the kind:
+A `domain/` file is titled by what it holds — a base file by its kind, a split
+file by its chapter, `context.md` by the context — and a file written before that
+rule may still carry the context name. A file node's label is therefore composed
+as `<title> (<kind>)`, and the suffix is dropped when the title already slugifies
+to the kind:
 
 | File | Title | `type` | Node label |
 |---|---|---|---|
-| `.domain/order-management/domain.md` | `Order Management` | `domain` | `Order Management (domain)` |
-| `.domain/order-management/features.md` | `Order Management` | `features` | `Order Management (features)` |
-| `.domain/context-map.md` | `Order Platform` | `context-map` | `Order Platform (context-map)` |
-| `.domain/context-map.md` | `Context Map` | `context-map` | `Context Map` |
-| `.arc42/01-introduction-and-goals.md` | `01. Introduction and Goals` | none | `01. Introduction and Goals` |
+| `.devbook/domain/order-management/domain.md` | `Domain` | `domain` | `Domain` |
+| `.devbook/domain/order-management/domain.order.md` | `Order` | `domain` | `Order (domain)` |
+| `.devbook/domain/order-management/features.md` | `Order Management` | `features` | `Order Management (features)` |
+| `.devbook/domain/context-map.md` | `Order Platform` | `context-map` | `Order Platform (context-map)` |
+| `.devbook/domain/context-map.md` | `Context Map` | `context-map` | `Context Map` |
+| `.devbook/arc42/01-introduction-and-goals.md` | `01. Introduction and Goals` | none | `01. Introduction and Goals` |
 
-Node `id` is the path and was always unique; this only fixes the display label.
+Node `id` is the path and was always unique; the label is for display, and it names
+the context only where the title does.
 
 The two `context-map.md` rows are the recommended shape and the fallback: title
 that file after the system it maps, and reach for the literal `Context Map` only
@@ -218,9 +226,13 @@ are always emitted as a list, so a consumer never has to branch on shape. `effor
 string, so a viewer can total or threshold it directly; a value that is not a
 non-negative integer is left off the node and reported as a lint error instead.
 
-`approved-by` and `approved-at` ride along as authored strings on any node whose
-`status` is the shared `approved` rung. The generator reports an approval with no
-signature and a signature with no approval, but never invents either.
+The six decision fields — `approved-by`, `approved-at`, `approved-hash`,
+`accepted-by`, `accepted-at`, `accepted-hash` — ride along as authored strings on
+any node that carries them. They belong to `domain/`'s two rungs, so a node in
+another folder should have none; the generator copies what is authored and the
+check reports it in the same run, but never invents a value. It reports a
+decision with no signature, a signature with no decision, and a fingerprint that
+no longer matches the chapter's content.
 
 Everything a block writes under `ext.<plugin>.<key>` is gathered into one `ext`
 object on the node, keys and values verbatim. The generator validates none of it
@@ -297,6 +309,11 @@ each expects, without building a command.
 | `ai/` `stage` on a file-level block — a file groups chapters and places none of them | error |
 | `ai/` `related` entry reaching into `tech/` — the tool a usage rests on goes in `depends-on`, which is what the loop picture draws | warning |
 | A directory missing the root document its folder convention names | warning |
+| A change's `proposal.md` without `category`, or with one outside `feature`, `behaviour-change`, `defect` | error |
+| A delta whose opening `meta` block is missing, names another change, lacks `delta`, or carries any other field | error |
+| A delta naming a chapter or section its target lacks, adding one it has, or using a section other than `ADDED`, `MODIFIED`, `REMOVED` | error |
+| A delta whose merge would leave its target with a new error | error |
+| A `change` value that is not one lowercase kebab-case change name | error |
 
 ### Literal escape sequences
 

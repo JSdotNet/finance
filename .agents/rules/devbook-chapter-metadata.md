@@ -5,7 +5,7 @@ description: Common per-chapter and per-file metadata convention for domain/, ar
 
 # Chapter and file metadata
 
-`domain/`, `arc42/`, `tech/`, `design/`, and `ai/` are intended to be read by a
+`domain/`, `arc42/`, `tech/`, `design/`, and `ai/` are intended to be read by
 visualization and indexing tooling, not just by humans. To make that
 possible, every **chapter** in these folders carries a small, parseable
 metadata block directly under its heading, in a fenced `meta` (YAML) code
@@ -15,33 +15,34 @@ top-level (`#`) heading describing the document as a whole.
 A "chapter" here means any heading that these folders' own instructions
 already treat as an addressable unit:
 
-- `.domain/<context>/domain.md` — each Aggregate, Domain Service, Domain Event,
+- `.devbook/domain/<context>/domain.md` — each Aggregate, Domain Service, Domain Event,
   and each Shared Value Objects / Shared Enums chapter, plus every Entity, Value
   Object, and Enum sub-chapter inside an Aggregate. Those sub-chapters each
   carry their own metadata block; they are not covered by their parent
   Aggregate's block. A chapter split into a `domain.<name>.md` — or into a
   `features.<name>.md` or `skills.<name>.md` below — is the same chapter at a
   different path, per `devbook-domain.md`.
-- `.domain/<context>/features.md` — each Feature and Sub-feature.
-- `.domain/<context>/domain.md`, under its `## Ubiquitous Language` grouping —
+- `.devbook/domain/<context>/features.md` — each Feature and Sub-feature.
+- `.devbook/domain/<context>/domain.md`, under its `## Ubiquitous Language` grouping —
   each `Term` chapter.
-- `.domain/<context>/skills.md` — each Feature and Sub-feature, where the
+- `.devbook/domain/<context>/skills.md` — each Feature and Sub-feature, where the
   context describes skills rather than product features.
-- `.domain/<context>/actors.md` — each User, Organisation, and Technical actor.
-- `.arc42/<nn>-<name>.md` — the file's top-level chapter, and any ## section
+- `.devbook/domain/<context>/actors.md` — each User, Organisation, and Technical actor.
+- `.devbook/arc42/<nn>-<name>.md` — the file's top-level chapter, and any ## section
   inside it that is independently trackable.
-- `.tech/<layer>.md` — each `## <Technology Name>` chapter (one graph node per
+- `.devbook/tech/<layer>.md` — each `## <Technology Name>` chapter (one graph node per
   chapter).
-- `.design/<name>.md` — the file's top-level chapter, and every `##` chapter
+- `.devbook/design/<name>.md` — the file's top-level chapter, and every `##` chapter
   inside it. `###` sub-headings are covered by their parent `##` chapter and
   carry a block only if they need independent status or cross-references.
-- `.ai/<nn>-<part>.md` and `.ai/concepts.md` — each `## <Chapter Name>`
+- `.devbook/ai/<nn>-<part>.md` and `.devbook/ai/concepts.md` — each `## <Chapter Name>`
   chapter (one graph node per chapter).
 
-- `domain/` `context-map.md`, `model.md`, `flow.md`, their split files, and
-  `dependencies.md`, `tech/` `technology-graph.md`, and `ai/` `adoption-map.md` are
-  strategic/structural artifacts; their `##` sections do **not** carry
-  per-chapter metadata blocks.
+- `domain/` `context-map.md`, `model.md`, `flow.md`, their split files,
+  `dependencies.md`, and any additional page a context carries, `tech/`
+  `technology-graph.md`, and `ai/` `adoption-map.md` are strategic/structural
+  artifacts; their `##` sections do **not** carry per-chapter metadata blocks,
+  and the check asks for none. Never demote such a section to a bold label.
 
 ## Chapter metadata block format
 
@@ -59,7 +60,8 @@ Prose for this chapter starts here.
 ```
 
 `type` is the only universally required field, and only in the three folders
-that define a value set for it (`domain/`, `tech/`, `ai/`). `status` is
+that classify every chapter with it (`domain/`, `tech/`, `ai/`); `design/`
+types its requirement chapters and nothing else. `status` is
 required per folder: mandatory in `tech/` and `ai/`, optional in
 `domain/`, `arc42/`, and `design/`, where leaving it out means the content is
 at rest — see the `status` entry under **Fields**. Optional fields (`related`,
@@ -67,9 +69,9 @@ at rest — see the `status` entry under **Fields**. Optional fields (`related`,
 are included only when they have a value; empty collections and null values are
 omitted rather than written out.
 
-**The `meta` fence stays even when the block ends up empty.** In `arc42/` and
-`design/` there is no `type` field, so a resting chapter with no
-relations has nothing left to write:
+**The `meta` fence stays even when the block ends up empty.** In `arc42/`, and
+on every `design/` chapter but a requirement, there is no `type` field, so a
+resting chapter with no relations has nothing left to write:
 
 ```markdown
 ## <Chapter Heading>
@@ -102,11 +104,15 @@ churn the heading's anchor and every reference pointing at it. Keeping it in
 `type` means a reclassification is a one-line metadata edit.
 
 Anchors are therefore slugs of the bare name —
-`.domain/order-management/domain.md#order`, not `#aggregate-order`.
+`.devbook/domain/order-management/domain.md#order`, not `#aggregate-order`.
 
 Headings that name a **grouping** rather than a thing keep their descriptive
 text, because that text *is* the group's name: `## Shared Value Objects` is
 correct, with `type: shared-value-objects`.
+
+`### Requirement:`, `### Invariant:`, and `#### Scenario:` keep their prefix,
+in `domain/` and, for requirements, in `design/`: the heading shape is
+OpenSpec's, and a tool that reads OpenSpec finds them by it.
 
 ## File-level metadata block
 
@@ -139,8 +145,9 @@ or optional by folder, exactly as above; `type` required where the folder
 defines a file-level value set; `related`, `issue`, `effort`, and `roadmap`
 optional) and the same omit-when-empty rule. Folder-specific fields defined for chapters
 (`depends-on`, `aliases`, `feature-flag`, `setting`, `role`, `key`, `default`,
-`scope`, `version`, `alternatives`) are chapter-scoped and are not used at file level — a file's
-overall relationships are expressed through `related` only.
+`scope`, `deployment`, `version`, `alternatives`) are chapter-scoped and are not used at file level — a file's
+overall relationships are expressed through `related` only. The one exception is
+`deployment` on a domain `context.md`, which is the bounded context itself.
 
 In `arc42/`, the file's top-level chapter heading (e.g. `# 01. Introduction
 and Goals`) already carries a chapter metadata block as described above; for
@@ -183,18 +190,22 @@ repository path:
 move and does not index it. Derived `_meta/` folders are written beside the
 chapters they index, and the repository-wide rollup under `.devbook/_meta/`.
 
+A proposed change lives outside the parent, in `openspec/changes/<name>/`; its
+`proposal.md` and deltas are chapters too, indexed into the rollup alone. Their
+shape is `devbook-changes.md`'s.
+
 ### Chapter and file references
 
 Chapters are not given a separate stored id. A chapter is addressed by its
 file path (relative to the repository root) plus a GitHub-style anchor slug
 of its heading text: `<path>#<heading-slug>`, e.g.
-`.domain/order-management/domain.md#order`. This is exactly what
+`.devbook/domain/order-management/domain.md#order`. This is exactly what
 renders as the heading's link target, so it stays correct automatically when
 read in any Markdown viewer and never needs to be kept in sync by hand.
 
 A file, addressed at the file-level metadata block, is referenced the same
 way but without a heading slug: `<path>`, e.g.
-`.domain/order-management/dependencies.md`. Use this bare-path form when a
+`.devbook/domain/order-management/dependencies.md`. Use this bare-path form when a
 `related` entry points at a file as a whole rather than one of its chapters.
 
 Use the `<path>#<heading-slug>` (chapter) or `<path>` (file) form as the
@@ -220,47 +231,31 @@ entries in `related` and in any folder-specific relation field (`depends-on`).
   Spell the absence by leaving the field out, never as `status: null` — same
   discipline as `issue: null`, and the reason is the same.
 
+  **Each folder's ladder is a built-in default.** A repository whose team
+  reviews differently declares its own in `.devbook/statuses.json`, and the
+  check validates against it:
 
-  On top of every folder's own ladder sits one shared rung, `approved`: a person
-  has read this chapter and approved it. It is the decision the approval gate
-  makes before a chapter becomes work, recorded in the chapter so it travels
-  with the content and lands in the git history like any other change — not in
-  flow configuration, and not in someone's memory.
+  ```json
+  { "folders": { "domain": { "rules": [
+    { "files": ["**/actors.md"], "scope": "file", "statuses": ["draft", "review", "ready"] },
+    { "files": ["**/domain.md", "**/domain.*.md"], "statuses": ["draft", "review", "ready", "deprecated"] }
+  ] } } }
+  ```
 
-  `approved` is never a resting value and is never omitted to mean itself. A
-  chapter states it while the approval stands and drops back to its ordinary
-  rung the moment the content changes: an approval is of what was read, not of
-  the heading. The rung is one word in every folder because what is approved is
-  the chapter; the ladder underneath says what kind of thing the chapter is.
-- **approved-by** (optional) — who approved this chapter: a person, a handle, or
-  a team. One value, not a list.
-- **approved-at** (optional) — the day they approved it, in `YYYY-MM-DD` form.
-
-  Write both whenever `status: approved` is written, and delete both in the same
-  change that drops the rung. An approval nobody signed and dated is reported, as
-  is an approval record left behind on a chapter no longer claiming the rung —
-  either the approval is current and the status says so, or it has lapsed and
-  the record comes out with it.
-- **review** (optional) — where this chapter's review pass stands, on the way to
-  that decision: `requested` (waiting on the reviewer), `changes-requested`
-  (waiting on the author; at least one open annotation says why), or `cleared`
-  (waiting on nobody; no open annotation remains, and the chapter is ready for
-  the approval decision). Omitted means no review is running. The three states
-  are checked against the notes in the chapter body: `changes-requested` over no
-  open fence, or `cleared` over one, is a verdict written without its findings.
-- **reviewer** (optional) — who owes the next move: one handle, name, or role.
-  Never a list.
-- **review-at** (optional) — the day the current review state was written, in
-  `YYYY-MM-DD` form.
-
-  The three are written together or not at all, mirroring the approval triad so
-  a chapter reads the same way on its way to a decision as it does past one.
-  None of it is chapter content: a reader loading a chapter for context skips
-  the review fields the same way it skips an annotation fence, and only review
-  work — a review skill, a queue, the approval gate — reads them. Approval
-  deletes all three in the same change that writes the rung: an approved
-  chapter carries the decision, not the road to it. A finding is never a field
-  here; it is one `annotation` fence beside the passage it is about.
+  Rules are tried in order and the first whose `files` glob — relative to the
+  folder — and `scope` (`file` for the `#` block, `chapter`, or `any`, the
+  default) match a block decides it. A block no rule matches, and a folder the
+  file does not name, takes the built-in ladder. A rule lists the rungs a person
+  writes, and nothing else: never the resting value, which stays written by
+  omission; never `approved` or `accepted`, which devbook adds to every
+  `domain/` rule and keeps out of every other folder; and in `tech/` and `ai/`
+  only rungs of the rating ladder, never an empty list, because a rating is
+  always stated. An empty list elsewhere means the block carries no status.
+  Listing any of those is a configuration error, reported once on the file.
+  The check reads only `folders.<folder>.rules[].files`, `scope`, and
+  `statuses`; every other key, and every folder that is not a devbook folder,
+  belongs to whatever else reads the file — a viewer's status picker — and is
+  left alone.
 
   The allowed values are folder-specific; see the `status` section
   in `devbook-domain.md`,
@@ -268,10 +263,98 @@ entries in `related` and in any folder-specific relation field (`depends-on`).
   `devbook-tech.md`,
   `devbook-design.md`, or
   `devbook-ai.md` for the value set
-  that applies to the folder you're editing. A file-level `status` reflects
+  that applies to the folder you're editing, unless `.devbook/statuses.json`
+  declares one for the block, as above. A file-level `status` reflects
   the document as a whole and is set independently of its chapters' own
   `status` values (e.g. a file can be `active` overall while one chapter
   inside it is still `draft`).
+
+  A review in progress is never a field beside `status`: the chapter stays on
+  its transitional rung — a repository that wants the review visible declares a
+  rung for it in `.devbook/statuses.json` — and its open `annotation` fences say
+  what is still asked. Who owes the next move belongs to the pull request or
+  the tracker, not the chapter. `review`, `reviewer`, and `review-at` were
+  removed in contract 21 and are reported by name.
+
+
+  On top of **`domain/`**'s ladder — and of a change's `proposal.md`, which
+  decides the whole change once per `devbook-changes.md`, and no other — sit two decision
+  rungs. The first is `approved`: a person has read this chapter and approved it. It is the decision the approval gate
+  makes before a chapter becomes work, recorded in the chapter so it travels
+  with the content and lands in the git history like any other change — not in
+  flow configuration, and not in someone's memory.
+
+  `approved` is never a resting value and is never omitted to mean itself. A
+  chapter states it while the approval stands and drops back to its ordinary
+  rung the moment the content changes: an approval is of what was read, not of
+  the heading.
+
+  The other four folders have no decision rung. `arc42/` and `design/` record a
+  standing structure, `tech/` and `ai/` rate a technology or a way of working
+  with one, and the question these rungs answer — did a person agree this, and
+  does what was built satisfy it — is asked of the model. The six record fields
+  below are `domain/`'s with the rungs: written anywhere else they are not in
+  that folder's vocabulary, and are reported as unrecognized.
+
+  A repository that wants that lapse **checked** rather than remembered writes
+  `approved-hash` beside the other two.
+
+  The second rung sits above it, `accepted`: a person has seen the implemented
+  work against this chapter and accepted it. The two are a **stack, not a choice** —
+  `approved` says the specification is right, `accepted` says what was built
+  satisfies it, and they are usually stated by different people on different
+  days. So an accepted chapter carries both records: `approved-by` and
+  `approved-at` stay, with `accepted-by` and `accepted-at` beside them and
+  `accepted-at` on or after `approved-at`. An acceptance written over no
+  approval is reported; there would be nothing saying the chapter the build was
+  accepted against was ever agreed.
+
+  What is accepted is the chapter's content, never a commit — which pull
+  request delivered it belongs to the tracker. Both records drop together in
+  one change the moment the content changes, and the chapter returns to its
+  folder's ordinary rung: a build was accepted against the text that was
+  approved, so neither statement outlives it.
+- **approved-by** (`domain/` and a proposal, optional) — who approved this chapter: a
+  person, a handle, or a team. One value, not a list.
+- **approved-at** (`domain/` and a proposal, optional) — the day they approved it, in
+  `YYYY-MM-DD` form.
+- **approved-hash** (`domain/` and a proposal, optional) — a fingerprint of the content
+  that was approved: `sha256:` followed by eight lowercase hex characters. Written by
+  the approval gate in the same change as the rung, and never by hand.
+
+  What is fingerprinted is the block a reader would say they read — its heading
+  text and everything under it, down to the next heading at the same or a
+  higher level, so a `#` file block covers the whole file and a `##` chapter
+  covers its `###` subsections. The `meta` blocks are excluded, because the
+  value lives in one; the `annotation` fences are excluded, because a note
+  written after the approval is not a change to the content; and whitespace is
+  normalised, because a reflowed paragraph reads identically.
+
+  Present and not matching, the chapter is reported as an approval standing
+  over content that has changed — the one thing the rung claimed and nothing
+  could establish, since git answers per file and not per chapter. Absent,
+  nothing is reported: the field is optional, and a repository that omits it is
+  exactly where it was before.
+
+  Write `approved-by` and `approved-at` whenever `status: approved` is written,
+  add `approved-hash` when the repository uses it, and delete all three in the
+  same change that drops the rung. An approval nobody signed and dated is
+  reported, as is an approval record left behind on a chapter no longer
+  claiming the rung — either the approval is current and the status says so, or
+  it has lapsed and the record comes out with it. Under `status: accepted` the
+  approval record is not orphaned: the acceptance stands on it.
+- **accepted-by** (`domain/` and a proposal, optional) — who accepted the built work
+  against this chapter. One value, not a list.
+- **accepted-at** (`domain/` and a proposal, optional) — the day they accepted it, in
+  `YYYY-MM-DD` form, on or after `approved-at`.
+- **accepted-hash** (`domain/` and a proposal, optional) — the fingerprint of the content accepted,
+  computed exactly as `approved-hash` is. Where both are written they are one
+  value, because an acceptance is of the approved content; two that disagree
+  say the chapter moved between the two decisions, and are reported.
+
+  The three behave field for field like the approval three: written together,
+  deleted together, reported when one is left behind, and off the moment the
+  content changes.
 - **type** (required where the folder defines a value set) — what kind of thing
   this chapter or file *is*: the classification that used to be written as a
   heading prefix. Like `status`, the allowed values are folder-specific and are
@@ -279,19 +362,24 @@ entries in `related` and in any folder-specific relation field (`depends-on`).
   and file-level blocks alike, with a separate value set for each level where
   the folder distinguishes them.
 
-  Three folders define a value set:
+  Four folders define a value set:
 
   | Folder | Chapter values | File values |
   |---|---|---|
-  | `domain/` | `aggregate`, `entity`, `value-object`, `enum`, `shared-value-objects`, `shared-enums`, `ubiquitous-language`, `domain-service`, `domain-event`, `feature`, `sub-feature`, `feature-flag`, `setting`, `user`, `organisation`, `technical`, `term` | `context-map`, `context`, `domain`, `actors`, `features`, `skills`, `model`, `flow`, `dependencies` |
+  | `domain/` | `bounded-context`, `aggregate`, `entity`, `value-object`, `enum`, `shared-value-objects`, `shared-enums`, `ubiquitous-language`, `domain-service`, `domain-event`, `feature`, `sub-feature`, `requirements`, `requirement`, `invariants`, `invariant`, `feature-flag`, `setting`, `user`, `organisation`, `technical`, `term` | `context-map`, `context`, `domain`, `actors`, `features`, `skills`, `requirements`, `invariants`, `model`, `flow`, `dependencies`, or an additional page's own filename |
   | `tech/` | `language`, `runtime`, `framework`, `library`, `package`, `tool`, `service`, `platform`, `protocol`, `format` | none |
   | `ai/` | `practice`, `agent`, `skill`, `plugin`, `mcp-server`, `hook`, `workflow`, `model`, `concept`, `guardrail` | `adoption-map`, `stage`, `concepts` |
+  | `design/` | `requirement` | none |
 
-  `arc42/` and `design/` deliberately define **no** value set. Their only kind
-  distinction — chapter vs section — is already carried by heading level, so a `type` field there would restate the document
-  structure rather than add anything. Omit it in those folders, per the same
-  omit-when-empty discipline that governs the optional fields; setting it is
-  reported as a warning.
+  `arc42/` deliberately defines **no** value set. Its only kind distinction —
+  chapter vs section — is already carried by heading level, so a `type` field
+  there would restate the document structure rather than add anything. Omit it,
+  per the same omit-when-empty discipline that governs the optional fields;
+  setting it is reported as a warning.
+
+  `design/`'s one value marks out chapters rather than classifying every one: a
+  `### Requirement:` under a component is `type: requirement`, per
+  `devbook-design.md`, and every other `design/` chapter omits `type`.
 
   In `tech/` this field was previously spelled `kind`. The old name still parses
   so an existing repository is not broken by a generator sync, but it reports a
@@ -348,6 +436,10 @@ entries in `related` and in any folder-specific relation field (`depends-on`).
   "[Linking test cases](#linking-test-cases)" for the format, the level and
   runner vocabularies, and why this field exists where a code-path field
   deliberately does not.
+- **change** (optional) — the change whose merge last touched this chapter or
+  file: its folder name under `openspec/changes/`. Written by
+  `delta.mjs --apply`, never by hand. Available in every folder. See
+  `devbook-changes.md`.
 - **number** (optional, **file-level blocks only**) — this document's number
   within its directory, as a single non-negative integer: arc42 chapter 9,
   TDR 2. A numbered filename (`09-architecture-decisions.md`,
@@ -389,7 +481,8 @@ its directory. A chapter's position is already its position in the document.
 
 Folder-specific fields (e.g. `depends-on` on feature/tech/ai chapters,
 `feature-flag` and `setting` on domain feature chapters, `key`/`default`/`scope`
-on domain switch chapters, `role` on domain actor chapters,
+on domain switch chapters, `role` on domain actor chapters, `deployment` on
+domain `bounded-context` chapters and on a domain `context.md`,
 `version`/`alternatives` on tech chapters, `stage` on ai chapters and never on an ai file) are
 documented in that folder's
 own instructions file, not here — this file only defines the fields common
@@ -401,7 +494,7 @@ A chapter that is estimated and carried by a roadmap item therefore reads:
 ## Offline Sync Queue
 
 \`\`\`meta
-status: ready
+status: draft
 effort: 8
 roadmap: [sync-service, mobile-mvp]
 related: [.devbook/domain/sync/features.md#offline-sync]
@@ -417,8 +510,9 @@ capability is covered end to end, and a viewer can offer to run the thing.
 ### Why a test link and not a code link
 
 This schema deliberately has **no field linking a chapter to a source path** —
-see "Counterpart resolution" in `assets/code-sync-protocol.md`, shared by
-`sync-specs`, `apply-change`, and `verify-change`. A path in a metadata block rots on the first refactor
+see "Counterpart resolution" in the devbook plugin's `assets/code-sync-protocol.md` — never
+materialized into a repository — shared by
+`capture-specs`, `apply-change`, and `verify-change`. A path in a metadata block rots on the first refactor
 and gives no signal when it does, so a chapter and its implementation are paired
 through naming instead.
 
@@ -456,6 +550,22 @@ The level is authored rather than inferred from the runner, because one runner
 routinely hosts all three — `dotnet` runs unit tests and API integration tests
 alike — and "is this covered end to end?" is the question a reader of the
 chapter actually has.
+
+**Two chapter types imply their level, and only two.** A `domain/` rule chapter
+sits in the file that says what kind of claim it makes, so the level its `tests`
+should reach is already decided:
+
+| Type | Level | Why |
+|---|---|---|
+| `requirement` | `e2e`, or `integration` for a policy no user triggers | It promises something to someone outside the model, so what proves it is the product driven the way that someone drives it. |
+| `invariant` | `unit` | It is what the type guarantees no matter who calls it, and a test that has to start the product to reach it is asserting something else. |
+
+A chapter of either type whose `tests` reach no entry at the expected level is
+reported as a **coverage warning** — the link may be at the wrong level, or the
+rule may be in the wrong file. It is never an error: refusing the document would
+teach people to leave `tests` off and write the rule back into prose, which is
+what these files exist to replace. Every other type carries no expectation at
+all, and a chapter with no `tests` carries none either — see the Rules below.
 
 **runner** and **selector** — which tool runs it, and how that tool addresses
 it:
@@ -504,6 +614,13 @@ command to `TEST_RUNNERS` in `.devbook/_tools/devbook-meta/metadata.mjs`.
   test asserts nothing, and linking it makes a chapter look covered when it is
   not.
 
+The absence rule holds for the two typed levels too: a `requirement` with no
+`tests` is reported for the level by nothing, because it has claimed no
+coverage. What it *is* reported for is having no `#### Scenario:` — a promise
+with no case that exercises it is one nobody can tell has been broken — and that
+is a coverage warning on the same footing. An `invariant` carries no scenario
+and is never reported for lacking one.
+
 A delivered feature, and a domain aggregate whose invariants are pinned,
 therefore read:
 
@@ -523,6 +640,18 @@ tests: [integration:dotnet:Ordering.Api.Tests.GuestCheckoutTests, e2e:playwright
 \`\`\`meta
 type: aggregate
 tests: unit:dotnet:Ordering.Domain.Tests.OrderTests
+\`\`\`
+```
+
+One of that aggregate's rules, in `domain.invariants.md`, names the test for that one
+rule rather than the suite:
+
+```markdown
+### Invariant: An order cannot be confirmed twice
+
+\`\`\`meta
+type: invariant
+tests: unit:dotnet:Ordering.Domain.Tests.OrderTests.CannotConfirmAnAlreadyConfirmedOrder
 \`\`\`
 ```
 
@@ -576,7 +705,7 @@ chapter.
   rule reaches `status` in `domain/`, `arc42/`, and `design/`, where the resting
   value `active` is what an absent field says: a settled chapter with no
   relations, no estimate, and no issue shows only `type` where the folder
-  defines one — and in `arc42/` and `design/`, which define none, an empty
+  defines one — and in `arc42/`, and on a `design/` guideline, an empty
   fence. Keep the fence; it is what makes the heading addressable.
 
 ## Where reading order comes from
@@ -598,7 +727,7 @@ Per directory, `_meta/index.json` is generated like this:
    | Directory | Root document by convention |
    |---|---|
    | `domain/` | `context-map.md` |
-   | `.domain/<context>/` | `context.md` |
+   | `.devbook/domain/<context>/` | `context.md` |
    | `tech/` | `technology-graph.md` |
    | `design/` | `README.md` |
    | `ai/` | `adoption-map.md` |
@@ -652,11 +781,11 @@ These metadata blocks are checked by `.devbook/_tools/devbook-meta/build.mjs`,
 which builds the reference graph and the reading outline to do it. A layered
 plugin may ask the same tool to write them, with `--write`, as derived indexes —
 one set per devbook folder plus a repository-wide rollup, placed per that
-plugin's `devbook-derived-artifacts.md`:
+plugin's own rule for `_meta/`:
 
 ```text
-_meta/graph.json          # reference graph, all adopted folders
-_meta/index.json          # reading outline, all adopted folders
+.devbook/_meta/graph.json          # reference graph, all adopted folders
+.devbook/_meta/index.json          # reading outline, all adopted folders
 .devbook/arc42/_meta/graph.json   # arc42/ only
 .devbook/arc42/_meta/index.json
 .devbook/domain/_meta/…
@@ -667,13 +796,14 @@ _meta/index.json          # reading outline, all adopted folders
 
 Only folders the repository actually has produce a scope.
 
-Regenerate whenever a chapter or file is added, renamed, or re-linked:
+Run the check whenever a chapter or file is added, renamed, or re-linked:
 
 ```bash
-node .devbook/_tools/devbook-meta/build.mjs
+node .devbook/_tools/devbook-meta/build.mjs --check
 ```
 
-These are derived output — never edit them by hand. CI
-(`.github/workflows/devbook-meta.yml`) fails when a reference does not
-resolve or when a committed index is stale. See
+The indexes are derived output — never edited by hand, and never regenerated in a
+session: where a repository commits them, the layered plugin's own refresh path writes
+them. CI (`.github/workflows/devbook-meta.yml`) fails when a reference does not resolve;
+whether a committed index has drifted is that plugin's question and never a failure. See
 the devbook-meta tooling README (`.devbook/_tools/devbook-meta/README.md`) for the output shape.

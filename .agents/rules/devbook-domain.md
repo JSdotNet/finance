@@ -38,27 +38,44 @@ across `domain/`, ADRs, and code module names where practical.
                      # feature flags and settings, and — until they outgrow
                      # it — its actors and its dependencies
     domain.md
+    domain.invariants.md  # what the aggregates on domain.md enforce: one rule
+                          # per chapter, where it is enforced, and the unit
+                          # test that proves it
     actors.md        # optional: the actors, once context.md is too small
                      # for them
     features.md      # what the context lets a user do, in business language
     skills.md        # the alternative to features.md, for a repository whose
                      # product is procedures rather than a running application
+    requirements.md  # what those features guarantee: one SHALL sentence per
+                     # requirement, with the scenarios that prove it
     model.md
     flow.md          # optional: when the context has lifecycle/process flows
     dependencies.md  # optional: the dependencies, once context.md is too
                      # small for them
-    domain.<name>.md    # optional: one chapter split out of the file it is
-    features.<name>.md  #   named after — an aggregate or domain service, a
-    skills.<name>.md    #   feature, a skill, one aggregate's structure, one
-    model.<name>.md     #   flow — when it is large enough or read often
-    flow.<name>.md      #   enough to stand alone. See "A split file" below.
+    domain.<name>.md        # optional: one chapter split out of the file it
+    features.<name>.md      #   is named after — an aggregate or domain
+    skills.<name>.md        #   service, a feature, a skill, one feature's
+    requirements.<name>.md  #   requirements, one aggregate's structure, one
+    model.<name>.md         #   flow — when it is large enough or read often
+    flow.<name>.md          #   enough to stand alone. See "A split file" below.
+    domain.<name>.invariants.md  # what the aggregate on domain.<name>.md
+                                 # enforces, beside it
 ```
 
 When starting a new bounded context, create the folder with `context.md`,
-`domain.md`, `model.md`, and one of `features.md` or `skills.md`, using the
-templates below. Add `flow.md` when the context has lifecycle or process
-flows, and split `actors.md` or `dependencies.md` out of `context.md` only
-when it has grown past what one file reads well with.
+`domain.md`, `model.md`, one of `features.md` or `skills.md`, and
+`requirements.md` and `domain.invariants.md`, using the templates below. Add
+`flow.md` when the context has lifecycle or process flows, and split
+`actors.md` or `dependencies.md` out of `context.md` only when it has grown
+past what one file reads well with.
+
+**The listed files are the ones with documented responsibilities, not the only
+files permitted.** A context may add a page for something it has to record
+that no listed file holds — a go-live takeover of a predecessor system's data,
+a regulatory annex, whatever that domain turns out to need. It is a file like
+any other: a kebab-case name, a file-level `meta` block whose `type` is the
+filename, and `##` sections that carry no blocks of their own. It reads after
+the listed files, and nothing here has to be changed to allow it.
 
 **`context.md` is the boundary, and the context's root document.** It opens
 with what the context is responsible for — inside the boundary, outside it,
@@ -91,13 +108,65 @@ feature chapter's `setting` reference is what says the capability hangs on it.
 Both carry `key`, the identifier as the code spells it, which is what lets a
 flag check or a configuration read found in code resolve to a chapter instead
 of to prose. A feature points at what gates or configures it through
-`feature-flag` or `setting`.
+`feature-flag` or `setting`. A deployment or environment value — a retry
+budget, a timeout, a maximum an operator sets per environment — is a `setting`
+with `scope: system`: a person chooses it, it is not decided at release, and it
+is never retired the way a flag is. A `feature-flag` is only ever a capability
+switch.
 
 **A context takes `features.md` or `skills.md`, never both.** They answer the
 same question — what does this context let someone do — for two different kinds
 of repository, so a context holding both has split one answer across two files.
 Pick per context, not per repository, though in practice a repository lands on
 one of them throughout.
+
+**Behaviour lives in `requirements.md` and the invariants subpages, not in
+prose.** The prose chapters keep what only prose can carry — why the thing
+exists, who works with it, where the boundary runs, how it moves through its
+lifecycle, what the domain calls it — and every rule that is either kept or
+broken moves to a behaviour file, one rule per chapter: a requirement with the
+scenarios that prove it, an invariant with the unit test that does. A
+requirement goes in `requirements.md`; an invariant goes in the invariants
+subpage of the domain page its aggregate is on. Each behaviour
+chapter points back at the chapter it belongs to through `related`, and that
+chapter points at it, so either half is reachable from the other.
+
+**Invariants are a subpage of their domain page.** `domain.invariants.md` holds
+the rules of the aggregates and domain services on `domain.md`, and
+`domain.order.invariants.md` those of the aggregate on a split `domain.order.md`.
+The name is the pairing: a reader who opens a domain page finds its rules one
+file over, and splitting an aggregate out of `domain.md` moves its invariants
+chapter to the new page's subpage in the same change. A subpage exists only
+beside its page and only when that page's aggregates have rules; it is never
+split on its own. Requirements keep their own file, because they pair with a
+feature and a feature does not live on a domain page.
+
+The two words are not a house style. A **requirement** is what the product
+promises someone outside it, and the word is OpenSpec's, kept along with its
+`### Requirement:` / `#### Scenario:` file layout so a tool that reads OpenSpec
+reads these files. An **invariant** is what a type guarantees no matter who
+calls it, and the word is DDD's, because that is the question the model is
+asked and the aggregate is the thing that answers it. The distinction is not
+about importance: it is about who is held to the rule, and it decides where the
+rule sits and what proves it.
+
+**The level of proof follows the file.** A requirement's `tests` are `e2e` —
+it is a promise to someone outside, so what proves it is the product driven the
+way that someone drives it; `integration` where the requirement is a policy no
+user triggers, reached by a scheduler, a callback, or another context. An
+invariant's `tests` are `unit`: it is what the type guarantees, and a test that
+has to start the product to reach it is not asserting the guarantee. A chapter
+whose links disagree with its file is reported as a coverage warning, never an
+error — the link may be right and the level mislabelled, and a check that
+refused the chapter would only teach people to leave `tests` empty.
+
+**A domain service's rules split by who is held to them.** A service that
+reacts — a policy, a process manager — makes a promise about what happens when
+something occurs, and that promise is a **requirement** of whatever it acts on:
+it goes in `requirements.md` under the feature the reaction belongs to. The
+rules the service enforces itself, the ones it will not let a caller break, are
+**invariants** and get a `## <ServiceName>` chapter in the invariants subpage of
+its domain page, like an aggregate's.
 
 **The actor chapters say who; the rest of the context says what.** No other
 chapter states which role the someone in "the case worker files a request" is.
@@ -138,34 +207,44 @@ separate glossary file: a registry that names what the model already names is a
 second copy, and it goes stale on the side nobody reads.
 
 **A split file holds one chapter of the file it is named after.** `domain.md`,
-`features.md` or `skills.md`, `model.md`, and `flow.md` each split the same way:
+`features.md` or `skills.md`, `requirements.md`, `model.md`, and `flow.md` each
+split the same way:
 `<file>.<name>.md`, where the suffix is the kebab-case name of the one thing the
 file holds — `domain.order.md` is the `## Order` aggregate with everything it
-owns, `features.checkout.md` one feature with its sub-features, `model.order.md`
-one aggregate's structure, `flow.flow-code.md` one flow, named after the skill it
+owns, `features.checkout.md` one feature with its sub-features,
+`requirements.checkout.md` one feature's requirements with their scenarios,
+`model.order.md` one aggregate's structure, `flow.flow-code.md` one flow, named after the skill it
 belongs to. A split file carries the `type` of the file it came from, because it
 is the same kind of document at a smaller scope, and its chapter reads exactly as
 it did inside that file: same heading, same block, same sub-chapters. Split when
 the file stops being readable, or when readers arrive looking for one chapter
 rather than for the context; keep the base file for the chapters still better
-read together. `features.md`, `skills.md`, `model.md`, and `flow.md` may be
-dropped once every chapter is split out; `domain.md` never is, because it holds
+read together. An invariants subpage is not a split file: it follows its page,
+so `domain.order.md` brings `domain.order.invariants.md` with it and
+`domain.invariants.md` keeps only the rules of what stayed on `domain.md`.
+`features.md`, `skills.md`, `requirements.md`, `model.md`, and `flow.md` may be
+dropped once every chapter is split out, and `domain.invariants.md` once no
+aggregate left on `domain.md` has a rule; `domain.md` never is, because it holds
 what belongs to no single aggregate — the `## Shared Value Objects`,
 `## Shared Enums`, and `## Ubiquitous Language` groupings — and `context.md`
 does not split at all, because it is the root document and what it holds is
 small by construction. A split chapter moves rather than copies: `## Order` lives at
 `domain.order.md#order` and nowhere else in the context. Wherever a rule or a
-skill names `domain.md`, `features.md`, `skills.md`, `model.md`, or `flow.md`,
-it means that file or any split file of it.
+skill names `domain.md`, `features.md`, `skills.md`, `requirements.md`,
+`model.md`, or `flow.md`, it means that file or any split file of it; wherever
+one names the invariants subpage, it means `domain.invariants.md` or any
+`domain.<name>.invariants.md`.
 
 Reading order comes from this convention, not from a metadata field and not from
 filenames. `context-map.md` is `domain/`'s root document and is read first,
 followed by the bounded contexts in alphabetical order; inside a context,
 `context.md` is the root document and the rest read in the order listed in the
 tree above — `domain.md`, `actors.md`, `skills.md` or `features.md`,
-`model.md`, `flow.md`, `dependencies.md` — with a split file read directly
-after the file it is named after, in filename order among its siblings, and in
-that file's place when the file itself is gone.
+`requirements.md`, `model.md`, `flow.md`, `dependencies.md` — with a split file
+read directly after the file it is named after, in filename order among its
+siblings, and in that file's place when the file itself is gone. An invariants
+subpage reads directly after its page: `domain.md`, `domain.invariants.md`,
+`domain.order.md`, `domain.order.invariants.md`.
 Adding a context or a file needs no declaration anywhere; just regenerate
 `_meta/`. See `devbook-chapter-metadata.md`.
 ## File responsibilities
@@ -191,7 +270,8 @@ Adding a context or a file needs no declaration anywhere; just regenerate
     turns a capability on or shapes how it behaves. Carries `key` (the setting
     key the code reads), `scope` (`user`, `tenant`, or `system` — who may
     change it), and `default`, the value the product ships with. The prose
-    says what each value does.
+    says what each value does. A deployment or environment value an operator
+    sets per environment is this type, at `scope: system`.
   - Both are headed by their name in business language, never the key; the
     key is the field. Their `related` points at the feature chapters they gate
     or configure, and those chapters point back through `feature-flag` or
@@ -205,8 +285,9 @@ Adding a context or a file needs no declaration anywhere; just regenerate
   Shared Value Objects / Shared Enums grouping in the context.
   - Aggregate chapters include sub-chapters for their owned Entities, Value
     Objects, and Enums, each carrying its own metadata block.
-  - Aggregate chapters also carry an `### Invariants` table — the rules the
-    aggregate guarantees, one row per rule. See the folder rules below.
+  - The rules an aggregate guarantees are **not** here: they are `### Invariant:`
+    chapters in this page's invariants subpage, and the aggregate chapter points
+    at its `## <AggregateName>` chapter there through `related`.
   - Domain Service chapters describe the service's responsibility and the
     aggregates/policies it coordinates.
   - Domain Event chapters are first-class addressable chapters and carry
@@ -244,7 +325,12 @@ Adding a context or a file needs no declaration anywhere; just regenerate
     administrator user that changes settings.
   - Rights are stated here, not argued. Why a right is split — separation of
     duties, four eyes — is a modeling decision and belongs in `domain.md`, beside
-    the invariant it protects.
+    the invariant it protects. A modeling decision that was contested, is
+    expensive to reverse, or would otherwise be re-litigated is an
+    `arc42/adr/` record instead — one per concern, with its history — and the
+    chapter's `related` points at it. There is no `decisions.md` here: a
+    decision log beside the model is a second copy of the *why*, and it goes
+    stale on the side nobody reads.
     A context whose rights need a screen-to-right matrix closes the file with one
     `## Rights` section carrying that table.
 - **features.md** — The features and sub-features this bounded context
@@ -264,6 +350,45 @@ Adding a context or a file needs no declaration anywhere; just regenerate
   - Describe what the skill lets someone do and what it guarantees, not how it
     is implemented. Where it needs a diagram, that belongs in `flow.md` or in
     its own `flow.<skill-name>.md`.
+- **requirements.md** — What the context's features guarantee, one chapter per
+  feature. Each `## <Feature>` chapter carries `type: requirements` and a
+  `related` reference to the feature chapter in `features.md` or `skills.md`;
+  the feature chapter points back the same way.
+  - **`type: requirement`** — one `### Requirement: <name>` chapter per rule,
+    holding exactly one SHALL sentence and nothing else, with one
+    `#### Scenario: <name>` per case beneath it: Given, When, Then, one clause
+    per line. A chapter with two SHALL sentences is two requirements, and
+    neither can be accepted on its own.
+  - `tests` on a requirement chapter are `e2e`, or `integration` for a policy
+    no user triggers.
+- **domain.invariants.md**, **domain.<name>.invariants.md** — What each
+  aggregate on the domain page it is named after enforces, one chapter per
+  aggregate. Each `## <AggregateName>` chapter carries `type: invariants` and a
+  `related` reference to the aggregate chapter on that page; the aggregate
+  chapter points back. A chapter whose aggregate is on another page is reported
+  as a warning. A domain service that enforces rules of its own gets a chapter
+  here too, pointing at its `domain-service` chapter, and so does each shared
+  grouping whose types enforce rules of their own — a `## Shared Value Objects`
+  or `## Shared Enums` chapter in `domain.invariants.md`, pointing at the
+  grouping on `domain.md`, which points back.
+  - **`type: invariant`** — one `### Invariant: <name>` chapter per rule: one
+    sentence stating a claim that is either true or false, in the domain's own
+    words, with the rejection code in parentheses where the type has one
+    ``(`order-already-confirmed`)``; optionally one sentence of why; then an
+    `Enforced at:` line naming where the guarantee is made — `constructor`, a
+    named transition (`Confirm()`, `AddLine()`), `all mutations` where it
+    genuinely holds across every one, or `open` for a rule nobody has settled.
+  - An invariant has no `#### Scenario:`. The claim already is the case, and
+    its proof is the `unit` test in `tests`, which names it; Given/When/Then
+    belongs to requirements. A scenario an older chapter still carries is left
+    alone and never required.
+  - `tests` on an invariant chapter are `unit`.
+  - The rules an owned Entity or Value Object enforces are chapters here too,
+    under the aggregate that owns it; `Enforced at:` names the type.
+  - The rules a **shared** Value Object or Enum enforces sit under the
+    `## Shared Value Objects` or `## Shared Enums` chapter of
+    `domain.invariants.md`, never under an aggregate that uses the type and
+    never copied under each; `Enforced at:` names the type.
 - **model.md** — The structural domain model: relationships between
   aggregates, entities, and value objects, ideally as a Mermaid class diagram,
   plus relationship notes. Lifecycle/process flows live in `flow.md`, not
@@ -274,7 +399,8 @@ Adding a context or a file needs no declaration anywhere; just regenerate
   `model.md` stays purely structural. Include only when the context actually
   has a flow. Its `##` sections do not carry metadata blocks.
 - **<file>.<name>.md** — One chapter split out of `domain.md`, `features.md`,
-  `skills.md`, `model.md`, or `flow.md`, under the rules of that file: a
+  `skills.md`, `requirements.md`, `model.md`, or `flow.md`,
+  under the rules of that file: a
   `domain.<name>.md` chapter and its sub-chapters carry their blocks, a
   `model.<name>.md` or `flow.<name>.md` carries only the file-level one. Where
   a `flow.<name>.md` belongs to a skill, the file and that skill's chapter in
@@ -309,7 +435,10 @@ instructions.
 - Every Aggregate, Domain Service, Domain Event, Shared Value Objects, and
   Shared Enums chapter in `domain.md`, every Entity/Value Object/Enum
   sub-chapter inside an Aggregate, every Feature/Sub-feature chapter in
-  `features.md` or `skills.md`, every Feature Flag and Setting chapter in
+  `features.md` or `skills.md`, every Feature and Requirement chapter in
+  `requirements.md`, every Aggregate and Invariant chapter in an invariants
+  subpage,
+  every Feature Flag and Setting chapter in
   `context.md`, every User, Organisation, and Technical chapter in
   `context.md` or `actors.md`, and every Term chapter under `domain.md`'s
   `## Ubiquitous Language` grouping must carry a
@@ -319,23 +448,32 @@ instructions.
   issue link (`issue`) are included only when they have a value.
 - Every file in `domain/` — `context-map.md` and, per bounded context,
   `context.md`, `domain.md`, `actors.md` (when present), `features.md` or
-  `skills.md`, `model.md`, `flow.md`, `dependencies.md` (when present), and
-  each split file (when present) — must also carry the file-level metadata
+  `skills.md`, `requirements.md`, `model.md`, `flow.md`, `dependencies.md` (when
+  present), each split file and invariants subpage (when present), and any additional page the context carries
+  — must also carry the file-level metadata
   block described in `devbook-chapter-metadata.md`, placed directly under the
   file's top-level `#` heading. This applies even to `context-map.md`,
-  `model.md`, `flow.md`, their split files, and
-  `dependencies.md`, whose `##` sections do not carry their own per-chapter
+  `model.md`, `flow.md`, their split files, `dependencies.md`, and any
+  additional page, whose `##` sections do not carry their own per-chapter
   blocks — the file-level block is the only metadata those files carry.
   `context.md` declares `index: root`, so that it sorts first even in a
   context whose `domain.md` declared it before contract 11.
 - The metadata block's `status` field uses `draft`, `proposed`, `active`, or
   `deprecated` in this folder. This folder describes the current (or
   agreed-future) model, not a task queue, so there is no `done`: `active`
-  means "this is the current model", `deprecated` means superseded.
-- On top of that ladder sits the shared `approved` rung, defined once in
-  `devbook-chapter-metadata.md`: a person approved this chapter,
-  recorded with `approved-by` and `approved-at`. It is written explicitly, never
-  rested at, and comes off the moment the content changes.
+  means "this is the current model", `deprecated` means superseded. That is
+  the built-in ladder; a repository replaces its transitional rungs per file
+  in `.devbook/statuses.json`, per `devbook-chapter-metadata.md`.
+- On top of that ladder sit the two decision rungs, defined once in
+  `devbook-chapter-metadata.md` and belonging to **this folder only**:
+  `approved`, a person agreed this chapter, recorded with `approved-by` and
+  `approved-at`; and `accepted` above it, a person saw the built work against
+  this chapter and accepted it, recorded with `accepted-by` and `accepted-at`
+  beside the approval record it stands on. Each may carry a content
+  fingerprint — `approved-hash`, `accepted-hash` — which is what makes a lapse
+  a check result rather than something a reader has to establish. Both are
+  written explicitly, never rested at, and both come off together the moment
+  the content changes.
 - **`active` is this folder's resting value, so it is written by omitting the
   field.** State `status` only while the chapter is in transition (`draft`,
   `proposed`) or carries a standing warning (`deprecated`); drop the line when
@@ -348,8 +486,15 @@ instructions.
 
   | Level | Values |
   |---|---|
-  | Chapter | `aggregate`, `entity`, `value-object`, `enum`, `shared-value-objects`, `shared-enums`, `ubiquitous-language`, `domain-service`, `domain-event`, `feature`, `sub-feature`, `feature-flag`, `setting`, `user`, `organisation`, `technical`, `term` |
-  | File | `context-map`, `context`, `domain`, `actors`, `features`, `skills`, `model`, `flow`, `dependencies` |
+  | Chapter | `bounded-context`, `aggregate`, `entity`, `value-object`, `enum`, `shared-value-objects`, `shared-enums`, `ubiquitous-language`, `domain-service`, `domain-event`, `feature`, `sub-feature`, `requirements`, `requirement`, `invariants`, `invariant`, `feature-flag`, `setting`, `user`, `organisation`, `technical`, `term` |
+  | File | `context-map`, `context`, `domain`, `actors`, `features`, `skills`, `requirements`, `invariants`, `model`, `flow`, `dependencies` — or, for an additional page, its own filename |
+
+  `requirements` and `invariants` are each in both sets, and mean the same
+  thing at both levels: the file holds a context's, a `##` chapter holds one
+  feature's or one aggregate's. Everywhere else the two levels have disjoint
+  vocabularies, so the repetition is worth naming — a `## <Feature>` chapter in
+  `requirements.md` is `type: requirements`, plural, and only the
+  `### Requirement:` chapters under it are `type: requirement`.
 
   There is no `skill` chapter type, deliberately. A skill in `skills.md` is a
   `feature` and its stages are `sub-feature`s: the file already says which kind
@@ -361,17 +506,51 @@ instructions.
   `domain.md` is `type: domain`, `features.md` is `type: features`, and so on,
   with `context-map.md` at the `domain/` root carrying `type: context-map`. A
   split file carries the type of the file it is named after — `domain.order.md`
-  is `type: domain` — because the suffix narrows the scope and not the kind.
+  is `type: domain` — because the suffix narrows the scope and not the kind. An
+  invariants subpage is the exception the name spells out: a trailing
+  `.invariants` makes `domain.invariants.md` and `domain.order.invariants.md`
+  `type: invariants`, and one declaring any other type is an error. The
+  `invariants.md` and `invariants.<name>.md` of contract 16 still validate with a
+  warning; `017-invariants-under-domain` moves them.
 - Heading text in `domain/` carries the **name only** — `## Order`, not
   `## Aggregate: Order`. Anchors are therefore slugs of the bare name
-  (`.domain/order-management/domain.md#order`). The two exceptions are the
+  (`.devbook/domain/order-management/domain.md#order`). The two exceptions are the
   `## Shared Value Objects` and `## Shared Enums` chapters, whose headings name
   a grouping rather than a single thing, so the descriptive text *is* the name.
   `## Ubiquitous Language` is a third of the same kind.
-  File titles are the bounded-context name alone (`# Order Management`), with
-  the file's own `type` distinguishing the files of a context. A split file is
-  no exception: its title stays the context name and the chapter's own name
-  goes in its `##` heading, exactly as it did inside the file it came from.
+
+  `### Requirement:`, `### Invariant:`, and `#### Scenario:` are the deliberate
+  fourth. They carry the kind in the heading because that heading shape is
+  OpenSpec's, and keeping it is the whole reason these two files exist in this
+  layout: a tool that reads OpenSpec finds the requirements in a devbook
+  repository without being taught anything. The cost is one prefix in three
+  heading kinds, paid once, and their anchors carry it —
+  `domain.invariants.md#invariant-an-order-cannot-be-confirmed-twice`. No other
+  `domain/` heading may take a prefix on the strength of this one; the
+  exception is bought by an external format, not by taste.
+  A file's title names what the page holds; the folder names the context. A
+  menu that lists pages by title would otherwise show the context name on every
+  entry with nothing to tell them apart. `context.md` alone is titled by the
+  bounded-context name (`# Order Management`), because the context is what it
+  holds. Every other base file is titled by its kind — `# Domain`, `# Actors`,
+  `# Features`, `# Skills`, `# Model`, `# Flows`, `# Dependencies` — and a
+  split file by the chapter it holds: `domain.order.md` and `model.order.md`
+  are `# Order`, `features.checkout.md` is `# Checkout`, and a
+  `flow.<name>.md` takes the flow's name. The chapter keeps its `##` heading
+  and block exactly as they stood in the file it came from. A page the
+  convention does not name is titled by its subject. Write the title in the
+  language the folder is written in: `# Actoren` is `# Actors`.
+
+  The behaviour files are titled by kind: `requirements.md` is
+  `# Requirements`, and `domain.invariants.md` and
+  `domain.<name>.invariants.md` are `# Invariants`, because each reads beside
+  the page it belongs to. A `requirements.<name>.md` is a split like any other
+  and takes its feature's name — `requirements.checkout.md` is `# Checkout` —
+  because it lists under `requirements.md`, where a title by kind would read
+  `Requirements` on every entry. A behaviour file still titled by its context
+  validates; `018-behaviour-titles` retitles it. No other file carries a title the check
+  reads, so one still titled by its context validates too; retitle it when the
+  file is next edited, never by a sweep.
 
   `context-map.md` is the one `domain/` file that is not about a single bounded
   context, so it has no context name to carry. Prefer titling it after the
@@ -437,6 +616,22 @@ instructions.
   who may change it at runtime. A flag has no `scope`: it is decided at
   release, and writing one on it is an error. No other chapter carries any of
   the three.
+- A `bounded-context` chapter in `context-map.md` may carry `deployment`:
+  how the context ships. `service` is a deployable of its own, released and
+  scaled apart from the others; `module` runs inside a modular monolith beside
+  other contexts, sharing its process and its release. It is one plain value,
+  never a reference, and no other chapter carries it — an aggregate or a
+  feature ships with its context. The context's `context.md` carries the same
+  value on its file-level block, so a reader of the context sees it without
+  opening the map; where the chapter's `related` names that `context.md`, the
+  two must agree, and the check reports a difference or a value on one side
+  only. A repository that lists its contexts only in tables writes it on
+  `context.md` alone. Omit it until the choice is made. Name the
+  deployable itself — the service, or the monolith hosting the module — through
+  `related`, pointing at its `arc42/` building block; which contexts share one
+  host is read from those links, not restated here. Moving a context from
+  `module` to `service`, or back, is a decision worth an `arc42/adr/` record
+  that the chapter's `related` points at.
 - Actor chapters may carry a `role` field: the role, claim, or group name
   the authorization layer checks for this actor, as the code spells it — e.g.
   `role: Consultant` or, where one actor holds several, `role: [Consultant,
@@ -454,39 +649,46 @@ instructions.
   cross-context row when applicable (for example: `ACL`,
   `Customer/Supplier`, `Partnership`, `OHS + Published Language`) and identify
   the contract/published language entry used by consumers.
-- Every Aggregate chapter in `domain.md` carries an `### Invariants`
-  sub-section directly under its prose: a table with one row per rule the
-  aggregate guarantees. It is a structural sub-section of that one chapter, not
-  an addressable chapter, so it carries no metadata block — like `### Payload`
-  under a Domain Event. Entity and Value Object sub-chapters may carry the same
-  table when they enforce rules of their own; where they do not, their prose
-  validation rules are enough and the aggregate's table is the record.
+- One rule per chapter, in both files. A chapter holding three related rules
+  cannot be checked, enforced, or accepted as one thing, and it is a chapter a
+  brief has to split before it can quote it. A requirement states its one rule
+  as a single SHALL sentence; an invariant as a single claim that is either
+  true or false, in the domain's own language.
+- `Enforced at:` is the line prose loses, and every invariant chapter carries
+  one. An invariant is what the type guarantees no matter who calls it, and
+  *where* it is guaranteed is what tells an `apply-change` pass whether a guard
+  clause belongs in the constructor or in one transition. A rule whose
+  enforcement point cannot be named is usually a caller's rule rather than an
+  invariant — see `assets/code-sync-protocol.md`. A requirement carries no such
+  line: it is a promise about the product, and where it is kept is the
+  implementation's business.
+- A rule that is **not yet settled** is an invariant chapter with `open` on its
+  `Enforced at:` line and the open question itself in a `kind: question`
+  annotation fence beside it, per `devbook-annotations.md`. A requirement not
+  yet settled is the same, at `status: draft`. This is the hot spot of an Event
+  Storming session kept in place rather than resolved by guessing, and it is
+  where `assets/code-sync-protocol.md` means a rule to go when it says to record
+  it as an open question instead of capturing it as fact.
 
-  | Column | Holds |
-  |---|---|
-  | `Rule` | One rule, in the domain's own language, stated as a claim that is either true or false. One rule per row — a row holding three related rules cannot be checked, enforced, or accepted as one thing. |
-  | `Enforced at` | Where the aggregate guarantees it: `constructor`, a named transition (`Confirm()`, `AddLine()`), or `all mutations` when it genuinely holds across every one. |
-  | `Evidence` | What establishes that it holds: a selector from the chapter's `tests` field, or `untested` when a guard clause enforces the rule and no test asserts it. |
-
-  `Enforced at` is the column that prose loses. An invariant is what the type
-  guarantees no matter who calls it, and *where* it is guaranteed is what tells
-  an `apply-change` pass whether a guard clause belongs in the constructor or in one
-  transition. A rule whose enforcement point cannot be named is usually a
-  caller's rule rather than an invariant — see `assets/code-sync-protocol.md`.
-
-  `untested` is a real and useful state: write it rather than leaving the cell
-  empty. An empty cell reads as "not filled in yet", which is a different claim,
-  and a rule nothing asserts is one refactor away from being gone.
-- A rule that is **not yet settled** is recorded in the same table as a row with
-  `open` in `Enforced at` and the open question itself in `Evidence`. This is
-  the hot spot of an Event Storming session kept in place rather than resolved
-  by guessing, and it is where `assets/code-sync-protocol.md` means a rule to go
-  when it says to record it as an open question instead of capturing it as fact.
-
-  An `open` row does not stop a chapter reaching `active` — a model can
+  An `open` rule does not stop the aggregate reaching `active` — a model can
   be the current one and still carry a known unanswered question. It does stop
   that one rule being *built*: an `apply-change` pass names it as needing a decision
-  instead of briefing an implementation of a rule nobody has agreed.
+  instead of briefing an implementation of a rule nobody has agreed. The
+  existing gate already refuses `approved` or `accepted` over an open question,
+  so a rung on a chapter carrying one is reported without a second rule here.
+- A requirement with no scenarios is reported as a coverage warning. A promise
+  with no case that exercises it is a sentence nobody can tell has been broken,
+  and one a brief cannot derive an acceptance check from. It is a warning and
+  not an error because the rule is still worth recording before its cases are
+  written — but a chapter left that way is not finished. An invariant with no
+  scenarios is complete: its claim and its rejection code are the check.
+- `tests` entries are checked against the file they sit in: `unit` for an
+  invariant, `e2e` — or `integration` for a policy no user triggers — for a
+  requirement. A requirement backed only by unit tests, or an invariant backed
+  only by end-to-end tests, is reported as a coverage warning. A chapter with no
+  `tests` at all is reported for neither, because the absence of the field
+  carries no claim; that rule is `devbook-chapter-metadata.md`'s and is not
+  changed here.
 - In Domain Service chapters, state invocation semantics when it clarifies
   behavior boundaries: whether logic is command-invoked, scheduled,
   query/composition-oriented, or event-triggered policy/process-manager
@@ -522,15 +724,28 @@ type: context-map
 > `domain/`'s root document. Prefer titling it after the system the map covers,
 > since the `type` above already carries the kind and the generator labels this
 > node `<System Name> (context-map)`; a plain `# Context Map` is also accepted.
-> Its structural `##` sections — the four below — carry no metadata blocks; the
-> file-level block above is the only metadata they need.
+> Its structural `##` sections — the four from `## Subdomain landscape` on —
+> carry no metadata blocks; the file-level block above is the only metadata
+> they need.
 >
 > A `##` section naming **one bounded context** is the exception, and it takes
 > `type: bounded-context`. Give a context its own section and block when another
-> chapter needs to address it — `.domain/context-map.md#order-management` — which
+> chapter needs to address it — `.devbook/domain/context-map.md#order-management` — which
 > is how a building block, a technology, or an arc42 chapter points at the
-> context it belongs to. A repository whose contexts are only listed in the
-> tables below needs no such sections.
+> context it belongs to, or when its `deployment` is decided: `service` or
+> `module`. A repository whose contexts are only listed in the tables below
+> needs no such sections.
+
+## <Bounded Context Name>
+
+\`\`\`meta
+type: bounded-context
+deployment: module
+related: [.devbook/domain/<bounded-context-name>/context.md, .devbook/arc42/05-building-block-view.md#<host-heading-slug>]
+\`\`\`
+
+What the context is for, in one sentence, and where it runs: the service it
+is, or the modular monolith that hosts it as a module.
 
 ## Subdomain landscape
 
@@ -563,6 +778,7 @@ each one.>
 status: draft
 index: root
 type: context
+deployment: module
 \`\`\`
 
 What this context is responsible for, in one or two sentences.
@@ -633,7 +849,7 @@ describes, one heading level down.
 ### domain.md
 
 ```markdown
-# <Bounded Context Name>
+# Domain
 
 \`\`\`meta
 status: draft
@@ -651,17 +867,13 @@ type: domain
 \`\`\`meta
 status: draft
 type: aggregate
+related: [.devbook/domain/<context>/domain.invariants.md#<aggregate-heading-slug>]
 \`\`\`
 
 Responsibility, lifecycle, and why this aggregate exists as a consistency
-boundary. The rules it guarantees go in the `### Invariants` table below rather
-than in this prose.
-
-### Invariants
-
-| Rule | Enforced at | Evidence |
-|---|---|---|
-| <One rule, as a claim that is either true or false> | <constructor / <Transition>() / all mutations / open> | <tests selector / untested / the open question> |
+boundary. The rules it guarantees are not here: they are `### Invariant:`
+chapters under `## <AggregateName>` in `domain.invariants.md`, which `related`
+above points at.
 
 ### <EntityName>
 
@@ -706,6 +918,10 @@ why the behavior does not belong on a single aggregate.
 
 Invocation semantics: <command-invoked | scheduled |
 query/composition-oriented | event-triggered policy/process manager>.
+
+What it reacts to is a requirement of the unit that reacts, in
+`requirements.md`; what it enforces itself is a `## <ServiceName>` chapter in
+`domain.invariants.md`, pointed at from `related` when it has one.
 
 ## <EventName>
 
@@ -793,8 +1009,9 @@ aggregate as `###` headings. There are no `### Entities` / `### Value Objects`
 grouping headings only pushed every real chapter a level deeper and added
 anchors nobody references.
 
-`### Invariants` under an Aggregate, and `### Payload`, `### Consumers`, and
-`### Published language rules` under a Domain Event, are structural
+`### Payload`, `### Consumers`, and `### Published language rules` under a
+Domain Event, and `#### Scenario:` under a Requirement, are
+structural
 sub-sections of that one chapter rather than addressable chapters, so they carry
 no metadata block. `build.mjs --check` warns on each of them, as it does on
 every structural heading: the validator cannot know which headings a folder means
@@ -803,13 +1020,20 @@ to be addressable, so the warning is expected here and never driven to zero.
 case one level up — structural sections of the file rather than addressable
 chapters — and warn the same way.
 
+A scenario is structural on purpose. It is a case *of* its requirement and has no life
+apart from it: nothing addresses one, a brief quotes the requirement and carries
+its scenarios along, and giving each a block would put two `meta` fences on
+every rule for no reader's benefit. The rule is the addressable unit; its
+scenarios are how it is stated. The cost is one warning per scenario, which is
+the same warning every structural heading in this folder already produces.
+
 ### actors.md
 
 Only once the actor chapters have outgrown `context.md`; then every one of them
 moves here.
 
 ```markdown
-# <Bounded Context Name>
+# Actors
 
 \`\`\`meta
 status: draft
@@ -876,7 +1100,7 @@ comes last.
 ### features.md
 
 ```markdown
-# <Bounded Context Name>
+# Features
 
 \`\`\`meta
 status: draft
@@ -893,9 +1117,12 @@ status: draft
 type: feature
 feature-flag: [.devbook/domain/<context>/context.md#<switch-heading-slug>]
 setting: [.devbook/domain/<context>/context.md#<setting-heading-slug>]
+related: [.devbook/domain/<context>/requirements.md#<feature-heading-slug>]
 \`\`\`
 
-Short description of the capability and the business value it delivers.
+Short description of the capability and the business value it delivers. What it
+guarantees is not here: those are `### Requirement:` chapters under the matching
+`## <FeatureName>` chapter in `requirements.md`, which `related` points at.
 
 ### <SubFeatureName>
 
@@ -922,7 +1149,7 @@ The alternative to `features.md`, for a repository whose product is procedures.
 A skill is a feature here, so the chapter types are the same.
 
 ```markdown
-# <Bounded Context Name>
+# Skills
 
 \`\`\`meta
 status: draft
@@ -957,10 +1184,144 @@ One stage of the skill, or one mode it can run in.
 ...
 ```
 
+### requirements.md
+
+```markdown
+# Requirements
+
+\`\`\`meta
+status: draft
+type: requirements
+\`\`\`
+
+> What this context's features guarantee, one chapter per feature. Each
+> requirement is one SHALL sentence with the scenarios that prove it.
+
+## <FeatureName>
+
+\`\`\`meta
+status: draft
+type: requirements
+related: [.devbook/domain/<context>/features.md#<feature-heading-slug>]
+\`\`\`
+
+> The requirements of one feature. The feature chapter itself says what the
+> capability is and why it exists; this says what it promises.
+
+### Requirement: <what it promises, as a short name>
+
+\`\`\`meta
+status: draft
+type: requirement
+tests: e2e:playwright:tests/e2e/<spec>.ts#<test title>
+\`\`\`
+
+The system SHALL <one promise, stated once>.
+
+#### Scenario: <the case this covers>
+
+- **Given** <the state the case starts in>
+- **When** <the one thing that happens>
+- **Then** <what is true afterwards>
+
+#### Scenario: <the next case>
+
+...
+
+### Requirement: <the next promise>
+
+...
+
+## <NextFeatureName>
+
+...
+```
+
+### domain.invariants.md
+
+The same template serves `domain.<name>.invariants.md`, with `related` pointing
+at `domain.<name>.md`.
+
+```markdown
+# Invariants
+
+\`\`\`meta
+status: draft
+type: invariants
+\`\`\`
+
+> What each aggregate on `domain.md` enforces, one chapter per aggregate. Each
+> invariant is one claim, where it is enforced, and the unit test that proves it.
+
+## <AggregateName>
+
+\`\`\`meta
+status: draft
+type: invariants
+related: [.devbook/domain/<context>/domain.md#<aggregate-heading-slug>]
+\`\`\`
+
+> The invariants of one aggregate, including those its owned entities and value
+> objects enforce. The aggregate chapter itself says what the boundary is and
+> why it exists; this says what it will not let a caller break.
+
+### Invariant: <the rule, as a short name>
+
+\`\`\`meta
+status: draft
+type: invariant
+tests: unit:dotnet:<Ordering.Domain.Tests.OrderTests.TheRule>
+\`\`\`
+
+<One rule, as a claim that is either true or false> (`<rejection-code>`).
+<Optionally, one sentence of why.>
+
+Enforced at: <constructor | <Transition>() | all mutations | open>
+
+### Invariant: <the next rule>
+
+...
+
+## <NextAggregateName>
+
+...
+
+## Shared Value Objects
+
+\`\`\`meta
+status: draft
+type: invariants
+related: [.devbook/domain/<context>/domain.md#shared-value-objects]
+\`\`\`
+
+> The invariants of the value objects more than one aggregate uses. Only
+> `domain.invariants.md` carries this chapter, and `## Shared Enums` the same
+> way, because the groupings live on `domain.md`.
+
+### Invariant: <the rule, as a short name>
+
+\`\`\`meta
+status: draft
+type: invariant
+tests: unit:dotnet:<Ordering.Domain.Tests.IbanTests.TheRule>
+\`\`\`
+
+<One rule of the shared type> (`<rejection-code>`).
+
+Enforced at: constructor (<SharedValueObjectName>)
+```
+
+An invariant carries no scenario. Given/When/Then in the aggregate's event terms
+restates a claim like "the start date is not after the end date" three times
+over, and the unit test in `tests` already names the case. A requirement keeps
+its scenarios, read in the product's terms — a state, an action, an outcome —
+because it is a promise to someone outside the model and the scenario is how
+the promise is checked.
+
 ### model.md
 
 ```markdown
-# <Bounded Context Name>
+# Model
 
 \`\`\`meta
 status: draft
@@ -998,7 +1359,7 @@ classDiagram
 ### flow.md
 
 ```markdown
-# <Bounded Context Name>
+# Flows
 
 \`\`\`meta
 status: draft
@@ -1024,14 +1385,18 @@ type: flow
 ### <file>.<name>.md
 
 One chapter split out of its file, under that file's template: the file-level
-block carries the base file's `type`, and the chapter follows as it stood there.
+block carries the base file's `type`, the title names the chapter, and the chapter
+follows as it stood there.
 `domain.order.md` is the `## <AggregateName>` section of the `domain.md`
 template under a `type: domain` file block; `features.checkout.md` and
-`skills.<skill-name>.md` the same for one feature or skill; `model.order.md`
+`skills.<skill-name>.md` the same for one feature or skill;
+`requirements.checkout.md` one feature's `## <FeatureName>` chapter with its
+`### Requirement:` chapters under a `type: requirements` file block;
+`model.order.md`
 the `model.md` template narrowed to one aggregate. A `flow.<name>.md`:
 
 ```markdown
-# <Bounded Context Name>
+# <Flow Name>
 
 \`\`\`meta
 status: draft
@@ -1059,7 +1424,7 @@ Only once the dependency tables have outgrown `context.md`'s `## Dependencies`
 section; then the section moves here whole.
 
 ```markdown
-# <Bounded Context Name>
+# Dependencies
 
 \`\`\`meta
 status: draft
@@ -1090,4 +1455,3 @@ type: dependencies
 - Link to the relevant `domain-interaction-diagram` / `context-mapping`
   artifact if one exists for this relationship, instead of duplicating it.
 ```
-
