@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Finance app icon, composed: the background layer (app-icon-background.svg)
+     with the foreground layer (app-icon-foreground.svg) on top. This is
+     the reference picture of what Resizetizer produces from the two layers.
+     The app builds from the two layers, not from this file. -->
+<svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>Finance</title>
+    <rect x="0" y="0" width="456" height="456" fill="#197B47" />
+    <path d="M335.8 146.25A110 110 0 1 0 335.8 309.75L313.05 284.48A76 76 0 1 1 313.05 171.52Z" fill="#FFFFFF" />
+    <rect x="120.2" y="190" width="142" height="24" fill="#FFFFFF" />
+    <rect x="120.2" y="242" width="142" height="24" fill="#FFFFFF" />
+</svg>

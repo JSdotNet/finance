@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Finance app icon, foreground layer: the euro sign, drawn as geometry rather
+     than set in a font, so no build machine's font substitution can change it.
+
+     One open ring with radial terminals, and two bars that cross its left side
+     and stop at the ring's centre. The ring and the bars are separate elements,
+     so overlapping fills never depend on path winding.
+
+     The fill is white (#FFFFFF), an icon-only brand value, 5.30:1 on the green tile.
+
+     All ink sits within radius 135.3 of the canvas centre (228,228). That is
+     inside the 139.5 safe radius Backlog's mark keeps, so a mask that rounds
+     the tile never crops the glyph. Copy into the app as
+     Resources/AppIcon/appiconfg.svg. -->
+<svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <path d="M335.8 146.25A110 110 0 1 0 335.8 309.75L313.05 284.48A76 76 0 1 1 313.05 171.52Z" fill="#FFFFFF" />
+    <rect x="120.2" y="190" width="142" height="24" fill="#FFFFFF" />
+    <rect x="120.2" y="242" width="142" height="24" fill="#FFFFFF" />
+</svg>
