@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Finance app icon, background layer: a flat tile in color-green-600 (#197B47),
+     the brand tile from .devbook/design/color-scheme.md#app-icon.
+
+     Flat, because Resizetizer rasterises this at every size Windows asks for and
+     a gradient is the one thing here worth not betting on. The same green goes
+     in the MauiIcon Color attribute. Copy into the app as
+     Resources/AppIcon/appicon.svg. -->
+<svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="456" height="456" fill="#197B47" />
+</svg>
