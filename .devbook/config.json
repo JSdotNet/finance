@@ -22,7 +22,9 @@
         "agent": "csharp-coding:coding"
       },
       "phase-review": {},
-      "phase-build-test": {},
+      "phase-build-test": {
+        "agent": "csharp-coding:coding"
+      },
       "phase-verify": {
         "agent": "qa:qa"
       },
@@ -58,9 +60,7 @@
       "phase-drafting:design": {
         "agent": "ux-design:ux-designer"
       },
-      "phase-drafting:ai": {
-        "agent": "documentation:documentation"
-      },
+      "phase-drafting:ai": {},
       "phase-check-review": {},
       "phase-create-pr": {},
       "phase-report-back": {},
