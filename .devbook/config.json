@@ -3,34 +3,80 @@
   "bindings": {
     "delivery.tracker": {
       "provider": "github"
-    },
-    "delivery.roles": {
-      "architecture": "architecture",
-      "qa": "qa",
-      "domain": "domain-design",
-      "ux": "ux-design",
-      "docs": "documentation",
-      "product": null,
-      "security": null
     }
   },
-  "extensions": {
-    "session.start": [
-      "devbook:validate"
-    ],
-    "implement": "csharp-coding:coding",
-    "validate": "csharp-coding:coding",
-    "verify": "devbook:verify-change",
-    "flow.end": [
-      "devbook:update"
-    ]
+  "phases": {
+    "flow-code": {
+      "phase-update-base": {
+        "before": [
+          "devbook:validate"
+        ]
+      },
+      "phase-scope": {
+        "agent": "architecture:architect"
+      },
+      "phase-plan": {
+        "agent": "architecture:architect"
+      },
+      "phase-implement": {
+        "agent": "csharp-coding:coding"
+      },
+      "phase-review": {},
+      "phase-build-test": {},
+      "phase-verify": {
+        "agent": "qa:qa"
+      },
+      "phase-spec-check": {
+        "skill": "devbook:verify-change"
+      },
+      "phase-create-pr": {},
+      "phase-report-back": {},
+      "phase-summary": {
+        "after": [
+          "devbook:update"
+        ]
+      }
+    },
+    "flow-spec": {
+      "phase-update-base": {
+        "before": [
+          "devbook:validate"
+        ]
+      },
+      "phase-scope": {
+        "agent": "architecture:architect"
+      },
+      "phase-drafting:arc42": {
+        "agent": "architecture:architect"
+      },
+      "phase-drafting:domain": {
+        "agent": "domain-design:domain-architect"
+      },
+      "phase-drafting:tech": {
+        "agent": "architecture:architect"
+      },
+      "phase-drafting:design": {
+        "agent": "ux-design:ux-designer"
+      },
+      "phase-drafting:ai": {
+        "agent": "documentation:documentation"
+      },
+      "phase-check-review": {},
+      "phase-create-pr": {},
+      "phase-report-back": {},
+      "phase-summary": {
+        "after": [
+          "devbook:update"
+        ]
+      }
+    }
   },
   "policy": {
     "commit.at": "gate"
   },
   "gates": [
     {
-      "at": "app.start",
+      "at": "verify",
       "when": "before",
       "purpose": "resource",
       "prompt": "Only one runtime instance runs here. OK to start?",
@@ -355,7 +401,7 @@
       }
     },
     "delivery": {
-      "pluginVersion": "1.13.0"
+      "pluginVersion": "1.18.0"
     },
     "schedule": {
       "pluginVersion": "1.2.0",
