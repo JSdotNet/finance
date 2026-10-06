@@ -11,7 +11,17 @@ requirements, and the component-library recommendation per channel.
 
 It is guideline-level only. Concrete artifacts produced *from* these
 guidelines — wireframes, user flows, prototypes, screenshots — are not stored
-here.
+here. The agreed screens of a bounded context are its demos, in
+`.devbook/domain/<context>/*.demo.html`, per `devbook-domain.md`.
+
+The one HTML file `design/` holds is `demo-template.html`: the template every
+demo is built on, beside the tokens and guidelines it is built from. It changes
+through the same flow as any other `design/` file, carries no `meta` block, and
+has no reading position. The change that edits it runs
+`node .devbook/_tools/devbook-meta/demo-template.mjs --refresh`, which re-stamps
+its begin marker and rewrites every demo's managed region from it; the check
+reports a demo left on an earlier version, and fails on a region edited by hand.
+The region is outside every fingerprint, so the refresh lifts no approval.
 
 ## Authoritative source
 
@@ -66,6 +76,7 @@ placeholders.
   interaction-guidelines.md  (feedback, motion, input affordances)
   accessibility.md
   component-libraries.md     (per-channel recommendation + rationale)
+  demo-template.html         (optional: the template every demo is built on)
 ```
 
 Add a file only when a topic genuinely does not belong to an existing one, and
@@ -126,7 +137,8 @@ The sortable list SHALL let every item be moved without a pointer.
 
 A design requirement is proved `e2e`: the rendered component driven by
 keyboard or pointer, or compared by a visual test. A requirement with no
-scenario, or whose `tests` reach no `e2e`, is reported as a coverage warning.
+scenario, or whose `tests` reach no `e2e`, is reported as a coverage warning;
+one at `status: deprecated` is not asked for a scenario.
 Guidance a component cannot break on its own — a principle, a rationale, a
 comparison — stays prose in the component chapter.
 
