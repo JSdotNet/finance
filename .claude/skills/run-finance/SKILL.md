@@ -40,8 +40,10 @@ aspire start
 3. **Wait for the signals under Healthy.** Stop waiting on a fatal error, or after two
    minutes of silence. Do not report a partially-started app as healthy.
 4. **Re-read the entry points** every launch — a port changes.
+5. **Open the front end** from the table under Entry points, on the area the branch changes
+   (see Go to). Use the host's inline browser when it has one; otherwise give the plain URL.
 
-Report in a couple of lines: the command, the health verdict, the entry points. Leave the app
+Report in a couple of lines: the command, the health verdict, the entry points, the opened URL. Leave the app
 running — `show`, `debug`, and a flow's later stages work against it.
 
 ## Healthy
@@ -61,6 +63,17 @@ running — `show`, `debug`, and a flow's later stages work against it.
 | Aspire dashboard | `https://localhost:17090` |
 | Web front end | `https://localhost:7080` |
 | API | `https://localhost:7081/api` |
+
+## Go to
+
+<!-- Area — route — the source path it owns. Used to land on what the current branch changes.
+     Replace these rows; delete the section if the app has one entry point. -->
+
+| Area | Route | Owns |
+| --- | --- | --- |
+| _example_ | `/orders` | `src/Orders.Web/Pages/Orders/` |
+
+Match `git diff --name-only` against the `Owns` column and open the first area that hits.
 
 ## Sign in
 
