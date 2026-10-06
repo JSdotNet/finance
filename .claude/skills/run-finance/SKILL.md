@@ -1,6 +1,6 @@
 ---
 name: run-finance
-description: "Build and launch this repository's application the way this repository says to, and leave it running. Use when: running or starting the app locally, 'run it', 'start the app', resuming work on a branch, or a flow needs a runtime at app.start."
+description: "Build and launch this repository's application the way this repository says to, and leave it running. Use when: running or starting the app locally, 'run it', 'start the app', resuming work on a branch, or a flow's verify phase needs the application running."
 goal: "Leave this repository's application running and healthy, and report the command that started it, the health verdict, and its entry points. Never hand the person a command to run themselves."
 ---
 
@@ -40,9 +40,11 @@ aspire start
 3. **Wait for the signals under Healthy.** Stop waiting on a fatal error, or after two
    minutes of silence. Do not report a partially-started app as healthy.
 4. **Re-read the entry points** every launch — a port changes.
+5. **Open the front end** from the table under Entry points, on the area the branch changes
+   (see Go to). Use the host's inline browser when it has one; otherwise give the plain URL.
 
-Report in a couple of lines: the command, the health verdict, the entry points. Leave the app
-running — `show`, `debug`, and a flow's later stages work against it.
+Report in a couple of lines: the command, the health verdict, the entry points, the opened
+URL. Leave the app running — `capture`, `diagnose`, and a flow's verify phase work against it.
 
 ## Healthy
 
@@ -54,13 +56,24 @@ running — `show`, `debug`, and a flow's later stages work against it.
 
 ## Entry points
 
-<!-- What `show` opens and a stage validates against. -->
+<!-- What step 5 opens and a flow's verify phase validates against. -->
 
 | Entry point | URL |
 | --- | --- |
 | Aspire dashboard | `https://localhost:17090` |
 | Web front end | `https://localhost:7080` |
 | API | `https://localhost:7081/api` |
+
+## Go to
+
+<!-- Area — route — the source path it owns. Used to land on what the current branch changes.
+     Replace these rows; delete the section if the app has one entry point. -->
+
+| Area | Route | Owns |
+| --- | --- | --- |
+| _example_ | `/orders` | `src/Orders.Web/Pages/Orders/` |
+
+Match `git diff --name-only` against the `Owns` column and open the first area that hits.
 
 ## Sign in
 
