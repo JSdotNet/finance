@@ -76,10 +76,11 @@
   },
   "gates": [
     {
-      "at": "verify",
+      "at": "create-pr",
       "when": "before",
-      "purpose": "resource",
-      "prompt": "Only one runtime instance runs here. OK to start?",
+      "purpose": "approval",
+      "prompt": "Nothing here is pushed or opened as a pull request until asked. Push and open one now?",
+      "show": "summary",
       "unattended": "block"
     }
   ],
