@@ -39,7 +39,8 @@ flowchart LR
 ```
 
 Three usages are recorded, all `candidate`: the 1.19 update on 2026-10-06 wired the delivery
-flows, the repository's procedures, and a schedule selection, and nobody works through them
+flows, the repository's procedures, and a schedule selection, and the 1.25 update on
+2026-10-13 created the six routines that selection names. Nobody works through any of them
 yet. `build`, `release`, and `deploy` are empty, and that is the finding, not a gap to fill
 with a tool name.
 
