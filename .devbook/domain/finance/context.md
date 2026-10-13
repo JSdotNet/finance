@@ -10,7 +10,9 @@ type: context
 kind: question
 author: claude/domain-architect
 date: 2026-10-06
-body: Two of the out-of-scope lines are proposals, not stated facts: no business bookkeeping or tax reports, and never moving money (no payments, transfers, or trades). Confirm both, or say which belongs inside the boundary.
+body: |
+  Two of the out-of-scope lines are proposals, not stated facts: no business bookkeeping or tax reports, and never moving money (no payments, transfers, or trades). Confirm both, or say which belongs inside the boundary.
+  
 ```
 
 Finance keeps the record of one person's own money and lets that person work with it. The
