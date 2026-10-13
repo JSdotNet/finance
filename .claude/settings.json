@@ -8,10 +8,6 @@
     }
   },
   "enabledPlugins": {
-    "devbook@jsdotnet-devbook": true,
-    "devbook-config@jsdotnet-devbook": true,
-    "delivery@jsdotnet-devbook": true,
-    "delivery-schedule@jsdotnet-devbook": true,
     "architecture@jsdotnet-ai-plugins": true,
     "qa@jsdotnet-ai-plugins": true,
     "domain-design@jsdotnet-ai-plugins": true,
