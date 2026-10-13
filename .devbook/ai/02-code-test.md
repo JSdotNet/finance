@@ -13,7 +13,7 @@ Implementing and validating a change: the coding agent, TDD, code review, and QA
 status: candidate
 type: workflow
 stage: [plan, code, test]
-date: 2026-10-06
+date: 2026-10-13
 ```
 
 A change routes to the delivery flow named for what it changes — `flow-code` for anything
@@ -21,14 +21,16 @@ outside `.devbook/`, `flow-spec` for a devbook folder — which runs it phase by
 request behind a Personal Validation gate.
 
 - **Used for** — the phase maps in `.devbook/config.json`, one per flow, wired at the 1.19
-  update on 2026-10-06. Both flows run `devbook:validate` before `phase-update-base` and
-  `devbook:update` after `phase-summary`. `flow-code` hands scope and plan to
-  `architecture:architect`, implementation to `csharp-coding:coding`, and verification to
-  `qa:qa`, and runs `devbook:verify-change` as its spec check. `flow-spec` drafts each folder
-  through its own agent: `architecture:architect` for `arc42/` and `tech/`,
-  `domain-design:domain-architect` for `domain/`, `ux-design:ux-designer` for `design/`, and
-  `documentation:documentation` for `ai/`. `.claude/settings.json` enables those
-  `jsdotnet-ai-plugins` plugins for every session here.
+  update on 2026-10-06 and carried unchanged through the 1.25 update on 2026-10-13. Both flows
+  run `devbook:validate` before `phase-update-base` and `devbook:update` after `phase-summary`.
+  `flow-code` hands scope and plan to `architecture:architect`, implementation and Build & Test
+  to `csharp-coding:coding`, and verification to `qa:qa`, and runs `devbook:verify-change` as
+  its spec check. `flow-spec` drafts each folder through its own agent:
+  `architecture:architect` for `arc42/` and `tech/`, `domain-design:domain-architect` for
+  `domain/`, and `ux-design:ux-designer` for `design/`; `ai/` drafts on the engine's default.
+  No gate stands before verify. One approval gate, before `phase-create-pr`, holds every change
+  until the maintainer asks for it to be pushed and opened. `.claude/settings.json` enables
+  those `jsdotnet-ai-plugins` plugins for every session here.
 - **Adopted by** — nobody yet. The changes so far, the 1.19 update in #5 included, were carried
   by Claude Code sessions by hand, not through a flow.
 - **Evidence** — the pull request that wrote this chapter was the first change carried by
