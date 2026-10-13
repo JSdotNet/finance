@@ -9,14 +9,18 @@ type: domain
 kind: question
 author: claude/domain-architect
 date: 2026-10-06
-body: Which concepts does Finance hold? Candidates to confirm or drop: accounts (bank, savings, credit card, cash), transactions, categories, budgets, recurring payments, savings goals, investments, loans or mortgages. Which of these come first?
+body: |
+  Which concepts does Finance hold? Candidates to confirm or drop: accounts (bank, savings, credit card, cash), transactions, categories, budgets, recurring payments, savings goals, investments, loans or mortgages. Which of these come first?
+  
 ```
 
 ```annotation
 kind: question
 author: claude/domain-architect
 date: 2026-10-06
-body: How do transactions get into the app: typed by hand, imported from bank export files (CSV, MT940, CAMT.053), or later through the external API? Is a single currency (EUR) enough?
+body: |
+  How do transactions get into the app: typed by hand, imported from bank export files (CSV, MT940, CAMT.053), or later through the external API? Is a single currency (EUR) enough?
+  
 ```
 
 ```annotation
