@@ -13,7 +13,7 @@ Implementing and validating a change: the coding agent, TDD, code review, and QA
 status: candidate
 type: workflow
 stage: [plan, code, test]
-date: 2026-10-13
+date: 2026-10-15
 ```
 
 A change routes to the delivery flow named for what it changes — `flow-code` for anything
@@ -21,7 +21,8 @@ outside `.devbook/`, `flow-spec` for a devbook folder — which runs it phase by
 request behind a Personal Validation gate.
 
 - **Used for** — the phase maps in `.devbook/config.json`, one per flow, wired at the 1.19
-  update on 2026-10-06 and carried unchanged through the 1.25 update on 2026-10-13. Both flows
+  update on 2026-10-06 and carried unchanged through the 1.25 update on 2026-10-13 and the 1.26
+  update on 2026-10-15, which moved devbook and delivery to 1.26.0. Both flows
   run `devbook:validate` before `phase-update-base` and `devbook:update` after `phase-summary`.
   `flow-code` hands scope and plan to `architecture:architect`, implementation and Build & Test
   to `csharp-coding:coding`, and verification to `qa:qa`, and runs `devbook:verify-change` as
@@ -60,3 +61,25 @@ The procedures `devbook` seeds and this repository owns: `run`, `capture`, `diag
   application through `run`.
 - **Limits** — `estimate` compares against the repository's own reference rows, so it is only
   as good as the examples in `.agents/skills/estimate.md`.
+
+## Scenario Pages
+
+```meta
+status: candidate
+type: skill
+stage: [test]
+related: [".devbook/ai/02-code-test.md#flow-skills"]
+date: 2026-10-15
+```
+
+devbook's scenario page skills make an end-to-end journey, written as a page beside the chapter
+it demonstrates, the source of a Playwright spec and of the screenshots a reviewer opens.
+
+- **Used for** — `devbook:scenario-write` writes a page, `devbook:scenario-derive` derives its
+  spec, and `devbook:scenario-run` runs it and writes `run.json` and one screenshot per shot.
+  The tools are vendored into `.devbook/_tools/scenarios/` and were refreshed by the 1.26 update
+  on 2026-10-15. No phase binds the skills: `phase-verify` binds `qa:qa`.
+- **Adopted by** — nobody yet. No scenario page is committed.
+- **Evidence** — none yet. Promote to `trial` once a page and its committed run have landed.
+- **Limits** — a page runs only through a Playwright suite, and this repository has none yet,
+  nor a setup hook or profile for the runner to call.
