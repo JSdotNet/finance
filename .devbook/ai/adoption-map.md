@@ -26,21 +26,24 @@ flowchart LR
   plan --> code --> build --> test --> release --> deploy --> operate --> monitor --> plan
   flows["Flow Skills · candidate"]
   procs["Repository Procedures · candidate"]
+  scenarios["Scenario Pages · candidate"]
   routines["Scheduled Routines · candidate"]
   plan -.- flows
   code -.- flows
   test -.- flows
   code -.- procs
   test -.- procs
+  test -.- scenarios
   operate -.- routines
   monitor -.- routines
   classDef candidate fill:#e6e6e6,stroke:#7a7a7a,color:#333;
-  class flows,procs,routines candidate;
+  class flows,procs,scenarios,routines candidate;
 ```
 
-Three usages are recorded, all `candidate`: the 1.19 update on 2026-10-06 wired the delivery
-flows, the repository's procedures, and a schedule selection, and the 1.25 update on
-2026-10-13 created the six routines that selection names. Nobody works through any of them
+Four usages are recorded, all `candidate`: the 1.19 update on 2026-10-06 wired the delivery
+flows, the repository's procedures, and a schedule selection, the 1.25 update on 2026-10-13
+created the six routines that selection names, and devbook ships the scenario page skills and
+their tools, refreshed by the 1.26 update on 2026-10-15. Nobody works through any of them
 yet. `build`, `release`, and `deploy` are empty, and that is the finding, not a gap to fill
 with a tool name.
 
