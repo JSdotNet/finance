@@ -34,3 +34,29 @@ request back to the entry.
 - **Limits** — the trial's settings live in the committed `.devbook/config.json`, never in a
   personal overlay. An entry changing only the machine leaves no trace in the repository but
   this record.
+
+## OpenSpec Change Lane
+
+```meta
+status: candidate
+type: workflow
+stage: [plan]
+related: [".devbook/ai/02-code-test.md#flow-skills", ".devbook/ai/01-plan.md#backlog-plan-entries"]
+date: 2026-10-21
+```
+
+A change to the devbook folders is proposed as an OpenSpec change under `openspec/changes/`,
+drafted against the `devbook` schema, and merged into the chapters once approved.
+
+- **Used for** — the change folder, adopted as `changes` by the devbook 1.28 update on
+  2026-10-21, and the lane `devbook-openspec:init` set up on it: the OpenSpec CLI's skills and
+  commands for Claude Code and GitHub Copilot, the `devbook` schema in
+  `openspec/schemas/devbook/`, and `openspec/config.yaml`. `flow-code`'s `phase-scope` runs
+  `devbook-openspec:spec` and then `devbook-openspec:status --replan`, the tracker binding is
+  `devbook-openspec:tracker` instead of GitHub, and no grill step is bound.
+- **Adopted by** — nobody yet. The `finance-change-lane` entry of the `finance-setup` plan wired
+  it; no change has been proposed through it.
+- **Evidence** — none yet. Promote to `trial` once a change has been proposed, approved, and
+  archived through the lane.
+- **Limits** — OpenSpec's anonymous usage statistics are off on the maintainer's machine, a
+  setting kept in the personal devbook overlay rather than here.

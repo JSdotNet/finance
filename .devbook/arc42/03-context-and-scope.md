@@ -15,19 +15,7 @@ status: draft
 related: [.devbook/arc42/01-introduction-and-goals.md#requirements-overview, .devbook/domain/finance/context.md]
 ```
 
-```mermaid
-C4Context
-    title System Context: Finance
-
-    Person(me, "ME", "Single user and owner of the finance records")
-    System(finance, "Finance", "Windows desktop application for personal finance, local-first")
-    System_Ext(onedrive, "OneDrive", "Microsoft's file service and its Windows client")
-    System_Ext(extapi, "External finance API", "Anticipated, not chosen: for example a bank or market-data feed")
-
-    Rel(me, finance, "Keeps and reviews their finance records")
-    Rel(finance, onedrive, "Reads and writes JSON files in a OneDrive folder")
-    Rel(finance, extapi, "May fetch data later", "not designed")
-```
+![System Context: Finance](c4:business-context)
 
 Finance never calls OneDrive over the network. It reads and writes a local folder, and the
 OneDrive client replicates that folder on its own schedule. The external API is drawn so
