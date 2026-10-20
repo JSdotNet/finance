@@ -24,7 +24,8 @@ request behind a Personal Validation gate.
   update on 2026-10-06 and carried unchanged through the 1.25 update on 2026-10-13 and the 1.26
   update on 2026-10-15, which moved devbook and delivery to 1.26.0. Both flows
   run `devbook:validate` before `phase-update-base` and `devbook:update` after `phase-summary`.
-  `flow-code` hands scope and plan to `architecture:architect`, implementation and Build & Test
+  `flow-code` hands scope and plan to `architecture:architect` — scope through
+  `devbook-openspec:spec` since 2026-10-21, per the OpenSpec Change Lane — implementation and Build & Test
   to `csharp-coding:coding`, and verification to `qa:qa`, and runs `devbook:verify-change` as
   its spec check. `flow-spec` drafts each folder through its own agent:
   `architecture:architect` for `arc42/` and `tech/`, `domain-design:domain-architect` for
