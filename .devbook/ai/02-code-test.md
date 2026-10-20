@@ -13,7 +13,7 @@ Implementing and validating a change: the coding agent, TDD, code review, and QA
 status: candidate
 type: workflow
 stage: [plan, code, test]
-date: 2026-10-15
+date: 2026-10-21
 ```
 
 A change routes to the delivery flow named for what it changes — `flow-code` for anything
@@ -24,15 +24,16 @@ request behind a Personal Validation gate.
   update on 2026-10-06 and carried unchanged through the 1.25 update on 2026-10-13 and the 1.26
   update on 2026-10-15, which moved devbook and delivery to 1.26.0. Both flows
   run `devbook:validate` before `phase-update-base` and `devbook:update` after `phase-summary`.
-  `flow-code` hands scope and plan to `architecture:architect` — scope through
-  `devbook-openspec:spec` since 2026-10-21, per the OpenSpec Change Lane — implementation and Build & Test
-  to `csharp-coding:coding`, and verification to `qa:qa`, and runs `devbook:verify-change` as
-  its spec check. `flow-spec` drafts each folder through its own agent:
-  `architecture:architect` for `arc42/` and `tech/`, `domain-design:domain-architect` for
-  `domain/`, and `ux-design:ux-designer` for `design/`; `ai/` drafts on the engine's default.
+  Since 2026-10-21 the maps carry delivery profile C, the strong generalist: no phase names an
+  agent, and each sets a model and effort instead. `flow-code` plans on fable at high effort,
+  implements on sonnet at high, reviews on opus at high, builds and tests on sonnet, verifies on
+  sonnet at medium, runs `devbook:verify-change` as its spec check on fable at high, and reports
+  back on haiku; scope runs through `devbook-openspec:spec`, per the OpenSpec Change Lane, on the
+  engine's default. `flow-spec` drafts on sonnet at medium, `arc42/` and `domain/` on opus at
+  high, and reports back on haiku; every other phase runs on the engine's default.
   No gate stands before verify. One approval gate, before `phase-create-pr`, holds every change
-  until the maintainer asks for it to be pushed and opened. `.claude/settings.json` enables
-  those `jsdotnet-ai-plugins` plugins for every session here.
+  until the maintainer asks for it to be pushed and opened. `.claude/settings.json` enables the
+  `jsdotnet-ai-plugins` plugins for every session here.
 - **Adopted by** — nobody yet. The changes so far, the 1.19 update in #5 included, were carried
   by Claude Code sessions by hand, not through a flow.
 - **Evidence** — the pull request that wrote this chapter was the first change carried by
@@ -79,7 +80,7 @@ it demonstrates, the source of a Playwright spec and of the screenshots a review
 - **Used for** — `devbook:scenario-write` writes a page, `devbook:scenario-derive` derives its
   spec, and `devbook:scenario-run` runs it and writes `run.json` and one screenshot per shot.
   The tools are vendored into `.devbook/_tools/scenarios/` and were refreshed by the 1.26 update
-  on 2026-10-15. No phase binds the skills: `phase-verify` binds `qa:qa`.
+  on 2026-10-15. No phase binds the skills, and `phase-verify` names no agent.
 - **Adopted by** — nobody yet. No scenario page is committed.
 - **Evidence** — none yet. Promote to `trial` once a page and its committed run have landed.
 - **Limits** — a page runs only through a Playwright suite, and this repository has none yet,

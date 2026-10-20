@@ -14,7 +14,6 @@
         ]
       },
       "phase-scope": {
-        "agent": "architecture:architect",
         "skill": "devbook-openspec:spec",
         "after": [
           {
@@ -24,23 +23,33 @@
         ]
       },
       "phase-plan": {
-        "agent": "architecture:architect"
+        "model": "fable",
+        "effort": "high"
       },
       "phase-implement": {
-        "agent": "csharp-coding:coding"
+        "model": "sonnet",
+        "effort": "high"
       },
-      "phase-review": {},
+      "phase-review": {
+        "model": "opus",
+        "effort": "high"
+      },
       "phase-build-test": {
-        "agent": "csharp-coding:coding"
+        "model": "sonnet"
       },
       "phase-verify": {
-        "agent": "qa:qa"
+        "model": "sonnet",
+        "effort": "medium"
       },
       "phase-spec-check": {
-        "skill": "devbook:verify-change"
+        "skill": "devbook:verify-change",
+        "model": "fable",
+        "effort": "high"
       },
       "phase-create-pr": {},
-      "phase-report-back": {},
+      "phase-report-back": {
+        "model": "haiku"
+      },
       "phase-summary": {
         "after": [
           "devbook:update"
@@ -53,25 +62,27 @@
           "devbook:validate"
         ]
       },
-      "phase-scope": {
-        "agent": "architecture:architect"
+      "phase-scope": {},
+      "phase-drafting": {
+        "model": "sonnet",
+        "effort": "medium"
       },
       "phase-drafting:arc42": {
-        "agent": "architecture:architect"
+        "model": "opus",
+        "effort": "high"
       },
       "phase-drafting:domain": {
-        "agent": "domain-design:domain-architect"
+        "model": "opus",
+        "effort": "high"
       },
-      "phase-drafting:tech": {
-        "agent": "architecture:architect"
-      },
-      "phase-drafting:design": {
-        "agent": "ux-design:ux-designer"
-      },
+      "phase-drafting:tech": {},
+      "phase-drafting:design": {},
       "phase-drafting:ai": {},
       "phase-check-review": {},
       "phase-create-pr": {},
-      "phase-report-back": {},
+      "phase-report-back": {
+        "model": "haiku"
+      },
       "phase-summary": {
         "after": [
           "devbook:update"
