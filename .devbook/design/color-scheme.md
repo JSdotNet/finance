@@ -10,6 +10,15 @@ related: [.devbook/design/design-principles.md#dark-mode-only, .devbook/design/a
 > around a money-green primary. This file is the single source of token values. Every other
 > file in `.devbook/design/` and all product code reference token names only.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "The dark colour palette and semantic design tokens for Finance."
+body: |
+  [minor] Prose (restated heading): The verbless lead restates the title; start at "Finance is dark mode only".
+```
+
 ## Provenance
 
 ```meta
@@ -113,6 +122,15 @@ Design sets caution figures in orange and the financial room in blue, so Finance
 | `color-info` | `#0B2540` | Informational notices, a highlighted total row |
 | `color-info-text` | `#8DB4F2` | The financial room and other figures the product points out, not as a status |
 
+```annotation
+kind: question
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "The financial room and other figures"
+body: |
+  [minor] Vocabulary: "the financial room" is used as a product concept here, in #chart-roles and in #finance-app-design-mapping (with "net income" and "pension pot"), but .devbook/domain/finance/domain.md defines no term yet, and devbook-design.md says design/ uses the ubiquitous language from the domain term chapters. Will "financial room" be a domain term? Settle: name it in domain/ when it is modelled, or describe the usage here generically ("a figure the product points out") without the domain noun.
+```
+
 ### Neutral and Text
 
 ```meta
@@ -198,6 +216,14 @@ Backlog's values unchanged.
 the hue of its own surface, lightened until it clears 4.5:1 on every surface and on that
 surface. Blue sits 69° from the primary and orange 123°, so neither reads as another green.
 
+```annotation
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Two foregrounds added."
+body: |
+  [minor] "Each is the hue of its own surface" holds for info (color-info #0B2540 is 211 deg, color-info-text 217 deg) but not for warning: color-warning #3D2E00 computes to hue 45 deg (amber) and color-warning-text #F0A46E to 25 deg (orange), a 20 deg gap. Settle: say warning-text was taken from the board orange rather than the surface hue, or re-derive it near 45 deg and re-measure #measured-pairs.
+```
+
 **Readable borders.** Backlog's `color-border` (`#545459`) measures 2.49:1 against its base
 and misses the 3:1 that WCAG 1.4.11 asks of a control boundary. Finance splits the job in
 two. `color-border` now passes 3:1 on every surface, and it draws the edges that identify a
@@ -209,6 +235,15 @@ stronger than the border.
 **Additions to Backlog's names.** Two tokens are new. `color-primary-subtle` gives selection
 a tinted background that is not the hover colour. `color-divider` is the decorative line
 above. Every other token keeps Backlog's name.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Two tokens are new."
+body: |
+  [minor] Prose (stale name): The section says only two tokens are new and every other keeps Backlog's name, but the same file adds color-warning-text and color-info-text; correct the count or name all four.
+```
 
 ## Amount Tokens
 
@@ -242,6 +277,15 @@ Rules:
 - **Totals and balances** follow the same rule as single amounts: a positive total is
   `color-amount-positive`, a negative total is `color-amount-negative`, unless the product
   flags it.
+
+```annotation
+kind: question
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Totals and balances"
+body: |
+  [major] #finance-app-design-mapping maps "#12784A A change for the better: income up, debt down" to color-success-text and "#B42318 A loss" to color-error-text, but this chapter defines colour only by direction of money (in / out / flagged). A debt going down is not money coming in, a change for the worse (income down) has no token at all, and a loss is painted red although this chapter keeps red for "a figure that needs action". Is a change (a delta) an amount with a direction, and which sign and token does it take? Settle: add change tokens (e.g. color-change-better / color-change-worse referencing palette tokens) with their sign rule, or remap those board rows onto the three existing amount tokens.
+```
 
 The contrast of each token is the contrast of the palette token it references. See
 `#measured-pairs`.
@@ -277,6 +321,15 @@ Rules:
 - Badge text is small, so it MUST clear 4.5:1. `color-text-disabled` is not available to a
   badge. An out-of-force value takes `archived`.
 - Colour MUST NOT be the only carrier. Every badge prints its value as text.
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Filled means the product acts on it."
+body: |
+  [medium] The rule says filled means "the product acts on it ... a filled chip in a list is always the one to look at", but settled ("Finished and correct") is filled while live ("the product may act on it") is outlined. #finance-app-design-mapping now sends the boards' most frequent pills (Active, In contract, Renews yearly, On track, Funded, Paid off) to settled, so most rows would carry a filled chip and the attention signal is lost. This chapter carries no status, so it is binding as written. Settle: make settled outlined (filled only for alert and fault), or restate what filled means.
+```
 
 ## Chart Roles
 
@@ -333,6 +386,24 @@ Rules:
 - A chart MUST NOT be the only way to read its numbers. The same figures MUST be available
   as text or a table.
 
+```annotation
+kind: flag
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Money in and money out may share a plot."
+body: |
+  [major] chart-money-out resolves to color-warning-text (#F0A46E), the same value #semantic reserves for "a figure over its budget, an expired contract", so every income-vs-expenses chart paints ordinary spending in the caution colour. #amount-tokens says the opposite on purpose ("Money going out is not red ... would make the ordinary case an alarm"). Income also changes hue between views: color-amount-positive is the yellow-green color-success-text in a table, but chart-money-in is the blue color-info-text in a chart. And the rule above ("The highlight is blue, the only second hue a chart may carry") is contradicted by this rule admitting orange as a third hue. Settle: give chart-money-in/out roles that match #amount-tokens (e.g. money-in = color-amount-positive, money-out = a neutral such as color-text-secondary or chart-axis), or keep blue/orange and state explicitly why a chart may use the warning hue for routine spending, and reword the single-second-hue rule.
+```
+
+```annotation
+kind: flag
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "A higher ramp step is lighter"
+body: |
+  [major] chart-ramp-7 is color-green-50 (#F0F9F4, 15.14:1 on color-background-alt, re-computed), and this rule gives the highest step to the largest part, so the biggest segment of every part-to-whole bar (net income split, pension pots; #finance-app-design-mapping row #0E5E50 -> chart-ramp-7) is a near-white block. design-principles.md#dark-mode-only (Media) says charts MUST be authored for dark surfaces "with no glaring white blocks". Settle: stop the ramp at green-200 or green-100 and fold more parts into "Other", or reverse which end the largest part takes, or write an explicit exception into the Media rule.
+```
+
 ## Contrast Rules
 
 ```meta
@@ -367,6 +438,23 @@ status: draft
 ```
 
 Every binding pair, measured. All pass.
+
+```annotation
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Every binding pair, measured. All pass."
+body: |
+  [minor] All 43 listed ratios were re-computed with the WCAG formula and match. But #contrast-rules binds the four -text foregrounds, color-primary and color-text-secondary "on any surface", and two surfaces that carry them are not measured: color-primary-subtle (selected row, active nav link) and color-info (highlighted total row; demo-template .data tr.highlight). Computed, they all pass: color-success-text on primary-subtle 7.30:1, color-error-text on primary-subtle 5.34:1, color-text-secondary on primary-subtle 8.44:1, color-success-text on color-info 8.99:1, color-text-secondary on color-info 10.39:1; color-border-strong as a filled badge edge on success / warning / error is 4.94 / 4.84 / 6.16:1. Settle: add these rows so "every binding pair" holds.
+```
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Every binding pair, measured."
+body: |
+  [minor] Prose (telegraphic): Two fragments; write "Every binding pair is measured below, and all pass."
+```
 
 | Pairing | Required | Measured |
 |---|---|---|
@@ -427,6 +515,15 @@ related: [.devbook/design/typography-and-layout.md#shadows-and-elevation]
 Elevation is expressed mainly by a **lighter surface colour**, not by heavy shadows. This is
 Backlog's rule.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Elevation is expressed mainly by a"
+body: |
+  [minor] Prose (restated heading): The first sentence restates the heading; "mainly" is a hedge on a rule, and typography-and-layout.md#shadows-and-elevation repeats the sentence, so keep it in one file.
+```
+
 | Level | Surface token | Typical use |
 |---|---|---|
 | Base (0) | `color-background` | Window and page |
@@ -474,6 +571,14 @@ Rules:
   stylesheet with these values swapped in, or keeps its own. See
   `component-libraries.md#risks-and-gaps`.
 
+```annotation
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Names keep their stem."
+body: |
+  [minor] arc42/adr/styling.md says design/ "already declares every token as a CSS custom property, in the token mapping and in typography and layout", but this table lists four tokens and typography-and-layout.md lists none as CSS properties; the rest follow only from the stem rule. Settle: say here that the table is illustrative and every token maps by the stem rule (and align the ADR wording in its own change), or list the full property set.
+```
+
 ## Full Token Reference
 
 ```meta
@@ -515,6 +620,15 @@ MUST be replaced by a token.
 These twenty-six palette tokens, the eleven ramp tokens in `#primary-ramp`, and the derived
 tokens in `#amount-tokens` and `#chart-roles` are the whole colour palette.
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "These twenty-six palette tokens"
+body: |
+  [minor] chart-forecast is the raw literal #4F7FD0, not a palette or ramp token, yet #dark-palette says "These are the only colour values the product uses", #amount-tokens says derived tokens add no new colour, this chapter says anything else is a literal that MUST be replaced, and README.md#provenance says every board value was given a token. Settle: declare it as a palette token (e.g. color-info-muted, with its measured ratio) and reference that from #chart-roles, or name chart-forecast here as the one sanctioned literal.
+```
+
 ## Finance App Design Mapping
 
 ```meta
@@ -526,6 +640,15 @@ Every colour the eleven boards of the Finance App Design use, and the token that
 place. The boards are drawn on a light page, and Finance is dark mode only, so no board value
 is carried over as it is. Each is mapped **by role**: the token that does the same job on the
 dark surfaces. A value with two jobs has a row per job. "Dark value" is what Finance paints.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Every colour the eleven boards of the Finance App Design use"
+body: |
+  [minor] Prose (telegraphic): The opening sentence has no verb; write "This table lists every colour the boards use and the token that replaces it."
+```
 
 | Board value | Its job on the boards | Token | Dark value |
 |---|---|---|---|
@@ -582,10 +705,28 @@ and `#E2EEE9` both take `chart-ramp-1`, and `#CFE3DB` and `#D3E6DF` both take
 `chart-ramp-2`. The board splits net income into eight parts and the ramp has seven steps,
 so its two smallest parts share a step; a chart built on the tokens folds them into "Other".
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Two board values map to one token where they differ"
+body: |
+  [minor] Prose (overlong sentence): The sentence carries two pairs of hex values and a rule; split it, or move the pairs into the table.
+```
+
 **Pills.** The boards colour pills with a fill and an ink of their own. Each pill takes a tone
 from `#badge-and-chip-tones` instead, and the tokens that tone derives from replace these
 fills and inks: `#E3F1EC` on `#0E5E50`, `#FDEBDD` on `#8A3A0F`, `#FBE4E2` on
 `#9A1C12`, `#E6EDFA` on `#1D4AA8`, `#EEF0EC` on `#4A544F`, and `#F1E8F7` on `#6B2E8F`.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Each pill takes a tone"
+body: |
+  [minor] Prose (overlong sentence): The sentence runs a six-pair hex list into the clause; split off the list as a bulleted or tabled list.
+```
 
 | Board pill | Tone |
 |---|---|

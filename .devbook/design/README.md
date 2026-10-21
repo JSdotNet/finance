@@ -21,6 +21,15 @@ Chromium browser control. The stack itself is recorded in
 [the desktop stack record](../arc42/adr/desktop-stack.md). These files set the binding,
 testable rules that keep every screen of it consistent:
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "WebView2, Microsoft's embedded"
+body: |
+  [minor] Prose (repeated definition): The arc42 glossary defines WebView2; link to it and cut the second definition.
+```
+
 - one set of **design tokens**, declared in `color-scheme.md` and `typography-and-layout.md`,
 - consistent **typography, spacing, and layout**, including how amounts of money are set,
 - consistent **interaction behavior**: auto-save, keyboard alternatives, feedback, and motion,
@@ -117,6 +126,15 @@ of the product (Overview, Income and expenses, Inflation, Subscriptions, Debts a
 Pension, Savings goals, Investments, Crypto, Bruto to netto, Energy and EV charging). Each
 board carries its own inline CSS and no token set. On 2026-10-21 that CSS was compared with
 the tokens here, and every value the boards use was given a token:
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "eleven screen boards"
+body: |
+  [minor] Prose (overlong sentence): The sentence naming the artifact, its date, the eleven boards and a parenthesised list of screens runs past 35 words; split it and move the list to its own line.
+```
 
 - **Type** follows the artifact: Hanken Grotesk and IBM Plex Mono replace Backlog's fonts,
   and the heading ramp is the artifact's compact one.

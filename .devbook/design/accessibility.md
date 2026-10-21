@@ -8,6 +8,15 @@ related: [.devbook/design/color-scheme.md#contrast-rules, .devbook/design/intera
 > and has no save buttons, so this file concentrates on keyboard operation, save-state and
 > amount announcements, focus visibility, Windows contrast themes, and reduced motion. Adapted from Backlog's `accessibility.md`.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "so this file concentrates on keyboard operation"
+body: |
+  [minor] Prose (overlong sentence): The lead sentence strings six topics after "so"; split it, or cut the list since the headings show it.
+```
+
 ## Target and Scope
 
 ```meta
@@ -41,6 +50,14 @@ minimums are these:
 - Colour MUST NOT be the only way information is conveyed. Pair it with text, an icon, a
   sign, or shape. An amount's direction is carried by its `+` or `−` sign.
 
+```annotation
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "are exempt."
+body: |
+  [minor] The table binds "chart marks" to 3:1, but chart-track (color-green-900, 1.29:1 on color-background-alt) is below it by design (color-scheme.md#chart-roles: it shows the absence of data). Settle: add chart-track, and chart-grid (color-divider), to this exemption list so the two chapters agree.
+```
+
 ## Keyboard Navigation
 
 ```meta
@@ -56,6 +73,15 @@ related: [.devbook/design/design-principles.md#keyboard-first, .devbook/design/i
 | Tables | In a data table, arrow keys SHOULD move between cells, and a row's actions MUST be reachable without a pointer. |
 | Shortcuts | Shortcuts MUST be discoverable through the command palette, and MUST NOT override Windows or assistive-technology shortcuts. |
 | Custom controls | An element that is not natively focusable but becomes interactive MUST get `tabindex="0"` and a visible focus style. |
+
+```annotation
+kind: question
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Shortcuts MUST be discoverable through the command palette"
+body: |
+  [minor] This MUST depends on a command palette, but design-principles.md#keyboard-first only says primary actions SHOULD be reachable through one, and no chapter specifies it (color-scheme.md#elevation-by-color lists it only as an overlay surface). Is the command palette a committed component? Settle: make it a MUST in design-principles.md and specify it, or let shortcuts be discoverable another way (tooltips, a shortcuts list).
+```
 
 ## Screen Reader Announcements
 
@@ -171,6 +197,15 @@ related: [.devbook/design/typography-and-layout.md#iconography]
 | Minimum text | Readable text MUST NOT be smaller than `font-size-sm` (14 px). |
 | Respect scaling | Use `rem` so Windows text scaling and zoom are respected. Layouts MUST reflow without loss of content up to 200% zoom. |
 | Not by style alone | Do not convey meaning by weight, italic, or colour alone. Pair it with text or an icon. |
+
+```annotation
+kind: flag
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Minimum text"
+body: |
+  [major] "Readable text MUST NOT be smaller than font-size-sm (14 px)" conflicts with typography-and-layout.md, which sets labels, table headers, badges, chart axis letters and metadata lines at font-size-xs (12 px); see the fence on typography-and-layout.md#type-scale. Settle: list the 12 px exceptions here (WCAG sets no minimum size, so this is a product rule) or raise those uses to 14 px.
+```
 
 ## Iconography Accessibility
 

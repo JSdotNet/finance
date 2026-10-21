@@ -11,6 +11,15 @@ related: [.devbook/design/color-scheme.md, .devbook/design/design-principles.md#
 > non-colour token values. Colour values live in `color-scheme.md`, and every other file
 > references token names.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Type scale, fonts, spacing, density, layout, radius"
+body: |
+  [minor] Prose (restated heading): The verbless lead restates the title and the README index; cut it or write one sentence of scope.
+```
+
 ## Font Families
 
 ```meta
@@ -39,6 +48,15 @@ Rules:
   up. See `#amounts`.
 - The Finance App Design replaced Backlog's Inter, Poppins, and Fira Code.
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Hanken Grotesk is bundled at weights"
+body: |
+  [medium] The bundled weights do not cover the declared and used ones: font-weight-light (300) is allowed at font-size-3xl and above but Hanken Grotesk 300 is not bundled, and IBM Plex Mono ships only 400 and 500 while amounts reach 600 and 700 (the emphasis rule says font-weight-semibold, and the demo template sets tfoot cells semibold and .data tr.highlight bold over .num mono cells). WebView2 then synthesizes a faux bold, so totals render unlike the board. Settle: bundle Plex Mono 600 (and Hanken 300 if light stays), or state that an amount never goes above font-weight-medium and drop font-weight-light.
+```
+
 ## Type Scale
 
 ```meta
@@ -49,6 +67,15 @@ related: [.devbook/design/accessibility.md#target-sizes-and-text]
 A modular scale on a 16 px (1 rem) base. Use `rem` in the WebView2 UI. MUST NOT introduce
 sizes outside this scale. The Finance App Design's fourteen sizes all fall on it or within
 one step of it; `#finance-app-design-mapping` lists where each one lands.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "MUST NOT introduce"
+body: |
+  [minor] Prose (telegraphic): The paragraph is fragments with no subject ("A modular scale on...", "MUST NOT introduce..."); write full sentences.
+```
 
 | Token | rem | px | Usage |
 |---|---|---|---|
@@ -61,6 +88,15 @@ one step of it; `#finance-app-design-mapping` lists where each one lands.
 | `font-size-3xl` | `1.875rem` | 30 | A key figure |
 | `font-size-4xl` | `2.25rem` | 36 | The page title |
 | `font-size-5xl` | `3rem` | 48 | Display: the one figure a calculator screen is about |
+
+```annotation
+kind: flag
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Labels, table headers, badges, chart axis letters"
+body: |
+  [major] font-size-xs (12 px) is assigned to labels, table headers, badges and chart axis letters here, to the Label style in #heading-defaults, and to every metadata line in #metadata-lines; yet the font-size-sm row calls 14 px the "minimum readable size", and accessibility.md#target-sizes-and-text says "Readable text MUST NOT be smaller than font-size-sm (14 px)". Labels and table headers are readable text, so the binding rules contradict each other (the demo template sets th and .badge at font-size-xs). Settle: scope the accessibility rule to body text and list the 12 px uses as allowed exceptions, or move those uses to font-size-sm and update the mapping (board 12 px -> font-size-sm).
+```
 
 Backlog's `font-size-2xs` (10 px) is not carried over. It existed only for Backlog's DEV and
 BETA flags.
@@ -155,6 +191,15 @@ status: draft
 A 4 px (0.25 rem) base with a geometric progression. Always use a scale token. MUST NOT use
 one-off values such as `13px`.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "MUST NOT use"
+body: |
+  [minor] Prose (telegraphic): The paragraph is fragments with no subject ("A 4 px base...", "MUST NOT use..."); write full sentences.
+```
+
 | Token | rem | px | Common usage |
 |---|---|---|---|
 | `spacing-0` | 0 | 0 | Explicit zero |
@@ -204,6 +249,15 @@ Finance is one desktop window, so the breakpoints are window widths. The layout 
 to icons with labels in tooltips, and every feature MUST stay usable. At 200% zoom the
 content MUST reflow without loss, per `accessibility.md#target-sizes-and-text`.
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "the rail collapses"
+body: |
+  [minor] Below lg the navigation rail shows icons "with labels in tooltips", a hover-revealed affordance, and devbook-design.md requires every pointer-only interaction to have a keyboard equivalent. Settle: state that the tooltip also shows on keyboard focus and that each icon-only link carries its label as accessible name (accessibility.md#iconography-accessibility) with a 44 px target.
+```
+
 `[TODO: clarify]` The minimum window size Finance enforces.
 
 ## Border Radius and Width
@@ -233,6 +287,24 @@ related: [.devbook/design/color-scheme.md#elevation-by-color]
 Elevation is shown mainly by surface colour (see `color-scheme.md#elevation-by-color`).
 Shadows are secondary and MUST be about 30% less opaque than the raw values below on the
 dark surfaces.
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Shadows are secondary and MUST be about 30% less opaque"
+body: |
+  [medium] Finance is dark mode only and color-scheme.md says every token has exactly one value, yet these shadow tokens declare values that MUST NOT be used as written, and "about 30%" is not testable. The demo template already bakes its own dark values (shadow-md 0.07, shadow-xl 0.14), which are declared nowhere. Settle: declare the dark values as the token values (0.035 / 0.07 / 0.105 / 0.14, inner 0.042) and drop the rule here and in color-scheme.md#elevation-by-color.
+```
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Elevation is shown mainly by surface colour"
+body: |
+  [minor] Prose (restated heading): The first sentence restates the heading, hedges with "mainly", and repeats color-scheme.md#elevation-by-color; link to that chapter and cut it.
+```
 
 | Token | Value | Usage |
 |---|---|---|
@@ -325,11 +397,29 @@ Every font family, font size, weight, letter spacing, line height, spacing step,
 the eleven boards of the Finance App Design use, and the token it lands on. Colours are
 mapped in `color-scheme.md#finance-app-design-mapping`.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Every font family, font size, weight, letter spacing"
+body: |
+  [minor] Prose (telegraphic): The opening sentence has no verb and runs past 35 words; write "This table lists each value the boards use and the token it lands on."
+```
+
 A board value within one step of a token maps to the nearest token, a step being the gap
 between the two tokens either side of it. A value halfway between two tokens takes the
 larger for a font size, so no text drops below a minimum, and the smaller for spacing and
 radius, to keep the density compact. Spacing never rounds to zero. Twelve pixels of spacing,
 used on almost every board, is the one value that got a token of its own: `spacing-ms`.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "A board value within one step of a token maps"
+body: |
+  [minor] Prose (overlong sentence): The sentence defines "step" in a trailing clause and carries two ideas; split it and move the definition to its own sentence.
+```
 
 **Font families**
 

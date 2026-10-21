@@ -6,6 +6,13 @@ index: root
 related: [.devbook/arc42/09-architecture-decisions.md]
 ```
 
+```annotation
+author: "claude/chapter-review"
+date: 2026-10-21
+body: |
+  [minor] Gap: 11. Risks and Technical Debt O3 (packaging and installation: MSIX, unpackaged, other) is a hosting/deployment-model choice whose reversal costs a migration, which devbook-arc42.md names as record-worthy, and MAUI on Windows forces it early (WindowsPackageType, WebView2 runtime delivery). The index has no row for it. When O3 is answered, open a packaging record and list it here; until then nothing here needs to change.
+```
+
 One record per concern. A new decision on a concern changes its record and adds a row to the
 record's history.
 
@@ -22,3 +29,12 @@ record's history.
 | [Scripting](scripting.md) | Repository automation as .NET 10 file-based apps under `scripts/`, run with `dotnet run`. | proposed |
 | [Styling](styling.md) | Every colour, font, size, and spacing value is a CSS custom property declared once in `Finance.UI`, with values owned by `.devbook/design/`. | proposed |
 | [Test stack](test-stack.md) | xUnit, Moq, Bogus, AwesomeAssertions, NetArchTest, and Playwright under Aspire for every test project. | proposed |
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "| Concern | Standing choice | Status |"
+body: |
+  [minor] The Status column restates each record's meta status, a second copy no check keeps in step: when one record moves off proposed, the index will silently disagree. devbook-arc42.md asks the index for the concern and its standing choice in one line only. Drop the column, or have the derived index carry the status.
+```
