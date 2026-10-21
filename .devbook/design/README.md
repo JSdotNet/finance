@@ -67,11 +67,14 @@ them.
 | File | Scope |
 |---|---|
 | [`design-principles.md`](design-principles.md) | Product-level UX principles: dark mode only, local-first UX, no save buttons, keyboard-first, low chrome, exact amounts. |
-| [`color-scheme.md`](color-scheme.md) | The money-green primary ramp, the dark palette, amount tokens, badge tones, chart roles, measured contrast, elevation, the token mapping, and the app icon. |
-| [`typography-and-layout.md`](typography-and-layout.md) | Fonts, type scale, spacing, density, layout, radius, shadows, z-index, iconography, metadata lines, and how amounts are set. |
+| [`color-scheme.md`](color-scheme.md) | The money-green primary ramp, the dark palette, amount tokens, badge tones, chart roles, measured contrast, elevation, the token mapping, the Finance App Design's colours, and the app icon. |
+| [`typography-and-layout.md`](typography-and-layout.md) | Fonts, type scale, spacing, density, layout, radius, shadows, z-index, iconography, metadata lines, how amounts are set, and the Finance App Design's type and spacing. |
 | [`interaction-guidelines.md`](interaction-guidelines.md) | Auto-save, undo, reordering with keyboard equivalents, entering amounts, feedback, motion, focus and selection, and empty, loading, and error states. |
 | [`accessibility.md`](accessibility.md) | The WCAG 2.2 AA target, keyboard navigation, announcements, focus visibility, Windows contrast themes, reduced motion, and target sizes. |
 | [`component-libraries.md`](component-libraries.md) | The component-library recommendation for the desktop app, with a comparison and the known gaps. |
+
+[`demo-template.html`](demo-template.html) is the template every demo of a Finance screen is
+built on, styled by the tokens above. It is not a chapter and has no reading position.
 
 The app icon's source files sit in [`assets/`](assets/): `app-icon-background.svg` and
 `app-icon-foreground.svg` are the two layers the app builds from, and `app-icon.svg` is the
@@ -107,6 +110,24 @@ token carries the decorative lines that need no contrast. See
 
 There is no sync back to Backlog. A change here is a change to Finance's design language
 alone.
+
+**The Finance App Design.** The second source is the Finance App Design artifact,
+<https://claude.ai/artifact/S2W8WmGhUZxLkAq2Yhg8WQ>, dated 2026-10-08: eleven screen boards
+of the product (Overview, Income and expenses, Inflation, Subscriptions, Debts and loans,
+Pension, Savings goals, Investments, Crypto, Bruto to netto, Energy and EV charging). Each
+board carries its own inline CSS and no token set. On 2026-10-21 that CSS was compared with
+the tokens here, and every value the boards use was given a token:
+
+- **Type** follows the artifact: Hanken Grotesk and IBM Plex Mono replace Backlog's fonts,
+  and the heading ramp is the artifact's compact one.
+- **Spacing and radius** map onto the existing scales, with one added step, `spacing-ms`.
+- **Colour** is translated by role. The boards are drawn light, and Finance is dark mode
+  only, so the artifact's light values are never painted. Two foregrounds and four chart
+  roles were added for the blue and orange the boards use.
+
+Each value and the token it lands on is listed in `color-scheme.md#finance-app-design-mapping`
+and `typography-and-layout.md#finance-app-design-mapping`. The artifact wins on type, spacing,
+radius, and which roles exist; this folder wins on the theme.
 
 ## Status Vocabulary
 

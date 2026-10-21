@@ -54,7 +54,7 @@ related: [.devbook/design/color-scheme.md#chart-roles, .devbook/design/interacti
 | Charts | **Apache ECharts**, vendored into `Finance.UI`'s `wwwroot` | Backlog's recommendation. Broad chart coverage, Apache-2.0, and a theme object that can take the chart-role tokens. Its `aria` option can generate a text description. |
 | Reorder | **Hand-rolled on pointer events** in the UI library, with the keyboard path built in | Backlog measured that WebView2 in the MAUI desktop head aborts a native HTML5 drag a few milliseconds after it starts, so no `dragover` or `drop` event arrives. A library built on drag events has nothing to hook. Finance runs on the same stack. |
 | Icons | **Lucide** SVGs, vendored into the UI library | See `typography-and-layout.md#iconography`. |
-| Fonts | Inter, Poppins, and Fira Code as `woff2` files in the UI library | See `typography-and-layout.md#font-families`. |
+| Fonts | Hanken Grotesk and IBM Plex Mono as `woff2` files in the UI library | See `typography-and-layout.md#font-families`. |
 
 Every asset MUST ship inside the app. A CDN is acceptable only during development, and only
 with a visible fallback when it fails.

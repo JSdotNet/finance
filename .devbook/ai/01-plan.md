@@ -60,3 +60,28 @@ drafted against the `devbook` schema, and merged into the chapters once approved
   archived through the lane.
 - **Limits** — OpenSpec's anonymous usage statistics are off on the maintainer's machine, a
   setting kept in the personal devbook overlay rather than here.
+
+## Design Artifacts as Token Source
+
+```meta
+status: trial
+type: workflow
+stage: [plan]
+related: [".devbook/design/README.md#provenance", ".devbook/ai/01-plan.md#backlog-plan-entries"]
+date: 2026-10-21
+```
+
+The product's screens are sketched with Claude as a design artifact, a canvas of HTML boards
+with their own inline CSS, and `flow-spec` then carries that CSS into `design/` as named
+tokens, mapping every board value onto a token and listing the mapping.
+
+- **Used for** — the Finance App Design, eleven boards drawn on 2026-10-08, turned into tokens
+  by the `finance-tokens` entry of the `finance-setup` plan on 2026-10-21. Type, spacing, and
+  radius came over; its light colours were translated by role, because `design/` is dark mode
+  only.
+- **Adopted by** — the maintainer, for this one design so far.
+- **Evidence** — the pull request that wrote this chapter. Promote to `adopted` once a screen
+  built on the tokens has been reviewed against its board.
+- **Limits** — the artifact link could not be read from the account the plan ran under, so
+  the run read a local copy of the artifact's files. A board's inline CSS is a sketch, not a
+  token set, and an off-scale value is mapped rather than copied.
