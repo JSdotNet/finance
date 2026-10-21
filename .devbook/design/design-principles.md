@@ -11,6 +11,15 @@ related: [.devbook/arc42/04-solution-strategy.md#local-first-desktop-application
 Each principle lists testable rules. Treat every MUST and MUST NOT as a design review
 acceptance criterion.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Treat every MUST and MUST NOT as a design review"
+body: |
+  [minor] Prose (repeated definition): README.md#how-to-use-this-folder already states how MUST and MUST NOT are read; point at it.
+```
+
 ## Dark Mode Only
 
 ```meta
@@ -19,6 +28,15 @@ related: [.devbook/design/color-scheme.md#dark-palette, .devbook/design/color-sc
 
 Finance ships a single dark theme, as Backlog does. There is no light theme and no theme
 toggle.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Finance ships a single dark theme, as Backlog does."
+body: |
+  [minor] Prose (restated heading): The opening sentence paraphrases the heading and the table's Single theme and No toggle rows; start at the table.
+```
 
 | Rule | Requirement |
 |---|---|
@@ -43,6 +61,15 @@ related: [.devbook/arc42/04-solution-strategy.md#local-first-desktop-application
 Finance is local-first. Its records are JSON files in the user's own data folder, and no
 workflow needs a network.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Finance is local-first."
+body: |
+  [minor] Prose (restated heading): The opening sentence restates the heading and defines local-first again; link to the glossary term and cut it.
+```
+
 | Rule | Requirement |
 |---|---|
 | Never gate on network | Every workflow MUST work with no network connection. |
@@ -57,6 +84,15 @@ related: [.devbook/design/interaction-guidelines.md#auto-save]
 ```
 
 Every change is saved automatically. There is no manual save.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Every change is saved automatically."
+body: |
+  [minor] Prose (restated heading): The opening sentence paraphrases the heading and the Continuous persistence row; cut it.
+```
 
 | Rule | Requirement |
 |---|---|
@@ -73,6 +109,15 @@ related: [.devbook/design/accessibility.md#keyboard-navigation, .devbook/design/
 Finance is built to be driven from the keyboard. The pointer is an accelerator, not a
 requirement.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Finance is built to be driven from the keyboard."
+body: |
+  [minor] Prose (restated heading): The opening sentence paraphrases the heading; start at the second sentence.
+```
+
 | Rule | Requirement |
 |---|---|
 | Everything reachable | Every interactive element and every command MUST be operable from the keyboard alone. |
@@ -87,6 +132,15 @@ requirement.
 ```
 
 The chrome recedes so the user's own figures are the main surface.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "The chrome recedes so the user's own figures"
+body: |
+  [minor] Prose (restated heading): The opening sentence paraphrases the heading; cut it, as the table states the rules.
+```
 
 | Rule | Requirement |
 |---|---|
@@ -112,3 +166,12 @@ the figures around it.
 | Sign in text | Whether an amount is money in or money out MUST be readable from its sign alone. Colour adds to the sign and never replaces it. |
 | Comparable | Amounts in a column MUST line up digit under digit. See `typography-and-layout.md#amounts`. |
 | One format | Every amount in the product MUST use the one format in `typography-and-layout.md#amounts`. A component MUST NOT format money its own way. |
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Exact by default"
+body: |
+  [minor] The rounded example "€ 1.2k" uses a full stop as decimal separator, while typography-and-layout.md#amounts formats under nl-NL with a comma (€ 1.234,56), and "one step away" is undefined, so the rule is not testable. Settle: give the rounded form in the same culture (e.g. "€ 1,2k") or point at the one amount formatter for it, and say what "one step away" means (tooltip, focus, a click).
+```

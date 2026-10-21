@@ -2,8 +2,9 @@
   "id": "finance",
   "bindings": {
     "delivery.tracker": {
-      "provider": "github"
-    }
+      "provider": "devbook-openspec:tracker"
+    },
+    "openspec.grill": null
   },
   "phases": {
     "flow-code": {
@@ -13,26 +14,42 @@
         ]
       },
       "phase-scope": {
-        "agent": "architecture:architect"
+        "skill": "devbook-openspec:spec",
+        "after": [
+          {
+            "run": "devbook-openspec:status --replan",
+            "on-failure": "required"
+          }
+        ]
       },
       "phase-plan": {
-        "agent": "architecture:architect"
+        "model": "fable",
+        "effort": "high"
       },
       "phase-implement": {
-        "agent": "csharp-coding:coding"
+        "model": "sonnet",
+        "effort": "high"
       },
-      "phase-review": {},
+      "phase-review": {
+        "model": "opus",
+        "effort": "high"
+      },
       "phase-build-test": {
-        "agent": "csharp-coding:coding"
+        "model": "sonnet"
       },
       "phase-verify": {
-        "agent": "qa:qa"
+        "model": "sonnet",
+        "effort": "medium"
       },
       "phase-spec-check": {
-        "skill": "devbook:verify-change"
+        "skill": "devbook:verify-change",
+        "model": "fable",
+        "effort": "high"
       },
       "phase-create-pr": {},
-      "phase-report-back": {},
+      "phase-report-back": {
+        "model": "haiku"
+      },
       "phase-summary": {
         "after": [
           "devbook:update"
@@ -45,25 +62,27 @@
           "devbook:validate"
         ]
       },
-      "phase-scope": {
-        "agent": "architecture:architect"
+      "phase-scope": {},
+      "phase-drafting": {
+        "model": "sonnet",
+        "effort": "medium"
       },
       "phase-drafting:arc42": {
-        "agent": "architecture:architect"
+        "model": "opus",
+        "effort": "high"
       },
       "phase-drafting:domain": {
-        "agent": "domain-design:domain-architect"
+        "model": "opus",
+        "effort": "high"
       },
-      "phase-drafting:tech": {
-        "agent": "architecture:architect"
-      },
-      "phase-drafting:design": {
-        "agent": "ux-design:ux-designer"
-      },
+      "phase-drafting:tech": {},
+      "phase-drafting:design": {},
       "phase-drafting:ai": {},
       "phase-check-review": {},
       "phase-create-pr": {},
-      "phase-report-back": {},
+      "phase-report-back": {
+        "model": "haiku"
+      },
       "phase-summary": {
         "after": [
           "devbook:update"
@@ -86,14 +105,15 @@
   ],
   "components": {
     "devbook": {
-      "pluginVersion": "1.26.0",
-      "contractVersion": 30,
+      "pluginVersion": "1.28.0",
+      "contractVersion": 33,
       "adopted": [
         "arc42",
         "domain",
         "tech",
         "design",
-        "ai"
+        "ai",
+        "changes"
       ],
       "materialized": {
         ".agents/rules/devbook-ai.md": {
@@ -107,13 +127,13 @@
           "managed": true
         },
         ".agents/rules/devbook-arc42.md": {
-          "from": "1.13.0",
-          "hash": "sha256:028e6835f14e1cd14aa803699c2e4132eeb9c8e5b430d80465d8ebf196d64287",
+          "from": "1.28.0",
+          "hash": "sha256:5486898958ba18a337790c97fbb9dff2778d71e41860f1489969969008ba9b12",
           "managed": true
         },
         ".agents/rules/devbook-chapter-metadata.md": {
-          "from": "1.26.0",
-          "hash": "sha256:207f5c8ded2e8f880a9c7ceee4b7b5dff99fae8ee05b640f621943b60059e40f",
+          "from": "1.28.0",
+          "hash": "sha256:c72f2bad1cfaa3ed9fba5edab26b39db42296b23db0436011035a75c74d48efa",
           "managed": true
         },
         ".agents/rules/devbook-design.md": {
@@ -122,13 +142,13 @@
           "managed": true
         },
         ".agents/rules/devbook-domain.md": {
-          "from": "1.25.0",
-          "hash": "sha256:50877bedfe5667044f35aa0fda6a7bb32b388d97bb0f2ae79df62d51bbe2d956",
+          "from": "1.28.0",
+          "hash": "sha256:86b4db087af8d4e78bdc7c22426f75a68567a1b644de1cd4e4074ad8f889f10f",
           "managed": true
         },
         ".agents/rules/devbook-naming.md": {
-          "from": "1.25.0",
-          "hash": "sha256:f2a8522e16b2fbe8c58fd7d5205387544006824a6dfefb97a7dbc3f21eed6cd0",
+          "from": "1.28.0",
+          "hash": "sha256:bca2c6f51c2fc62b8e0085ac0a680262fa41bf65038e4490bdd8486ea64958b9",
           "managed": true
         },
         ".agents/rules/devbook-tech.md": {
@@ -137,8 +157,8 @@
           "managed": true
         },
         ".agents/rules/devbook-writing.md": {
-          "from": "1.25.0",
-          "hash": "sha256:6986c7fbb380f2cad557f2dd95505246c835f7ba0ce787938420500ff35a4bdf",
+          "from": "1.28.0",
+          "hash": "sha256:76261974360205ca6acbd5f611fdeae0e1391514b0366bfd13ae6a335d56f6fd",
           "managed": true
         },
         ".agents/skills/capture.md": {
@@ -152,8 +172,8 @@
           "managed": true
         },
         ".agents/skills/prototype.md": {
-          "from": "1.25.0",
-          "hash": "sha256:77773e99b523035ab10571ec31a39da94efcc35876f54945203b1a42281b4462",
+          "from": "1.28.0",
+          "hash": "sha256:03ccd34aacdd90cfc20462adcebb71eef120a3ce34e93265df71f6c23ff446e3",
           "managed": true
         },
         ".claude/rules/devbook-ai.md": {
@@ -222,8 +242,8 @@
           "managed": false
         },
         ".devbook/_tools/devbook-meta": {
-          "from": "1.26.0",
-          "hash": "sha256:b1cf2cb46e4864e7d6d8bd2a04217f3ff8bb8569bf9d901f08b911770baccd3e",
+          "from": "1.28.0",
+          "hash": "sha256:6e06efceb183aeee1c88cf99bfc0811adac3a07c826d061f981ad843bd6e90ce",
           "managed": true
         },
         ".devbook/_tools/devbook-tech": {
@@ -303,12 +323,12 @@
         },
         ".github/workflows/devbook-meta.yml": {
           "from": "1.2.0",
-          "hash": "sha256:e34e16641f832a26b1b792cd745a66f72a8953b3b148e7b206783fd88c8831f7",
-          "managed": true
+          "hash": "sha256:a3a8f1a15f138af82d3a185a4e11366abe0272deaa8a17f7b9efbb168098f3f5",
+          "managed": false
         },
         "AGENTS.md#devbook": {
-          "from": "1.13.0",
-          "hash": "sha256:601e6d85335687ec8d3c0af4cb6844f0437467a2867c44fc952ffca70458b5ab",
+          "from": "1.28.0",
+          "hash": "sha256:141c54dfd732228ad77770f2fd5c0f397a32e04d963e8d14a1b52677d0d7d13b",
           "managed": true
         },
         "CLAUDE.md": {
@@ -337,8 +357,23 @@
           "managed": true
         },
         ".devbook/_tools/scenarios": {
-          "from": "1.26.0",
-          "hash": "sha256:9fc07599b7f50c75ba0c20692571463814dd7d7ddcedbbe90ec43366538805f6",
+          "from": "1.28.0",
+          "hash": "sha256:5ab00bd9e4efaf09aeba3891f610f57df85d84c95b371f5eb8f0cedc6f0368be",
+          "managed": true
+        },
+        ".agents/rules/devbook-changes.md": {
+          "from": "1.28.0",
+          "hash": "sha256:7872c7543fc6fb13f8e0b3ce8c8830911578bb4c27dbf6de3bc1e82a35cb4b9f",
+          "managed": true
+        },
+        ".claude/rules/devbook-changes.md": {
+          "from": "1.28.0",
+          "hash": "sha256:dee2c372091062184944ca69c6502437fca7fe6b427fff266a2027eab453ece8",
+          "managed": true
+        },
+        ".github/instructions/devbook-changes.instructions.md": {
+          "from": "1.28.0",
+          "hash": "sha256:919e8c40efbd0395c26979c6d969a276bc3942657107e3f82388df7d240068bb",
           "managed": true
         }
       },
@@ -402,6 +437,14 @@
         {
           "id": "030-scenario-tools",
           "applied": "2026-10-13"
+        },
+        {
+          "id": "032-scenarios-md",
+          "applied": "2026-10-20"
+        },
+        {
+          "id": "033-c4-workspace",
+          "applied": "2026-10-20"
         }
       ],
       "procedures": {
@@ -415,7 +458,7 @@
       }
     },
     "delivery": {
-      "pluginVersion": "1.26.0"
+      "pluginVersion": "1.28.0"
     },
     "schedule": {
       "pluginVersion": "1.25.0",
@@ -433,6 +476,38 @@
         },
         "tech-update": {
           "cron": "0 4 * * 0"
+        }
+      }
+    },
+    "openspec": {
+      "pluginVersion": "1.28.0",
+      "cli": ">=1.13.2 <2.0.0",
+      "tools": "claude,github-copilot",
+      "materialized": {
+        "openspec/schemas/devbook": {
+          "from": "1.28.0",
+          "hash": "sha256:df1ac74624998e197c8158f9ca689b3d018e0425a81f3f005b2039ec88f0e5c4",
+          "managed": true
+        },
+        "openspec/config.yaml": {
+          "from": "1.28.0",
+          "hash": "sha256:d185d1d1065545b83dee1fd97143bcb542208920bc73f2169259ae28587d54f1",
+          "managed": false
+        },
+        ".agents/rules/devbook-openspec-change.md": {
+          "from": "1.28.0",
+          "hash": "sha256:8ee17a3fc8802a9ac99f7e862335688bd6643a51a64aa6a47ef9b5a080a94c79",
+          "managed": true
+        },
+        ".claude/rules/devbook-openspec-change.md": {
+          "from": "1.28.0",
+          "hash": "sha256:02db8525cede49c5d98177b6b5848dbf62cf95a82861b2e26dde3a076a21a8ce",
+          "managed": true
+        },
+        ".github/instructions/devbook-openspec-change.instructions.md": {
+          "from": "1.28.0",
+          "hash": "sha256:e9544b4dc65a81d672450cdaf6c65037962356f5c28f4556b423ed6ed19959a3",
+          "managed": true
         }
       }
     }

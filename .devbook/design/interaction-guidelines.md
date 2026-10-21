@@ -10,6 +10,15 @@ related: [.devbook/design/design-principles.md#no-save-buttons, .devbook/design/
 > on the JSdotNet design style guide. Token names are declared in `color-scheme.md` and
 > `typography-and-layout.md`.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Binding interaction rules for Finance"
+body: |
+  [minor] Prose (restated heading): The verbless lead restates the title and the README index; cut it or write one sentence of scope.
+```
+
 ## Auto-Save
 
 ```meta
@@ -18,6 +27,15 @@ related: [.devbook/design/design-principles.md#no-save-buttons, .devbook/arc42/0
 
 There is no manual save anywhere in Finance. Every edit is written to the user's data folder
 automatically.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "There is no manual save anywhere in Finance."
+body: |
+  [minor] Prose (restated heading): The opening sentence repeats the heading and design-principles.md#no-save-buttons; cut it and start with the state diagram.
+```
 
 ```mermaid
 stateDiagram-v2
@@ -130,6 +148,15 @@ drag has a keyboard equivalent.
 | Lift | On drag start, the item lifts with `shadow-lg` and a `color-background-alt` tint. |
 | Handle target | The handle MUST meet the 44 × 44 px target. |
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "On drag start, the item lifts"
+body: |
+  [minor] The lift tint is color-background-alt, but list rows already sit on color-background-alt (color-scheme.md#elevation-by-color: Raised +1 = sidebar, cards, panels, list rows), so the tint changes nothing and the lift relies on a shadow alone, against the elevation-by-colour rule. Settle: lift to color-background-raised (+2).
+```
+
 ### Drop Indicators
 
 ```meta
@@ -211,6 +238,15 @@ related: [.devbook/design/typography-and-layout.md#shadows-and-elevation, .devbo
 Motion is for a purpose only: to show a change of state, direct attention, or give feedback.
 Use the fixed tokens.
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Use the fixed tokens."
+body: |
+  [medium] This chapter declares token values (the transition-* durations and ease-* curves), but devbook-design.md says design tokens are declared once in color-scheme.md and typography-and-layout.md, and README.md#how-to-use-this-folder says "Only color-scheme.md and typography-and-layout.md declare token values". The demo template, rebuilt from the tokens in f15543d, declares no motion property either. Settle: move the motion token table into typography-and-layout.md (or register motion as a third token home in README.md and the rule), keeping only the interaction-to-token table here.
+```
+
 | Duration token | Value | Easing token | Value |
 |---|---|---|---|
 | `transition-instant` | 0ms | `ease-linear` | linear |
@@ -272,6 +308,15 @@ many options can be on at once, before the user presses anything.
 | Alone means on or off | A control that is simply on or off and belongs to no set MUST stand alone, outside any fused group. |
 | Still one group | A loose group is still one `role="group"` with one label and one tab sequence. Only the drawing changes. |
 | Selected state | A fused option shows its selected state as an underline on the shared bottom edge. A loose option shows it on its own border. Neither relies on colour alone. |
+
+```annotation
+kind: flag
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Loose means one"
+body: |
+  [major] "Loose means one" requires exclusive options to be separate bordered controls with a gap, and a fused group to show selection as an underline. The Finance App Design segmented controls are exclusive and fused, and the tokens adopt them (typography-and-layout.md#density and #border-radius-and-width name segmented controls; color-scheme.md#finance-app-design-mapping maps "Selected segment" to color-primary-subtle). The demo template .seg draws exclusive aria-pressed options flush in one border with an inset ring and a subtle fill, breaking both rules. Settle: decide whether a segmented control is an allowed exception and how its selection is drawn, or redraw it as a loose group and fix the template.
+```
 
 ## Empty, Loading, and Error States
 

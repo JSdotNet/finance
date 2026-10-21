@@ -10,6 +10,15 @@ Every colour, font, size, and spacing value in Finance's UI is a CSS custom prop
 once in one `:root` block in a stylesheet of `Finance.UI`. Components use those properties only
 and never write a raw value. `.devbook/design/` owns the token names and values.
 
+```annotation
+kind: question
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "once in one `:root` block in a stylesheet of `Finance.UI`"
+body: |
+  [minor] Depends on an open question: design/color-scheme.md#per-stack-token-mapping and component-libraries.md carry a TODO on whether Finance reuses Backlog's component library (Backlog.UI.Components) as a shared package with Finance's values swapped in. If it does, the :root block lives in that package, not in Finance.UI. Settle the TODO, or state here that the record assumes Finance keeps its own library.
+```
+
 ## Why
 
 ```meta
@@ -29,6 +38,15 @@ and never write a raw value. `.devbook/design/` owns the token names and values.
 - Code review rejects a component style that writes a hex value, a font name, or a size
   directly.
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Code review rejects a component style that writes a hex value"
+body: |
+  [minor] Enforcement by review alone is the very option modularity.md rejects (review misses a stray reference; a test fails the build instead). A raw hex, font name, or px value in a .razor.css or .css under Finance.UI is mechanically detectable. Name a check (a stylelint rule, or a file-based script under scripts/ per scripting.md) that fails the build, or say why review suffices here.
+```
+
 ## Rejected
 
 ```meta
@@ -41,6 +59,15 @@ and never write a raw value. `.devbook/design/` owns the token names and values.
 | Values written in each component's own stylesheet | The same colour drifts across files, and a change means hunting through every component. |
 | Inline styles built in C# | They bypass the stylesheet entirely, so neither review nor a token rename can find them. |
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Inline styles built in C#"
+body: |
+  [minor] Gap: some values are data, not tokens, and Razor components routinely bind them inline, such as a bar width as a percentage or a chart height computed from the records. The rule that components never write a raw value, plus this rejection, would forbid them. Say whether computed geometry may be bound inline (for example as a custom property set on the element) while colours, fonts, and spacing stay tokens only.
+```
+
 ## History
 
 ```meta
@@ -49,3 +76,12 @@ and never write a raw value. `.devbook/design/` owns the token names and values.
 | Date | Change |
 | --- | --- |
 | 2026-10-08 | Proposed: CSS custom properties declared once in `Finance.UI`, with values owned by `.devbook/design/`, adopted from the organization's [ADR 0011](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/adrs/0011-centralized-frontend-styling-variables.md). |
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "| Date | Change |"
+body: |
+  [minor] The History table is headed Date | Change, but devbook-arc42.md fixes the header as Date | Change | Why, and build.mjs --check warns on it. Split the row's reason into its own Why column (here: adopted from the organization's ADR 0011 is the why).
+```

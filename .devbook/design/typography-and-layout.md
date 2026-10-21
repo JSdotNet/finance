@@ -6,20 +6,31 @@ related: [.devbook/design/color-scheme.md, .devbook/design/design-principles.md#
 
 > Type scale, fonts, spacing, density, layout, radius, elevation, z-index, and iconography
 > tokens for Finance, plus how amounts of money are set. Adapted from Backlog's
-> `typography-and-layout.md`, which drew on the JSdotNet design style guide. This file
-> declares the non-colour token values. Colour values live in `color-scheme.md`, and every
-> other file references token names.
+> `typography-and-layout.md`, which drew on the JSdotNet design style guide, and brought in
+> line with the Finance App Design named in `README.md#provenance`. This file declares the
+> non-colour token values. Colour values live in `color-scheme.md`, and every other file
+> references token names.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Type scale, fonts, spacing, density, layout, radius"
+body: |
+  [minor] Prose (restated heading): The verbless lead restates the title and the README index; cut it or write one sentence of scope.
+```
 
 ## Font Families
 
 ```meta
+status: draft
 ```
 
 | Token | Value | Usage |
 |---|---|---|
-| `font-family-base` | `'Inter', 'Segoe UI Variable', 'Segoe UI', sans-serif` | Body text, labels, inputs, amounts |
-| `font-family-heading` | `'Poppins', 'Segoe UI Variable', 'Segoe UI', sans-serif` | H1 to H4, display text |
-| `font-family-mono` | `'Fira Code', 'Cascadia Mono', Consolas, monospace` | Raw data views, diagnostics, logs |
+| `font-family-base` | `'Hanken Grotesk', 'Segoe UI Variable', 'Segoe UI', sans-serif` | Body text, labels, inputs, buttons |
+| `font-family-heading` | `'Hanken Grotesk', 'Segoe UI Variable', 'Segoe UI', sans-serif` | Headings and display text |
+| `font-family-mono` | `'IBM Plex Mono', 'Cascadia Mono', Consolas, monospace` | Amounts, dates, and every other figure; raw data views |
 
 Rules:
 
@@ -28,29 +39,64 @@ Rules:
   rather than Backlog's cross-platform chain.
 - The fonts MUST ship as `woff2` files in the UI library's own `wwwroot`, loaded with
   `@font-face`. Finance is offline-first, so a web font service is not an option. Backlog
-  declared these fonts and never loaded them; Finance MUST NOT repeat that.
-- Inter is the amount font because it has tabular figures. See `#amounts`.
+  declared its fonts and never loaded them; Finance MUST NOT repeat that.
+- Hanken Grotesk is bundled at weights 400, 500, 600, and 700, and IBM Plex Mono at 400 and
+  500: the weights the Finance App Design loads.
+- Headings keep their own token, with the base value, so a later display face changes one
+  token and no component.
+- IBM Plex Mono is the amount font: every digit has one width, so columns of figures line
+  up. See `#amounts`.
+- The Finance App Design replaced Backlog's Inter, Poppins, and Fira Code.
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Hanken Grotesk is bundled at weights"
+body: |
+  [medium] The bundled weights do not cover the declared and used ones: font-weight-light (300) is allowed at font-size-3xl and above but Hanken Grotesk 300 is not bundled, and IBM Plex Mono ships only 400 and 500 while amounts reach 600 and 700 (the emphasis rule says font-weight-semibold, and the demo template sets tfoot cells semibold and .data tr.highlight bold over .num mono cells). WebView2 then synthesizes a faux bold, so totals render unlike the board. Settle: bundle Plex Mono 600 (and Hanken 300 if light stays), or state that an amount never goes above font-weight-medium and drop font-weight-light.
+```
 
 ## Type Scale
 
 ```meta
+status: draft
 related: [.devbook/design/accessibility.md#target-sizes-and-text]
 ```
 
 A modular scale on a 16 px (1 rem) base. Use `rem` in the WebView2 UI. MUST NOT introduce
-sizes outside this scale.
+sizes outside this scale. The Finance App Design's fourteen sizes all fall on it or within
+one step of it; `#finance-app-design-mapping` lists where each one lands.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "MUST NOT introduce"
+body: |
+  [minor] Prose (telegraphic): The paragraph is fragments with no subject ("A modular scale on...", "MUST NOT introduce..."); write full sentences.
+```
 
 | Token | rem | px | Usage |
 |---|---|---|---|
-| `font-size-xs` | `0.75rem` | 12 | Helper text, badges, fine print |
-| `font-size-sm` | `0.875rem` | 14 | Secondary body, table cells, form hints (minimum readable size) |
-| `font-size-base` | `1rem` | 16 | Default body text |
-| `font-size-lg` | `1.125rem` | 18 | Lead paragraphs, emphasized body |
-| `font-size-xl` | `1.25rem` | 20 | Card titles, section sub-labels |
-| `font-size-2xl` | `1.5rem` | 24 | H4, a headline amount |
-| `font-size-3xl` | `1.875rem` | 30 | H3 |
-| `font-size-4xl` | `2.25rem` | 36 | H2 |
-| `font-size-5xl` | `3rem` | 48 | H1, display |
+| `font-size-xs` | `0.75rem` | 12 | Labels, table headers, badges, chart axis letters |
+| `font-size-sm` | `0.875rem` | 14 | Secondary body, table cells, buttons, the line under a key figure (minimum readable size) |
+| `font-size-base` | `1rem` | 16 | Default body text, inputs |
+| `font-size-lg` | `1.125rem` | 18 | Card and section headings |
+| `font-size-xl` | `1.25rem` | 20 | The product name in the navigation |
+| `font-size-2xl` | `1.5rem` | 24 | A secondary key figure |
+| `font-size-3xl` | `1.875rem` | 30 | A key figure |
+| `font-size-4xl` | `2.25rem` | 36 | The page title |
+| `font-size-5xl` | `3rem` | 48 | Display: the one figure a calculator screen is about |
+
+```annotation
+kind: flag
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Labels, table headers, badges, chart axis letters"
+body: |
+  [major] font-size-xs (12 px) is assigned to labels, table headers, badges and chart axis letters here, to the Label style in #heading-defaults, and to every metadata line in #metadata-lines; yet the font-size-sm row calls 14 px the "minimum readable size", and accessibility.md#target-sizes-and-text says "Readable text MUST NOT be smaller than font-size-sm (14 px)". Labels and table headers are readable text, so the binding rules contradict each other (the demo template sets th and .badge at font-size-xs). Settle: scope the accessibility rule to body text and list the 12 px uses as allowed exceptions, or move those uses to font-size-sm and update the mapping (board 12 px -> font-size-sm).
+```
 
 Backlog's `font-size-2xs` (10 px) is not carried over. It existed only for Backlog's DEV and
 BETA flags.
@@ -79,23 +125,24 @@ Rules:
 ### Heading Defaults
 
 ```meta
+status: draft
 ```
 
-| Element | Size | Weight | Line height | Family |
-|---|---|---|---|---|
-| H1 | `font-size-5xl` | `font-weight-bold` | `line-height-tight` | `font-family-heading` |
-| H2 | `font-size-4xl` | `font-weight-bold` | `line-height-tight` | `font-family-heading` |
-| H3 | `font-size-3xl` | `font-weight-semibold` | `line-height-tight` | `font-family-heading` |
-| H4 | `font-size-2xl` | `font-weight-semibold` | `line-height-tight` | `font-family-heading` |
-| H5 | `font-size-xl` | `font-weight-semibold` | `line-height-normal` | `font-family-base` |
-| H6 | `font-size-lg` | `font-weight-semibold` | `line-height-normal` | `font-family-base` |
-| Body | `font-size-base` | `font-weight-normal` | `line-height-normal` | `font-family-base` |
-| Small | `font-size-sm` | `font-weight-normal` | `line-height-normal` | `font-family-base` |
-| Mono | `font-size-sm` | `font-weight-normal` | `line-height-relaxed` | `font-family-mono` |
+| Element | Size | Weight | Line height | Letter spacing | Family |
+|---|---|---|---|---|---|
+| H1, the page title | `font-size-4xl` | `font-weight-bold` | `line-height-tight` | `letter-spacing-tight` | `font-family-heading` |
+| H2, a card or section heading | `font-size-lg` | `font-weight-bold` | `line-height-tight` | `letter-spacing-normal` | `font-family-heading` |
+| H3 | `font-size-base` | `font-weight-semibold` | `line-height-tight` | `letter-spacing-normal` | `font-family-heading` |
+| Label | `font-size-xs`, upper case | `font-weight-semibold` | `line-height-normal` | `letter-spacing-wide` | `font-family-base` |
+| Key figure | `font-size-3xl` | `font-weight-medium` | `line-height-tight` | `letter-spacing-normal` | `font-family-mono` |
+| Body | `font-size-base` | `font-weight-normal` | `line-height-normal` | `letter-spacing-normal` | `font-family-base` |
+| Small | `font-size-sm` | `font-weight-normal` | `line-height-normal` | `letter-spacing-normal` | `font-family-base` |
+| Mono | `font-size-sm` | `font-weight-normal` | `line-height-relaxed` | `letter-spacing-normal` | `font-family-mono` |
 
-This is the page ramp, for page and section headings. Inside a card or a list row, a
-compact ramp from `font-size-lg` down to `font-size-sm` applies, because a 48 px heading
-inside a card is a layout, not a heading. A page surface MUST use the table above.
+The ramp is compact, as the Finance App Design draws it: a page has one title, and below it
+every card and section heading is `font-size-lg`. A label sits above the figure or field it
+names, in `color-text-secondary`, and table headers take the same style. A screen MUST NOT go
+deeper than H3. Backlog's H1 of `font-size-5xl`, and its H4 to H6, do not apply.
 
 ## Amounts
 
@@ -112,14 +159,14 @@ Every amount of money in Finance is set the same way, by one formatter in the UI
 
 | Rule | Requirement |
 |---|---|
-| Tabular figures | An amount MUST use `font-family-base` with `font-variant-amount`, so every digit has the same width and columns line up. |
+| Tabular figures | An amount MUST use `font-family-mono` with `font-variant-amount`, so every digit has the same width and columns line up. |
 | Two decimals | An amount MUST show two decimals, including `,00`. A rounded figure is allowed only under `design-principles.md#exact-amounts`. |
 | Right-aligned | Amounts in a column or a list MUST be right-aligned, so the decimal separators line up. |
 | Sign first | An amount with a direction MUST start with its sign: `+` for money in, `−` (U+2212 MINUS SIGN) for money out. The hyphen-minus `-` and accounting brackets MUST NOT be used. Zero has no sign. |
 | Currency symbol | The amount MUST show `€` where the currency is the subject. In a column where every value is in euros, the symbol MAY move to the column header instead. |
 | Never truncated | An amount MUST NOT be truncated or wrapped. The label beside it gives up room first. |
 | Colour | Colour follows `color-scheme.md#amount-tokens`, and it never replaces the sign. |
-| Headline figure | A headline total or balance MAY be set at `font-size-2xl` and `font-weight-semibold`. It keeps every rule above. |
+| Headline figure | A key figure is set as **Key figure** in `#heading-defaults`, `font-size-3xl` and `font-weight-medium`; a secondary one MAY drop to `font-size-2xl`. It keeps every rule above. |
 
 The formatter writes the sign, then the amount as the culture formats a positive currency
 value. Under the Dutch culture (`nl-NL`) that gives these forms:
@@ -138,19 +185,30 @@ until the domain models another currency.
 ## Spacing Scale
 
 ```meta
+status: draft
 ```
 
 A 4 px (0.25 rem) base with a geometric progression. Always use a scale token. MUST NOT use
 one-off values such as `13px`.
 
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "MUST NOT use"
+body: |
+  [minor] Prose (telegraphic): The paragraph is fragments with no subject ("A 4 px base...", "MUST NOT use..."); write full sentences.
+```
+
 | Token | rem | px | Common usage |
 |---|---|---|---|
 | `spacing-0` | 0 | 0 | Explicit zero |
-| `spacing-xs` | 0.25rem | 4 | Icon-to-label gap, badge padding |
-| `spacing-sm` | 0.5rem | 8 | Input and button vertical padding, inline gaps, toast gap |
-| `spacing-md` | 1rem | 16 | Default component padding, form field spacing |
-| `spacing-lg` | 1.5rem | 24 | Small section padding, card header and footer |
-| `spacing-xl` | 2rem | 32 | Medium section padding, modal padding |
+| `spacing-xs` | 0.25rem | 4 | Icon-to-label gap, label-to-value gap, badge padding |
+| `spacing-sm` | 0.5rem | 8 | Table header padding, inline gaps, legend gaps, toast gap |
+| `spacing-ms` | 0.75rem | 12 | Table cell and navigation link padding, gaps inside a card |
+| `spacing-md` | 1rem | 16 | Default component padding, the gutter between cards, form field spacing |
+| `spacing-lg` | 1.5rem | 24 | Card padding, the gap between page sections |
+| `spacing-xl` | 2rem | 32 | Page padding, modal padding |
 | `spacing-2xl` | 3rem | 48 | Large section padding, page vertical rhythm |
 | `spacing-3xl` | 4rem | 64 | Large whitespace |
 | `spacing-4xl` | 6rem | 96 | Wide-window page margins |
@@ -158,6 +216,7 @@ one-off values such as `13px`.
 ## Density
 
 ```meta
+status: draft
 related: [.devbook/design/design-principles.md#low-chrome-content-first]
 ```
 
@@ -167,6 +226,7 @@ Default to a **comfortable but compact** density.
 |---|---|
 | Component padding | `spacing-md` inside components, `spacing-lg` or `spacing-xl` for outer sections. |
 | List and table rows | Rows use `spacing-sm` vertical padding and MUST keep a pointer target of at least 44 px. See `accessibility.md#target-sizes-and-text`. |
+| Control height | Buttons, inputs, navigation links, segmented controls, and chips are at least 44 px high. The Finance App Design draws navigation links at 40 px, chips at 36 px, and one segmented control at 40 px; Finance raises each to 44 px. |
 | Line length | Running text SHOULD stay within about 72 to 90 characters per line. |
 | No cramped controls | Controls MUST keep their minimum target size at compact density. |
 
@@ -189,21 +249,31 @@ Finance is one desktop window, so the breakpoints are window widths. The layout 
 to icons with labels in tooltips, and every feature MUST stay usable. At 200% zoom the
 content MUST reflow without loss, per `accessibility.md#target-sizes-and-text`.
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "the rail collapses"
+body: |
+  [minor] Below lg the navigation rail shows icons "with labels in tooltips", a hover-revealed affordance, and devbook-design.md requires every pointer-only interaction to have a keyboard equivalent. Settle: state that the tooltip also shows on keyboard focus and that each icon-only link carries its label as accessible name (accessibility.md#iconography-accessibility) with a 44 px target.
+```
+
 `[TODO: clarify]` The minimum window size Finance enforces.
 
 ## Border Radius and Width
 
 ```meta
+status: draft
 ```
 
 | Radius token | Value | Usage | Width token | Value |
 |---|---|---|---|---|
 | `border-radius-none` | 0 | Tables | `border-width` | 1px (default) |
-| `border-radius-sm` | 0.25rem (4px) | Badges, chips, tags | `border-width-2` | 2px (focus, selected) |
-| `border-radius-md` | 0.5rem (8px) | Inputs, buttons, cards (default) | `border-width-4` | 4px (accent stripes, progress) |
-| `border-radius-lg` | 1rem (16px) | Large cards, panels, modals | | |
+| `border-radius-sm` | 0.25rem (4px) | Bar tops, legend swatches, progress bars | `border-width-2` | 2px (focus, selected, dashed placeholders) |
+| `border-radius-md` | 0.5rem (8px) | Inputs, buttons, navigation links, segmented controls, step boxes | `border-width-4` | 4px (accent stripes, progress) |
+| `border-radius-lg` | 1rem (16px) | Cards, panels, modals | | |
 | `border-radius-xl` | 1.5rem (24px) | Feature cards | | |
-| `border-radius-full` | 9999px | Pills, avatars | | |
+| `border-radius-full` | 9999px | Badges, pills, chips, avatars | | |
 
 Rules: interactive controls use `border-radius-md`. Focus rings and selected states use
 `border-width-2`.
@@ -217,6 +287,24 @@ related: [.devbook/design/color-scheme.md#elevation-by-color]
 Elevation is shown mainly by surface colour (see `color-scheme.md#elevation-by-color`).
 Shadows are secondary and MUST be about 30% less opaque than the raw values below on the
 dark surfaces.
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Shadows are secondary and MUST be about 30% less opaque"
+body: |
+  [medium] Finance is dark mode only and color-scheme.md says every token has exactly one value, yet these shadow tokens declare values that MUST NOT be used as written, and "about 30%" is not testable. The demo template already bakes its own dark values (shadow-md 0.07, shadow-xl 0.14), which are declared nowhere. Settle: declare the dark values as the token values (0.035 / 0.07 / 0.105 / 0.14, inner 0.042) and drop the rule here and in color-scheme.md#elevation-by-color.
+```
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Elevation is shown mainly by surface colour"
+body: |
+  [minor] Prose (restated heading): The first sentence restates the heading, hedges with "mainly", and repeats color-scheme.md#elevation-by-color; link to that chapter and cut it.
+```
 
 | Token | Value | Usage |
 |---|---|---|
@@ -297,3 +385,107 @@ count, or a tag. It is one pattern wherever it appears.
 | Tags | Tags are chips, set smaller than the title, so a chip cannot outshout the title. |
 | Truncation | The metadata line gives up room before the title. Truncated text MUST stay in the DOM, so a screen reader still reads it. |
 | Amounts | An amount on a metadata line keeps every rule in `#amounts`, and is never the part that gets truncated. |
+
+## Finance App Design Mapping
+
+```meta
+status: draft
+related: [.devbook/design/README.md#provenance, .devbook/design/color-scheme.md#finance-app-design-mapping]
+```
+
+Every font family, font size, weight, letter spacing, line height, spacing step, and radius
+the eleven boards of the Finance App Design use, and the token it lands on. Colours are
+mapped in `color-scheme.md#finance-app-design-mapping`.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "Every font family, font size, weight, letter spacing"
+body: |
+  [minor] Prose (telegraphic): The opening sentence has no verb and runs past 35 words; write "This table lists each value the boards use and the token it lands on."
+```
+
+A board value within one step of a token maps to the nearest token, a step being the gap
+between the two tokens either side of it. A value halfway between two tokens takes the
+larger for a font size, so no text drops below a minimum, and the smaller for spacing and
+radius, to keep the density compact. Spacing never rounds to zero. Twelve pixels of spacing,
+used on almost every board, is the one value that got a token of its own: `spacing-ms`.
+
+```annotation
+kind: suggestion
+author: "claude/prose-check"
+date: 2026-10-21
+quote: "A board value within one step of a token maps"
+body: |
+  [minor] Prose (overlong sentence): The sentence defines "step" in a trailing clause and carries two ideas; split it and move the definition to its own sentence.
+```
+
+**Font families**
+
+| Board value | Token |
+|---|---|
+| `'Hanken Grotesk', system-ui, sans-serif` | `font-family-base` and `font-family-heading` |
+| `'IBM Plex Mono', monospace` | `font-family-mono` |
+
+The boards' `system-ui` fallback becomes the Windows chain in `#font-families`.
+
+**Font sizes**
+
+| Board px | Where | Token | px |
+|---|---|---|---|
+| 12 | Labels, table headers, pills, chart axis letters | `font-size-xs` | 12 |
+| 13 | The line under a key figure, a legend, a field label | `font-size-sm` | 14 |
+| 14 | Navigation links, buttons, table cells | `font-size-sm` | 14 |
+| 15 | Inputs, list rows | `font-size-base` | 16 |
+| 16 | A unit after a key figure | `font-size-base` | 16 |
+| 17 | A goal's amount | `font-size-lg` | 18 |
+| 18 | Card and section headings | `font-size-lg` | 18 |
+| 19 | The product name in the navigation | `font-size-xl` | 20 |
+| 24 | A secondary key figure | `font-size-2xl` | 24 |
+| 26 | A goal's progress figure | `font-size-2xl` | 24 |
+| 28 | A key figure | `font-size-3xl` | 30 |
+| 30 | A key figure on the overview | `font-size-3xl` | 30 |
+| 34 | The page title | `font-size-4xl` | 36 |
+| 44 | The net salary on the calculator | `font-size-5xl` | 48 |
+
+**Weights, letter spacing, line height**
+
+| Board value | Token | Value |
+|---|---|---|
+| `font-weight: 500` | `font-weight-medium` | 500 |
+| `font-weight: 600` | `font-weight-semibold` | 600 |
+| `font-weight: 700` | `font-weight-bold` | 700 |
+| `letter-spacing: -0.02em`, the page title | `letter-spacing-tight` | -0.025em |
+| `letter-spacing: -0.01em`, the product name | `letter-spacing-normal` | 0 |
+| `letter-spacing: .05em`, table headers | `letter-spacing-wide` | 0.05em |
+| `letter-spacing: .06em`, labels | `letter-spacing-wide` | 0.05em |
+| `line-height: 1.5` | `line-height-normal` | 1.5 |
+
+**Spacing**
+
+The boards' padding, margin, and gap values.
+
+| Board px | Token | px |
+|---|---|---|
+| 2, 3, 4, 6 | `spacing-xs` | 4 |
+| 8, 10 | `spacing-sm` | 8 |
+| 11, 12, 14 | `spacing-ms` | 12 |
+| 16, 18, 20 | `spacing-md` | 16 |
+| 22, 24, 28 | `spacing-lg` | 24 |
+| 32, 40 | `spacing-xl` | 32 |
+| 48 | `spacing-2xl` | 48 |
+
+**Radius**
+
+| Board px | Where | Token | px |
+|---|---|---|---|
+| 3 | Legend swatches | `border-radius-sm` | 4 |
+| 4 | Bar tops | `border-radius-sm` | 4 |
+| 6 | Bar tops, progress bars | `border-radius-sm` | 4 |
+| 7 | Slim progress bars | `border-radius-md` | 8 |
+| 8 | Navigation links, the split bar | `border-radius-md` | 8 |
+| 10 | Buttons, inputs, segmented controls, panels | `border-radius-md` | 8 |
+| 12 | Step boxes | `border-radius-md` | 8 |
+| 14 | Cards | `border-radius-lg` | 16 |
+| 999 | Pills, chips | `border-radius-full` | 9999 |

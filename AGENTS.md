@@ -15,6 +15,7 @@ task-scoped context, never baseline context: load the chapters a task names, wal
 | `.devbook/tech/` | The technology graph and its ratings | `devbook-tech.md` |
 | `.devbook/design/` | Design principles, tokens, and component guidelines | `devbook-design.md` |
 | `.devbook/ai/` | How the team works with AI, stage by stage; it records a way of working and never instructs one | `devbook-ai.md` |
+| `openspec/changes/` | Proposed changes to the folders above, each merged by `.devbook/_tools/devbook-meta/delta.mjs --apply`; never read its `archive/` | `devbook-changes.md` |
 
 Every chapter carries a fenced `meta` block; write it in the same change as the content,
 per `devbook-chapter-metadata.md`. Skip `annotation` fences when loading a
