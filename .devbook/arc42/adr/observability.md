@@ -10,6 +10,15 @@ Finance uses OpenTelemetry for logs, traces, and metrics, wired once in
 `Finance.ServiceDefaults`. It exports over OTLP only when `OTEL_EXPORTER_OTLP_ENDPOINT` is set,
 which only the AppHost does, so the installed application sends nothing off the machine.
 
+```annotation
+kind: flag
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "which only the AppHost does, so the installed application sends nothing off the machine"
+body: |
+  [major] The privacy guarantee rests on an environment variable being absent, but OTEL_EXPORTER_OTLP_ENDPOINT is a standard, process-inherited variable: any other tool that sets it user- or machine-wide (a collector, another instrumented app, a developer machine that is also the user's PC) silently turns export on, with operation traces of the user's finances. The rejected row says a code-set endpoint could export by accident; this can too. Add a Finance-specific opt-in the AppHost sets (or check for the AppHost's own variables) before the exporter is registered.
+```
+
 ## Why
 
 ```meta
@@ -30,6 +39,14 @@ which only the AppHost does, so the installed application sends nothing off the 
 - No span, metric, or log line carries an amount or any other financial value. Telemetry
   describes what Finance did, never the user's money.
 
+```annotation
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "so no telemetry leaves the user's PC"
+body: |
+  [minor] Gap: with no exporter in production, logs and the technical-fault exceptions error-handling.md keeps as exceptions go nowhere. 08 Observability and 11 O5 hold that open; this record should say so and link O5, so a reader does not assume production has a log.
+```
+
 ## Rejected
 
 ```meta
@@ -49,3 +66,12 @@ which only the AppHost does, so the installed application sends nothing off the 
 | Date | Change |
 | --- | --- |
 | 2026-10-08 | Proposed: OpenTelemetry through `Finance.ServiceDefaults`, exported over OTLP only under the AppHost, with no financial values in telemetry, adopted from the organization's [ADR 0010](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/adrs/0010-adopt-opentelemetry-for-observability.md), as Backlog applies it. |
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "| Date | Change |"
+body: |
+  [minor] The History table is headed Date | Change, but devbook-arc42.md fixes the header as Date | Change | Why, and build.mjs --check warns on it. Split the row's reason into its own Why column (here: adopted from the organization's ADR 0010 as Backlog applies it is the why).
+```

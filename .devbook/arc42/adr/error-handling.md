@@ -11,6 +11,15 @@ success flag, an optional value, an error code, and a message. An unexpected tec
 stays an exception. The Razor components in `Finance.UI` turn a failed `Result` into a message
 for the user.
 
+```annotation
+kind: question
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "An expected outcome crosses the application boundary"
+body: |
+  [major] Which project is the application boundary? 05 Level 1 has Finance.Desktop, Finance.UI, Finance.Domain, and Finance.Storage and no application layer; 08 User Interface puts a small UI service per feature in Finance.UI. Name where Result and Result<T> are defined (presumably Finance.Domain), whether the store port in Finance.Domain returns Result or throws, and which code does the domain-exception-to-Result translation the Why section mentions.
+```
+
 ## Why
 
 ```meta
@@ -27,6 +36,24 @@ for the user.
   OneDrive has locked, and a conflict copy OneDrive has made.
 - The error code is machine-readable, so the UI picks its message from the code and never
   parses the text.
+
+```annotation
+kind: flag
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "a conflict copy OneDrive has made"
+body: |
+  [major] These two are not faults no caller can handle: 11. Risks and Technical Debt R1 and R2 plan to detect conflict copies on load and to report a clear error when a file cannot be read, which are expected, user-actionable outcomes the UI must word specifically. By this record a specific message comes only from a Result error code, so classifying them as exceptions contradicts R1/R2. Either move OneDrive lock, online-only placeholder, and conflict copy into Result with their own codes, or say how an exception reaches the user with a specific message.
+```
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "The error code is machine-readable"
+body: |
+  [minor] Gap: the record says what a failed Result becomes, but not where a technical-fault exception is caught and what the user sees (a Blazor ErrorBoundary, a MAUI unhandled-exception handler, a restart prompt), nor where it is logged in production (open as 11 O5). 08 User Interface defers to this record for how a failure shows. Add the fault path.
+```
 
 ## Rejected
 
@@ -47,3 +74,12 @@ for the user.
 | Date | Change |
 | --- | --- |
 | 2026-10-08 | Proposed: `Result` and `Result<T>` for expected outcomes, exceptions for technical faults, and the UI mapping a failed `Result` to a message, adopted from the organization's [ADR 0004](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/adrs/0004-standardize-result-objects-for-expected-failures.md). |
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "| Date | Change |"
+body: |
+  [minor] The History table is headed Date | Change, but devbook-arc42.md fixes the header as Date | Change | Why, and build.mjs --check warns on it. Split the row's reason into its own Why column (here: adopted from the organization's ADR 0004 is the why).
+```

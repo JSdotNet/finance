@@ -21,11 +21,44 @@ related: [.devbook/arc42/adr/storage.md, .devbook/arc42/06-runtime-view.md#conti
 | R4 | Financial data sits unencrypted in the OneDrive folder. Anyone with access to the Windows or OneDrive account can read it. | Accepted for now. Revisit if the data or the threat changes. |
 | R5 | MAUI Blazor Hybrid adds tooling weight, and Playwright's CDP attach to WebView2 may prove brittle. | The optional `Finance.Web` harness gives a fallback test path. The fallback stacks are weighed in [the desktop stack record](adr/desktop-stack.md). |
 
+```annotation
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "allows lazy loading later"
+body: |
+  [minor] R3 rests on a file split that does not exist yet: 08#persistence says the split "is not decided yet", and O1 is open. Lazy loading also runs against 06#start-and-load and 08#user-interface, which keep the whole model in memory from the start. Settle: rephrase as a requirement on O1 (choose a split that permits lazy loading) and link O1.
+```
+
+```annotation
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "The fallback stacks are weighed in"
+body: |
+  [minor] adr/desktop-stack.md weighs no fallback. Its Rejected table discards WinUI 3, WPF, Electron, Blazor WebAssembly, and a server app, most of them because Playwright cannot drive them, so none of them is a fallback for a brittle CDP attach. Settle: name Finance.Web (O2) as the one fallback here, or add a Proposed section to the desktop stack record that weighs a real fallback.
+```
+
+```annotation
+kind: question
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Accepted for now. Revisit if the data or the threat changes."
+body: |
+  [major] Who accepted R4? domain/finance/context.md#user still asks the user whether the files need encryption or a password on open, so the risk has not been accepted by its owner. See the flag on 08#privacy-and-security. Settle: once the domain question is answered, say who accepted it and link the decision record that holds the choice.
+```
+
 ## Open Questions
 
 ```meta
 status: draft
 related: [.devbook/arc42/05-building-block-view.md#integration-seam, .devbook/arc42/05-building-block-view.md#development-harness]
+```
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+body: |
+  [minor] Questions that other chapters leave open have no row here. (1) The CI workflow: 07#development says it "is not designed yet", and whether the end-to-end level can run on a hosted Windows runner is unknown. (2) Protection of the data (encryption, a password on open), open in domain/finance/context.md#user. (3) How PC B finds the same data folder, given the path is per machine (08#configuration). (4) R1 mitigation: a marker file or conflict-copy detection, which needs a design decision. Settle: add rows with owners, or link each from the risk that raises it.
 ```
 
 | # | Question | Owner |

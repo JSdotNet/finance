@@ -19,6 +19,23 @@ tests use Playwright for .NET against the application started by the AppHost.
 | Architecture rules | NetArchTest |
 | End to end | Playwright for .NET, over CDP into WebView2, under Aspire |
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "| Test framework, every test type | xUnit |"
+body: |
+  [minor] xUnit v2 and v3 are different packages (xunit vs xunit.v3) with a different runner model (Microsoft Testing Platform in v3), and moving between them touches every test project, which is the reversal cost this record exists for. Name the major version.
+```
+
+```annotation
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "| End to end | Playwright for .NET, over CDP into WebView2, under Aspire |"
+body: |
+  [minor] 08 Testability allows end-to-end runs against Finance.Web if it is built (11 O2), and 05 draws Playwright reaching it over HTTP; this row names only CDP into WebView2. Mention the Finance.Web path as conditional on O2 so the two chapters agree.
+```
+
 ## Why
 
 ```meta
@@ -40,6 +57,15 @@ tests use Playwright for .NET against the application started by the AppHost.
   for it, so the test sees the same wiring a developer does.
 - A new test library needs its own decision. The stack stays small on purpose.
 
+```annotation
+kind: flag
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "A new test library needs its own decision."
+body: |
+  [major] The design folder already requires one: component-libraries.md (risk row) and accessibility.md#verification make accessibility checks Playwright with axe, a further library (Deque.AxeCore.Playwright or similar) this stack does not list. Add axe to the table and Why, or have the design folder drop the requirement; as written the two chapters disagree.
+```
+
 ## Rejected
 
 ```meta
@@ -54,6 +80,15 @@ tests use Playwright for .NET against the application started by the AppHost.
 | bUnit component tests instead of end-to-end tests | They render components without WebView2 or the MAUI shell, so they cannot show that the real application works. |
 | WinAppDriver or UI Automation | They drive native controls, not the Razor UI inside WebView2, and they are slower and more brittle than Playwright. |
 
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "Version 8 moved to a paid commercial licence."
+body: |
+  [minor] Incomplete: FluentAssertions 8 is under the Xceed licence, which is free for non-commercial use, and Finance is a personal project. The rejection holds on other grounds (licence terms that can change again, the organization standard, an Apache-licensed fork with the same API); state those rather than a paid-licence reason that does not bind Finance today.
+```
+
 ## History
 
 ```meta
@@ -62,3 +97,12 @@ tests use Playwright for .NET against the application started by the AppHost.
 | Date | Change |
 | --- | --- |
 | 2026-10-08 | Proposed: xUnit, Moq, Bogus, AwesomeAssertions, NetArchTest, and Playwright under Aspire, adopted from the organization's recommendations [testing shared](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/recommendations/testing-shared.md), [unit](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/recommendations/testing-unit.md), [end to end](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/recommendations/testing-end-to-end.md), and [architecture](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/recommendations/testing-architecture.md). |
+
+```annotation
+kind: suggestion
+author: "claude/chapter-review"
+date: 2026-10-21
+quote: "| Date | Change |"
+body: |
+  [minor] The History table is headed Date | Change, but devbook-arc42.md fixes the header as Date | Change | Why, and build.mjs --check warns on it. Split the row's reason into its own Why column (here: adopted from the organization's testing recommendations is the why).
+```
