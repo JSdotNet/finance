@@ -1,7 +1,6 @@
 # Finance
 
 ```meta
-status: draft
 type: context-map
 ```
 
@@ -14,7 +13,6 @@ so this map has one context and no relationships between contexts.
 ## Finance
 
 ```meta
-status: draft
 type: bounded-context
 related: [.devbook/domain/finance/context.md]
 ```

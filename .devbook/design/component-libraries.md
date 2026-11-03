@@ -11,15 +11,6 @@ related: [.devbook/arc42/04-solution-strategy.md#local-first-desktop-application
 > package-update workflow and then recorded in `.devbook/tech/`. No packages were installed.
 > Where a claim is a judgement rather than a fact, the text says so.
 
-```annotation
-kind: suggestion
-author: "claude/prose-check"
-date: 2026-10-21
-quote: "The component-library recommendation for Finance's one channel"
-body: |
-  [minor] Prose (restated heading): The verbless lead restates the title; open with what the file recommends.
-```
-
 ## Evaluation Criteria
 
 ```meta
@@ -68,15 +59,6 @@ related: [.devbook/design/color-scheme.md#chart-roles, .devbook/design/interacti
 Every asset MUST ship inside the app. A CDN is acceptable only during development, and only
 with a visible fallback when it fails.
 
-```annotation
-kind: suggestion
-author: "claude/chapter-review"
-date: 2026-10-21
-quote: "Every asset MUST ship inside the app."
-body: |
-  [medium] The ECharts row does not say which renderer is used. accessibility.md#windows-contrast-themes requires a chart to draw with system colour keywords under forced colours, which CSS cannot reach inside a canvas; and #risks-and-gaps treats every chart library as canvas-based although ECharts has an SVG renderer. Settle: name the renderer (SVG, so forced-colors and system colour keywords can apply) or record how the canvas renderer re-themes on forced-colors: active, and correct the risk row.
-```
-
 ## Candidate Comparison
 
 ```meta
@@ -96,15 +78,6 @@ Rating: ✔ strong · ◑ partial or with work · ✘ weak or absent · — not 
 
 The ratings for the third-party suites are a judgement from their documentation and from
 Backlog's evaluation. None was tried in Finance.
-
-```annotation
-kind: suggestion
-author: "claude/chapter-review"
-date: 2026-10-21
-quote: "The ratings for the third-party suites"
-body: |
-  [minor] Criterion C7 (Charts) is defined in #evaluation-criteria, and ECharts vs Chart.js vs Radzen charts is decided on it, but the table has no C7 column. Settle: add a C7 column (single-hue theming from chart-roles, SVG output, forced-colors support).
-```
 
 ## Risks and Gaps
 

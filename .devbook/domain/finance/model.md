@@ -1,7 +1,6 @@
 # Model
 
 ```meta
-status: draft
 type: model
 ```
 

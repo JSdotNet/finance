@@ -1,7 +1,7 @@
 # 2. Code and Test
 
 ```meta
-status: candidate
+rating: candidate
 type: stage
 ```
 
@@ -10,9 +10,9 @@ Implementing and validating a change: the coding agent, TDD, code review, and QA
 ## Flow Skills
 
 ```meta
-status: candidate
+rating: candidate
 type: workflow
-stage: [plan, code, test]
+stage: [specify, code, verify]
 date: 2026-10-21
 ```
 
@@ -43,9 +43,9 @@ request behind a Personal Validation gate.
 ## Repository Procedures
 
 ```meta
-status: candidate
+rating: candidate
 type: skill
-stage: [code, test]
+stage: [code, verify]
 related: [".devbook/ai/02-code-test.md#flow-skills"]
 date: 2026-10-06
 ```
@@ -67,9 +67,9 @@ The procedures `devbook` seeds and this repository owns: `run`, `capture`, `diag
 ## Scenario Pages
 
 ```meta
-status: candidate
+rating: candidate
 type: skill
-stage: [test]
+stage: [verify]
 related: [".devbook/ai/02-code-test.md#flow-skills"]
 date: 2026-10-15
 ```

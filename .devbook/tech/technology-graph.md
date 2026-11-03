@@ -1,7 +1,7 @@
 # Technology Graph
 
 ```meta
-status: candidate
+rating: candidate
 index: root
 ```
 
