@@ -3,8 +3,6 @@
 ```meta
 ```
 
-The risks the current architecture carries, the questions it leaves open, and its debt.
-
 ## Risks
 
 ```meta
@@ -13,11 +11,14 @@ related: [.devbook/arc42/adr/storage.md, .devbook/arc42/06-runtime-view.md#conti
 
 | # | Risk | Mitigation direction |
 | --- | --- | --- |
-| R1 | Finance runs on two PCs at once, or starts before OneDrive finishes a download. OneDrive then keeps both versions as a conflict copy, or Finance loads stale data. | Document one-PC-at-a-time use. Consider a marker file that says which PC has Finance open, and detecting conflict copies on load. |
-| R2 | OneDrive's Files On-Demand leaves a file as an online-only placeholder, and opening it offline fails. | Ask the user to keep the data folder always available offline, and report a clear error when a file cannot be read. |
+| R1 | Finance runs on two PCs at once, or starts before OneDrive finishes a download. | Document one-PC-at-a-time use. |
+| R2 | OneDrive's Files On-Demand leaves a file as an online-only placeholder, and opening it offline fails. | Ask the user to keep the folder available offline. Report a clear error for an unreadable file. |
 | R3 | The records grow beyond what loading everything at start handles comfortably. | Measure against Q6 in [10](10-quality-requirements.md#quality-scenarios). The file split in [08](08-crosscutting-concepts.md#persistence) allows lazy loading later. |
-| R4 | Financial data sits unencrypted in the OneDrive folder. Anyone with access to the Windows or OneDrive account can read it. | Accepted for now. Revisit if the data or the threat changes. |
-| R5 | MAUI Blazor Hybrid adds tooling weight, and Playwright's CDP attach to WebView2 may prove brittle. | The optional `Finance.Web` harness gives a fallback test path. The fallback stacks are weighed in [the desktop stack record](adr/desktop-stack.md). |
+| R4 | Financial data sits unencrypted in OneDrive. Anyone with access to either account can read it. | Accepted for now. Revisit if the data or the threat changes. |
+| R5 | MAUI Blazor Hybrid adds tooling weight, and Playwright's CDP attach to WebView2 may prove brittle. | `Finance.Web` gives a fallback test path. [The desktop stack record](adr/desktop-stack.md) weighs fallback stacks. |
+
+- **R1 consequence:** OneDrive keeps both versions as a conflict copy, or Finance loads stale data.
+- **R1 further measures:** Consider a marker file that says which PC has Finance open, and detecting conflict copies on load.
 
 ## Open Questions
 
