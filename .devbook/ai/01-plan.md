@@ -76,8 +76,8 @@ maps every board value onto a token and lists the mapping.
 
 - **Used for** — the Finance App Design, eleven boards drawn on 2026-10-08, turned into tokens
   by the `finance-tokens` entry of the `finance-setup` plan on 2026-10-21. Type, spacing, and
-  radius came over; its light colours were translated by role, because `design/` is dark mode
-  only.
+  radius came over; its light colours were translated by role, because `design/` was dark mode
+  only then. On 2026-10-22 the design became leading, and `design/` took the boards' own palette.
 - **Adopted by** — the maintainer, for this one design so far.
 - **Evidence** — the pull request that wrote this chapter.
 - **Moves up when** — a screen built on the tokens has been reviewed against its board.
