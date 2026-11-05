@@ -4,12 +4,20 @@
 related: [.devbook/design/color-scheme.md, .devbook/design/design-principles.md#low-chrome-content-first, .devbook/design/accessibility.md]
 ```
 
-> Type scale, fonts, spacing, density, layout, radius, elevation, z-index, and iconography
-> tokens for Finance, plus how amounts of money are set. Adapted from Backlog's
+> Finance's non-colour tokens, plus how amounts of money are set. Adapted from Backlog's
 > `typography-and-layout.md`, which drew on the JSdotNet design style guide, and brought in
 > line with the Finance App Design named in `README.md#provenance`. This file declares the
 > non-colour token values. Colour values live in `color-scheme.md`, and every other file
 > references token names.
+
+The tokens cover:
+
+- Type scale and fonts.
+- Spacing and density.
+- Layout.
+- Radius.
+- Elevation and z-index.
+- Iconography.
 
 ## Font Families
 
@@ -122,11 +130,17 @@ Every amount of money in Finance is set the same way, by one formatter in the UI
 | Tabular figures | An amount MUST use `font-family-mono` with `font-variant-amount`, so every digit has the same width and columns line up. |
 | Two decimals | An amount MUST show two decimals, including `,00`. A rounded figure is allowed only under `design-principles.md#exact-amounts`. |
 | Right-aligned | Amounts in a column or a list MUST be right-aligned, so the decimal separators line up. |
-| Sign first | An amount with a direction MUST start with its sign: `+` for money in, `−` (U+2212 MINUS SIGN) for money out. The hyphen-minus `-` and accounting brackets MUST NOT be used. Zero has no sign. |
-| Currency symbol | The amount MUST show `€` where the currency is the subject. In a column where every value is in euros, the symbol MAY move to the column header instead. |
+| Sign first | An amount with a direction MUST start with its sign. |
+| Sign characters | The sign is `+` for money in and `−` (U+2212 MINUS SIGN) for money out. |
+| Forbidden forms | An amount MUST NOT use the hyphen-minus `-` or accounting brackets. |
+| Zero | Zero has no sign. |
+| Currency symbol | The amount MUST show `€` where the currency is the subject. |
+| Currency column | In a column where every value is in euros, the symbol MAY move to the header. |
 | Never truncated | An amount MUST NOT be truncated or wrapped. The label beside it gives up room first. |
 | Colour | Colour follows `color-scheme.md#amount-tokens`, and it never replaces the sign. |
-| Headline figure | A key figure is set as **Key figure** in `#heading-defaults`, `font-size-3xl` and `font-weight-medium`; a secondary one MAY drop to `font-size-2xl`. It keeps every rule above. |
+| Headline figure | A key figure is set as **Key figure** in `#heading-defaults`, `font-size-3xl` and `font-weight-medium`. |
+| Secondary figure | A secondary key figure MAY drop to `font-size-2xl`. |
+| Headline rules | A key figure keeps every rule above. |
 
 The formatter writes the sign, then the amount as the culture formats a positive currency
 value. Under the Dutch culture (`nl-NL`) that gives these forms:
@@ -147,8 +161,8 @@ until the domain models another currency.
 ```meta
 ```
 
-A 4 px (0.25 rem) base with a geometric progression. Always use a scale token. MUST NOT use
-one-off values such as `13px`.
+The scale has a 4 px (0.25 rem) base and a geometric progression. Always use a scale token.
+Product code MUST NOT use one-off values such as `13px`.
 
 | Token | rem | px | Common usage |
 |---|---|---|---|
@@ -175,9 +189,11 @@ Default to a **comfortable but compact** density.
 |---|---|
 | Component padding | `spacing-md` inside components, `spacing-lg` or `spacing-xl` for outer sections. |
 | List and table rows | Rows use `spacing-sm` vertical padding and MUST keep a pointer target of at least 44 px. See `accessibility.md#target-sizes-and-text`. |
-| Control height | Buttons, inputs, navigation links, segmented controls, and chips are at least 44 px high. The Finance App Design draws navigation links at 40 px, chips at 36 px, and one segmented control at 40 px; Finance raises each to 44 px. |
+| Control height | Buttons, inputs, navigation links, segmented controls, and chips are at least 44 px high. |
 | Line length | Running text SHOULD stay within about 72 to 90 characters per line. |
 | No cramped controls | Controls MUST keep their minimum target size at compact density. |
+
+- **Control height:** The Finance App Design draws navigation links at 40 px, chips at 36 px, and one segmented control at 40 px. Finance raises each to 44 px.
 
 ## Layout Grid and Breakpoints
 
@@ -214,7 +230,7 @@ content MUST reflow without loss, per `accessibility.md#target-sizes-and-text`.
 | `border-radius-xl` | 1.5rem (24px) | Feature cards | | |
 | `border-radius-full` | 9999px | Badges, pills, chips, avatars | | |
 
-Rules: interactive controls use `border-radius-md`. Focus rings and selected states use
+Interactive controls use `border-radius-md`. Focus rings and selected states use
 `border-width-2`.
 
 ## Shadows and Elevation
@@ -251,7 +267,7 @@ dark surfaces.
 | `z-index-toast` | 400 | Toasts, save-state notifications |
 | `z-index-tooltip` | 500 | Tooltips (always on top) |
 
-MUST NOT use arbitrary z-index values such as `9999`. Use only the scale.
+Product code MUST NOT use arbitrary z-index values such as `9999`. Use only the scale.
 
 ## Iconography
 
@@ -299,13 +315,19 @@ count, or a tag. It is one pattern wherever it appears.
 | Rule | Requirement |
 |---|---|
 | Size | A metadata line is set at `font-size-xs` in `color-text-secondary`. It MUST NOT compete with its title. |
-| Order | Facts are ordered by what a reader asks first: what the item belongs to, then how far along it is, then when it happens. |
-| Emphasis | A fact that makes the item urgent MAY take `color-text-primary`. At most two facts on a line may be brought forward. |
-| Glyphs | A glyph decorates the words and never replaces them. The glyph is `aria-hidden`, and its meaning is in text or a visually hidden span. |
+| Order | Facts follow what a reader asks first. |
+| Emphasis | A fact that makes the item urgent MAY take `color-text-primary`. |
+| Emphasis limit | A line MAY bring at most two facts forward. |
+| Glyphs | A glyph decorates the words and never replaces them. |
+| Glyph accessibility | The glyph is `aria-hidden`, and its meaning is in text or a visually hidden span. |
 | Absent facts | An absent fact is left out, never shown as a placeholder or a dash. |
 | Tags | Tags are chips, set smaller than the title, so a chip cannot outshout the title. |
-| Truncation | The metadata line gives up room before the title. Truncated text MUST stay in the DOM, so a screen reader still reads it. |
-| Amounts | An amount on a metadata line keeps every rule in `#amounts`, and is never the part that gets truncated. |
+| Truncation | The metadata line gives up room before the title. |
+| Truncated text | Truncated text MUST stay in the DOM, so a screen reader still reads it. |
+| Amounts | An amount on a metadata line keeps every rule in `#amounts`. |
+| Amount truncation | An amount is never the part that gets truncated. |
+
+- **Order:** Put what the item belongs to first, then how far along it is, then when it happens.
 
 ## Finance App Design Mapping
 
@@ -313,9 +335,18 @@ count, or a tag. It is one pattern wherever it appears.
 related: [.devbook/design/README.md#provenance, .devbook/design/color-scheme.md#finance-app-design-mapping]
 ```
 
-Every font family, font size, weight, letter spacing, line height, spacing step, and radius
-the eleven boards of the Finance App Design use, and the token it lands on. Colours are
-mapped in `color-scheme.md#finance-app-design-mapping`.
+This section maps every value the eleven boards of the Finance App Design use to the
+token it lands on. It covers:
+
+- Font family.
+- Font size.
+- Weight.
+- Letter spacing.
+- Line height.
+- Spacing step.
+- Radius.
+
+Colours are mapped in `color-scheme.md#finance-app-design-mapping`.
 
 A board value within one step of a token maps to the nearest token, a step being the gap
 between the two tokens either side of it. A value halfway between two tokens takes the

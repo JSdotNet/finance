@@ -41,8 +41,10 @@ them.
 
 | # | Principle | What it means | Detailed in |
 |---|---|---|---|
-| 1 | **Dark mode only** | There is no light theme and no theme toggle, as in Backlog. Every palette, contrast, and elevation rule is written for dark surfaces only. | `design-principles.md#dark-mode-only`, `color-scheme.md` |
+| 1 | **Dark mode only** | There is no light theme and no theme toggle, as in Backlog. | `design-principles.md#dark-mode-only`, `color-scheme.md` |
 | 2 | **No save buttons** | Every edit saves automatically. There is no Save affordance anywhere. A save-state indicator says what has been written. | `interaction-guidelines.md#auto-save` |
+
+- **Dark mode only:** Every palette, contrast, and elevation rule is written for dark surfaces only.
 
 ## How to Use This Folder
 
@@ -67,9 +69,9 @@ them.
 | File | Scope |
 |---|---|
 | [`design-principles.md`](design-principles.md) | Product-level UX principles: dark mode only, local-first UX, no save buttons, keyboard-first, low chrome, exact amounts. |
-| [`color-scheme.md`](color-scheme.md) | The money-green primary ramp, the dark palette, amount tokens, badge tones, chart roles, measured contrast, elevation, the token mapping, the Finance App Design's colours, and the app icon. |
-| [`typography-and-layout.md`](typography-and-layout.md) | Fonts, type scale, spacing, density, layout, radius, shadows, z-index, iconography, metadata lines, how amounts are set, and the Finance App Design's type and spacing. |
-| [`interaction-guidelines.md`](interaction-guidelines.md) | Auto-save, undo, reordering with keyboard equivalents, entering amounts, feedback, motion, focus and selection, and empty, loading, and error states. |
+| [`color-scheme.md`](color-scheme.md) | Colour tokens, contrast, elevation, token mapping, the Finance App Design's colours, and the app icon. |
+| [`typography-and-layout.md`](typography-and-layout.md) | Type, spacing, density, layout, radius, shadows, z-index, iconography, metadata lines, amounts, and the Finance App Design mapping. |
+| [`interaction-guidelines.md`](interaction-guidelines.md) | Auto-save, undo, keyboard-accessible reordering, amount entry, feedback, motion, focus, selection, and empty, loading, and error states. |
 | [`accessibility.md`](accessibility.md) | The WCAG 2.2 AA target, keyboard navigation, announcements, focus visibility, Windows contrast themes, reduced motion, and target sizes. |
 | [`component-libraries.md`](component-libraries.md) | The component-library recommendation for the desktop app, with a comparison and the known gaps. |
 
@@ -94,10 +96,20 @@ guide. The user's brief was that Finance looks the same as Backlog, with three c
 - The app icon is the euro sign.
 
 Everything else is Backlog's system, with what Finance does not have taken out. Finance has
-one channel, so the mobile, IDE, and cloud guidance went. Backlog's Markdown editing,
-entries, tasks, roadmaps, AI surfaces, repository colours, sync states, and code theme are
-specific to Backlog, so they went too. Backlog's `content-editing.md` had nothing left once
-its Markdown editor was removed, so Finance has no such file.
+one channel, so the mobile, IDE, and cloud guidance went. These features are specific to
+Backlog, so they went too:
+
+- Markdown editing.
+- Entries.
+- Tasks.
+- Roadmaps.
+- AI surfaces.
+- Repository colours.
+- Sync states.
+- The code theme.
+
+Backlog's `content-editing.md` had nothing left once its Markdown editor was removed, so
+Finance has no such file.
 
 Finance is dark mode only, like Backlog. The user decided this on 2026-10-06, after a draft
 with a light theme as well.
@@ -111,11 +123,23 @@ There is no sync back to Backlog. A change here is a change to Finance's design 
 alone.
 
 **The Finance App Design.** The second source is the Finance App Design artifact,
-<https://claude.ai/artifact/S2W8WmGhUZxLkAq2Yhg8WQ>, dated 2026-10-08: eleven screen boards
-of the product (Overview, Income and expenses, Inflation, Subscriptions, Debts and loans,
-Pension, Savings goals, Investments, Crypto, Bruto to netto, Energy and EV charging). Each
-board carries its own inline CSS and no token set. On 2026-10-21 that CSS was compared with
-the tokens here, and every value the boards use was given a token:
+<https://claude.ai/artifact/S2W8WmGhUZxLkAq2Yhg8WQ>, dated 2026-10-08. It holds eleven screen
+boards of the product:
+
+- Overview.
+- Income and expenses.
+- Inflation.
+- Subscriptions.
+- Debts and loans.
+- Pension.
+- Savings goals.
+- Investments.
+- Crypto.
+- Bruto to netto.
+- Energy and EV charging.
+
+Each board carries its own inline CSS and no token set. On 2026-10-21 that CSS was compared
+with the tokens here, and every value the boards use was given a token:
 
 - **Type** follows the artifact: Hanken Grotesk and IBM Plex Mono replace Backlog's fonts,
   and the heading ramp is the artifact's compact one.

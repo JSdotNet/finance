@@ -18,13 +18,16 @@ related: [.devbook/arc42/04-solution-strategy.md#local-first-desktop-application
 
 | # | Criterion | Why it matters |
 |---|---|---|
-| C1 | Dark mode only | Finance ships one dark theme. A library must theme cleanly to dark without fighting a built-in light default. See `design-principles.md#dark-mode-only`. |
-| C2 | Theming through CSS custom properties | The tokens are CSS custom properties. A library that keeps its own palette has to be overridden everywhere. See `color-scheme.md#per-stack-token-mapping`. |
+| C1 | Dark mode only | Finance ships one dark theme, so a library must theme cleanly to dark. See `design-principles.md#dark-mode-only`. |
+| C2 | Theming through CSS custom properties | A library's own palette needs overriding everywhere. See `color-scheme.md#per-stack-token-mapping`. |
 | C3 | Data tables and amounts | Money is shown in columns that must right-align tabular figures. See `typography-and-layout.md#amounts`. |
 | C4 | Accessible reorder | Reordering needs a keyboard path. See `interaction-guidelines.md#keyboard-accessible-reordering`. |
 | C5 | Accessibility (WCAG 2.2 AA) | Semantics, focus, and announcements must be right. See `accessibility.md`. |
 | C6 | Maintenance, license, offline | Prefer maintained, permissively licensed packages whose assets ship inside the app, because Finance works offline. |
 | C7 | Charts | Overviews of money over time are likely, and a chart must follow `color-scheme.md#chart-roles`. |
+
+- **C1:** Theming to dark must not mean fighting a built-in light default.
+- **C2:** The tokens are CSS custom properties.
 
 ## Key Finding
 
@@ -50,11 +53,15 @@ related: [.devbook/design/color-scheme.md#chart-roles, .devbook/design/interacti
 | Layer | Recommendation | Rationale |
 |---|---|---|
 | Base controls | **A first-party Razor class library**, the UI project `Finance.UI`, styled only by the tokens | Same choice and same reasons as Backlog. Nothing to override, and every component reviewable in one place. |
-| Data tables | **QuickGrid** (`Microsoft.AspNetCore.Components.QuickGrid`), styled by the tokens | First-party from the ASP.NET Core team, MIT, unstyled, with sorting and virtualization. It renders a real `<table>`. Cell-level arrow-key navigation is not built in and has to be added. |
-| Charts | **Apache ECharts**, vendored into `Finance.UI`'s `wwwroot` | Backlog's recommendation. Broad chart coverage, Apache-2.0, and a theme object that can take the chart-role tokens. Its `aria` option can generate a text description. |
-| Reorder | **Hand-rolled on pointer events** in the UI library, with the keyboard path built in | Backlog measured that WebView2 in the MAUI desktop head aborts a native HTML5 drag a few milliseconds after it starts, so no `dragover` or `drop` event arrives. A library built on drag events has nothing to hook. Finance runs on the same stack. |
+| Data tables | **QuickGrid** (`Microsoft.AspNetCore.Components.QuickGrid`), styled by the tokens | First-party from the ASP.NET Core team, MIT, unstyled, with sorting and virtualization. |
+| Charts | **Apache ECharts**, vendored into `Finance.UI`'s `wwwroot` | Backlog's recommendation. Broad chart coverage, Apache-2.0, and a theme object that can take the chart-role tokens. |
+| Reorder | **Hand-rolled on pointer events** in the UI library, with the keyboard path built in | WebView2 in the MAUI desktop head aborts a native HTML5 drag, per Backlog's measurement. |
 | Icons | **Lucide** SVGs, vendored into the UI library | See `typography-and-layout.md#iconography`. |
 | Fonts | Hanken Grotesk and IBM Plex Mono as `woff2` files in the UI library | See `typography-and-layout.md#font-families`. |
+
+- **Data tables:** QuickGrid renders a real `<table>`. Finance has to add cell-level arrow-key navigation, which QuickGrid does not include.
+- **Charts:** The `aria` option of ECharts can generate a text description.
+- **Reorder:** The abort comes a few milliseconds after the drag starts, so no `dragover` or `drop` event arrives. A library built on drag events has nothing to hook. Finance runs on the same stack.
 
 Every asset MUST ship inside the app. A CDN is acceptable only during development, and only
 with a visible fallback when it fails.
@@ -89,6 +96,9 @@ Backlog's evaluation. None was tried in Finance.
 | A first-party library inherits no accessibility work | Keyboard support, focus order, and announcements are all Finance's own work | Test them: Playwright with axe, per `accessibility.md#verification`. |
 | QuickGrid has no cell navigation | A keyboard user can tab to a row's controls but cannot move cell by cell | Add arrow-key navigation in the table component, or accept row-level navigation and record it. |
 | Chart libraries are canvas-based | A canvas exposes nothing to a screen reader | Every chart has the same figures as a table or text, per `accessibility.md#amount-announcements`. |
-| Assets fetched from a CDN | Breaks offline use, and tells a third party when Finance is used | Vendor every asset into `wwwroot`. Backlog shipped Mermaid from a CDN and recorded it as a gap; Finance MUST NOT. |
-| Two apps, two copies of one library | Backlog and Finance would each keep a near-identical set of components | `[TODO: clarify]` Whether Finance reuses Backlog's `Backlog.UI.Components`, for example as a shared package with Finance's token values, or keeps its own `Finance.UI`. Sharing saves work, and both apps are dark only. It also couples Finance's releases to Backlog's. |
+| Assets fetched from a CDN | Breaks offline use, and tells a third party when Finance is used | Vendor every asset into `wwwroot`. Finance MUST NOT repeat Backlog's CDN gap. |
+| Two apps, two copies of one library | Backlog and Finance would each keep a near-identical set of components | `[TODO: clarify]` Whether Finance reuses Backlog's `Backlog.UI.Components` or keeps its own `Finance.UI`. |
 | Number formatting spread across components | Two components format the same amount differently | One amount formatter in the UI library, per `typography-and-layout.md#amounts`. |
+
+- **Assets fetched from a CDN:** Backlog shipped Mermaid from a CDN and recorded it as a gap.
+- **Two apps, two copies of one library:** Reuse could be a shared package with Finance's token values. Sharing saves work, and both apps are dark only. It also couples Finance's releases to Backlog's.

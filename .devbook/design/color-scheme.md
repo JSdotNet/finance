@@ -16,11 +16,17 @@ related: [.devbook/design/design-principles.md#dark-mode-only, .devbook/design/a
 
 - **Source.** Backlog's `color-scheme.md`, adapted on 2026-10-06. Backlog took its token set
   from the JSdotNet design style guide (`01-color-palette`), dark column only.
-- **What changed.** The primary is a money green instead of Backlog's gold. The success and
-  info colours, the borders, and the chart roles were re-derived around it.
-- **What stayed.** The token groups and their names, the dark surface ramp, the text tokens,
-  the error and warning colours, the badge tone scale, the single-hue chart rule, the
-  elevation-by-colour rule, and every contrast threshold.
+- **What changed.** The primary is a money green instead of Backlog's gold. Finance
+  re-derived the success and info colours, the borders, and the chart roles around it.
+- **What stayed.** These carry over from Backlog unchanged:
+  - The token groups and their names.
+  - The dark surface ramp.
+  - The text tokens.
+  - The error and warning colours.
+  - The badge tone scale.
+  - The single-hue chart rule.
+  - The elevation-by-colour rule.
+  - Every contrast threshold.
 - **How the ratios were measured.** Every ratio in this file is computed with the WCAG 2.2
   relative-luminance formula, which is unchanged from WCAG 2.1, from the hex values below.
 - **The Finance App Design.** The artifact named in `README.md#provenance` was compared
@@ -59,9 +65,12 @@ glyph sits on `color-green-600`. See `#app-icon`.
 **Why this green.** "Money green" names the green of banknote ink and of the dollar bill: a
 deep green, not a bright one. Hue 148° sits between pure green and emerald. It is cool
 enough to be read as a brand colour rather than a status, and it leaves the yellow-green
-side of the wheel free for `color-success`. In the UI, `color-green-400` is the primary:
-saturated enough to read as money green on a dark surface, and 8.72:1 on the base.
-`color-green-600` is the brand tile of the app icon, deep enough to carry a white glyph.
+side of the wheel free for `color-success`.
+
+In the UI, `color-green-400` is the primary. It
+is saturated enough to read as money green on a dark surface, and it measures 8.72:1 on the
+base. The token `color-green-600` is the brand tile of the app icon, deep enough to carry
+a white glyph.
 
 Product code MUST use the palette tokens below. The ramp tokens are for this file, for the
 chart roles, and for the app icon, and a component MUST NOT reference one directly.
@@ -302,10 +311,11 @@ A chart sits on `color-background-alt`. Every ratio below is measured against it
 | `chart-ink-muted` | `color-text-secondary` | 10.88:1 |
 
 The ramp ran four steps, `green-500` to `green-200`. The Finance App Design splits net
-income into eight parts, so it now runs seven, `green-600` to `green-50`, and the old
-`chart-ramp-1` to `chart-ramp-4` are now `chart-ramp-2` to `chart-ramp-5`. `chart-forecast`
-is the one chart value with no palette token of its own: the info hue, 218°, 58%, 56%,
-darker than `chart-highlight` so a forecast reads as less certain than a fact.
+income into eight parts, so the ramp now runs seven steps, `green-600` to `green-50`. The
+old `chart-ramp-1` to `chart-ramp-4` are now `chart-ramp-2` to `chart-ramp-5`.
+`chart-forecast` is the one chart value with no palette token of its own: the info hue,
+218°, 58%, 56%. It is darker than `chart-highlight`, so a forecast reads as less certain
+than a fact.
 
 Rules:
 
@@ -572,9 +582,15 @@ and `#E2EEE9` both take `chart-ramp-1`, and `#CFE3DB` and `#D3E6DF` both take
 so its two smallest parts share a step; a chart built on the tokens folds them into "Other".
 
 **Pills.** The boards colour pills with a fill and an ink of their own. Each pill takes a tone
-from `#badge-and-chip-tones` instead, and the tokens that tone derives from replace these
-fills and inks: `#E3F1EC` on `#0E5E50`, `#FDEBDD` on `#8A3A0F`, `#FBE4E2` on
-`#9A1C12`, `#E6EDFA` on `#1D4AA8`, `#EEF0EC` on `#4A544F`, and `#F1E8F7` on `#6B2E8F`.
+from `#badge-and-chip-tones` instead. The tokens that tone derives from replace these fills
+and inks:
+
+- `#E3F1EC` on `#0E5E50`.
+- `#FDEBDD` on `#8A3A0F`.
+- `#FBE4E2` on `#9A1C12`.
+- `#E6EDFA` on `#1D4AA8`.
+- `#EEF0EC` on `#4A544F`.
+- `#F1E8F7` on `#6B2E8F`.
 
 | Board pill | Tone |
 |---|---|
