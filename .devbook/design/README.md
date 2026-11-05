@@ -8,7 +8,8 @@ related: [.devbook/arc42/02-constraints.md#technical-constraints, .devbook/arc42
 > `.devbook/design/` holds the UX and visual design guidelines for Finance: how the product
 > looks and behaves for the one person who uses it. It complements `.devbook/arc42/`, which
 > says how Finance is built, and `.devbook/domain/`, which says what Finance is about. This
-> folder holds guidelines only. Wireframes, user flows, and prototypes live outside it.
+> folder holds guidelines, the demo template, and one product demo. Wireframes, user flows,
+> and other prototypes live outside it.
 
 ## Purpose
 
@@ -41,10 +42,8 @@ them.
 
 | # | Principle | What it means | Detailed in |
 |---|---|---|---|
-| 1 | **Dark mode only** | There is no light theme and no theme toggle, as in Backlog. | `design-principles.md#dark-mode-only`, `color-scheme.md` |
+| 1 | **One light theme** | The Finance App Design's light theme, with a dark navigation sidebar. There is no dark theme and no theme toggle. | `design-principles.md#one-light-theme`, `color-scheme.md` |
 | 2 | **No save buttons** | Every edit saves automatically. There is no Save affordance anywhere. A save-state indicator says what has been written. | `interaction-guidelines.md#auto-save` |
-
-- **Dark mode only:** Every palette, contrast, and elevation rule is written for dark surfaces only.
 
 ## How to Use This Folder
 
@@ -68,15 +67,21 @@ them.
 
 | File | Scope |
 |---|---|
-| [`design-principles.md`](design-principles.md) | Product-level UX principles: dark mode only, local-first UX, no save buttons, keyboard-first, low chrome, exact amounts. |
-| [`color-scheme.md`](color-scheme.md) | Colour tokens, contrast, elevation, token mapping, the Finance App Design's colours, and the app icon. |
-| [`typography-and-layout.md`](typography-and-layout.md) | Type, spacing, density, layout, radius, shadows, z-index, iconography, metadata lines, amounts, and the Finance App Design mapping. |
-| [`interaction-guidelines.md`](interaction-guidelines.md) | Auto-save, undo, keyboard-accessible reordering, amount entry, feedback, motion, focus, selection, and empty, loading, and error states. |
+| [`design-principles.md`](design-principles.md) | Product-level UX principles: one light theme, local-first UX, no save buttons, keyboard-first, low chrome, exact amounts. |
+| [`color-scheme.md`](color-scheme.md) | The Finance App Design's light palette and sidebar tokens, amount and change tokens, badge pills, chart roles, measured contrast and its known gaps, elevation, the token mapping, the board-to-token mapping, the icon's brand ramp, and the app icon. |
+| [`typography-and-layout.md`](typography-and-layout.md) | Fonts, type scale, spacing, density, layout, radius, shadows, z-index, iconography, metadata lines, how amounts are set, and the Finance App Design's type and spacing. |
+| [`interaction-guidelines.md`](interaction-guidelines.md) | Auto-save, undo, reordering with keyboard equivalents, entering amounts, feedback, motion, focus and selection, and empty, loading, and error states. |
 | [`accessibility.md`](accessibility.md) | The WCAG 2.2 AA target, keyboard navigation, announcements, focus visibility, Windows contrast themes, reduced motion, and target sizes. |
 | [`component-libraries.md`](component-libraries.md) | The component-library recommendation for the desktop app, with a comparison and the known gaps. |
 
 [`demo-template.html`](demo-template.html) is the template every demo of a Finance screen is
 built on, styled by the tokens above. It is not a chapter and has no reading position.
+
+[`finance-app.demo.html`](finance-app.demo.html) is the Finance App Design as a click demo on
+that template: Kasboek's eleven screens in the tokens above, with a flat and a grouped
+navigation variant. Its names, dates, quantities, and figures are made up at a real ledger's
+density, so its totals do not add up. It is not a chapter either; the Provenance chapter names
+it.
 
 The app icon's source files sit in [`assets/`](assets/): `app-icon-background.svg` and
 `app-icon-foreground.svg` are the two layers the app builds from, and `app-icon.svg` is the
@@ -85,6 +90,7 @@ two composed into one picture.
 ## Provenance
 
 ```meta
+demo: [.devbook/design/finance-app.demo.html]
 ```
 
 This design system is adapted from the design folder of Backlog, the sibling desktop app by
@@ -111,13 +117,9 @@ Backlog, so they went too:
 Backlog's `content-editing.md` had nothing left once its Markdown editor was removed, so
 Finance has no such file.
 
-Finance is dark mode only, like Backlog. The user decided this on 2026-10-06, after a draft
-with a light theme as well.
-
-One change goes beyond the brief. Backlog's `color-border` measures 2.49:1 and misses the
-3:1 a control boundary needs. Finance's border tokens pass, and a separate `color-divider`
-token carries the decorative lines that need no contrast. See
-`color-scheme.md#why-these-values`.
+Finance started dark mode only, like Backlog, by the user's decision of 2026-10-06. On
+2026-10-22 the user made the Finance App Design leading, and its light theme replaced the dark
+one. Backlog's token names and rules stayed; the values are the design's.
 
 There is no sync back to Backlog. A change here is a change to Finance's design language
 alone.
@@ -144,26 +146,21 @@ with the tokens here, and every value the boards use was given a token:
 - **Type** follows the artifact: Hanken Grotesk and IBM Plex Mono replace Backlog's fonts,
   and the heading ramp is the artifact's compact one.
 - **Spacing and radius** map onto the existing scales, with one added step, `spacing-ms`.
-- **Colour** is translated by role. The boards are drawn light, and Finance is dark mode
-  only, so the artifact's light values are never painted. Two foregrounds and four chart
-  roles were added for the blue and orange the boards use.
+- **Colour** is the boards' own. Since 2026-10-22 every token holds the board value it maps
+  to, the dark navigation sidebar has tokens of its own, and the pills keep their fills and
+  inks.
 
 Each value and the token it lands on is listed in `color-scheme.md#finance-app-design-mapping`
-and `typography-and-layout.md#finance-app-design-mapping`. The artifact wins on type, spacing,
-radius, and which roles exist; this folder wins on the theme.
+and `typography-and-layout.md#finance-app-design-mapping`. The artifact leads: where it and a
+rule here disagree, the rule changes. Where the artifact misses an accessibility threshold,
+`color-scheme.md#contrast-rules` records the gap for the user to settle.
 
-## Status Vocabulary
+## Metadata
 
 ```meta
 ```
 
-Files and chapters here use `status: draft | active | deprecated`. `draft` means written but
-not yet agreed. `active` means current and binding. `deprecated` means superseded and kept
-for history. Metadata follows `.agents/rules/devbook-chapter-metadata.md` and
-`.agents/rules/devbook-design.md`.
-
-`active` is the resting value, so an agreed chapter leaves the `status` field out. The rules
-carried over from Backlog are written that way. Everything new to Finance carries
-`status: draft` until the user has reviewed it: the palette, the amount rules, and the app
-icon. The dark-mode rule is Backlog's and the user's decision, so it is not a draft. The empty `meta` fence under a heading stays, because it is what
-makes the heading an addressable chapter.
+Metadata follows `.agents/rules/devbook-chapter-metadata.md` and
+`.agents/rules/devbook-design.md`. A merged chapter is in force and carries no `status`. The
+empty `meta` fence under a heading stays, because it is what makes the heading an addressable
+chapter.

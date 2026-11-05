@@ -239,15 +239,14 @@ Interactive controls use `border-radius-md`. Focus rings and selected states use
 related: [.devbook/design/color-scheme.md#elevation-by-color]
 ```
 
-Elevation is shown mainly by surface colour (see `color-scheme.md#elevation-by-color`).
-Shadows are secondary and MUST be about 30% less opaque than the raw values below on the
-dark surfaces.
+Cards are flat, per `color-scheme.md#elevation-by-color`. A shadow marks only a surface that
+floats above the page, and takes these values as written.
 
 | Token | Value | Usage |
 |---|---|---|
 | `shadow-none` | none | Flat surfaces |
 | `shadow-sm` | 0 1px 2px rgba(0,0,0,0.05) | Subtle lift: inputs, inline chips |
-| `shadow-md` | 0 4px 6px rgba(0,0,0,0.10) | Default card elevation |
+| `shadow-md` | 0 4px 6px rgba(0,0,0,0.10) | A dragged row or card while it moves |
 | `shadow-lg` | 0 10px 15px rgba(0,0,0,0.15) | Dropdowns, popovers |
 | `shadow-xl` | 0 20px 25px rgba(0,0,0,0.20) | Modals, drawers, toasts |
 | `shadow-inner` | inset 0 2px 4px rgba(0,0,0,0.06) | Pressed states, inset inputs |

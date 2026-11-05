@@ -18,16 +18,13 @@ related: [.devbook/arc42/04-solution-strategy.md#local-first-desktop-application
 
 | # | Criterion | Why it matters |
 |---|---|---|
-| C1 | Dark mode only | Finance ships one dark theme, so a library must theme cleanly to dark. See `design-principles.md#dark-mode-only`. |
-| C2 | Theming through CSS custom properties | A library's own palette needs overriding everywhere. See `color-scheme.md#per-stack-token-mapping`. |
+| C1 | One light theme | Finance ships one light theme, the Finance App Design's, with a dark sidebar. A library must take the light tokens without a dark default to undo. See `design-principles.md#one-light-theme`. |
+| C2 | Theming through CSS custom properties | The tokens are CSS custom properties. A library that keeps its own palette has to be overridden everywhere. See `color-scheme.md#per-stack-token-mapping`. |
 | C3 | Data tables and amounts | Money is shown in columns that must right-align tabular figures. See `typography-and-layout.md#amounts`. |
 | C4 | Accessible reorder | Reordering needs a keyboard path. See `interaction-guidelines.md#keyboard-accessible-reordering`. |
 | C5 | Accessibility (WCAG 2.2 AA) | Semantics, focus, and announcements must be right. See `accessibility.md`. |
 | C6 | Maintenance, license, offline | Prefer maintained, permissively licensed packages whose assets ship inside the app, because Finance works offline. |
 | C7 | Charts | Overviews of money over time are likely, and a chart must follow `color-scheme.md#chart-roles`. |
-
-- **C1:** Theming to dark must not mean fighting a built-in light default.
-- **C2:** The tokens are CSS custom properties.
 
 ## Key Finding
 
@@ -73,15 +70,15 @@ with a visible fallback when it fails.
 
 Rating: ✔ strong · ◑ partial or with work · ✘ weak or absent · — not applicable.
 
-| Candidate | Role | C1 Dark only | C2 CSS tokens | C3 Tables | C4 Reorder | C5 A11y | C6 Maintenance and license |
+| Candidate | Role | C1 Light theme | C2 CSS tokens | C3 Tables | C4 Reorder | C5 A11y | C6 Maintenance and license |
 |---|---|---|---|---|---|---|---|
 | **First-party Razor class library** | Base controls | ✔ | ✔ | ◑ (with QuickGrid) | ◑ (built by hand) | ◑ (built by hand) | ✔ (ours) |
 | **QuickGrid** | Tables | ✔ (unstyled) | ✔ | ✔ | — | ◑ (semantic table, no cell navigation) | ✔ MIT, first-party |
 | **FluentUI-Blazor** | Base controls | ✔ | ◑ (Fluent tokens to map) | ✔ (data grid) | ◑ | ✔ | ✔ MIT |
 | **MudBlazor** | Base controls | ✔ (`MudTheme`) | ◑ (Material palette to map) | ✔ (data grid) | ◑ (drop container, drag events) | ◑ | ✔ MIT |
-| **Radzen Blazor** | Base controls, charts | ◑ | ◑ | ✔ (data grid) | ◑ | ◑ | ✔ MIT |
+| **Radzen Blazor** | Base controls, charts | ✔ | ◑ | ✔ (data grid) | ◑ | ◑ | ✔ MIT |
 | **Apache ECharts** | Charts | ✔ (theme objects) | ◑ (values passed from tokens) | — | — | ◑ (`aria` option, needs a text alternative) | ✔ Apache-2.0 |
-| **Chart.js** | Charts | ◑ | ◑ | — | — | ✘ (canvas, no built-in description) | ✔ MIT |
+| **Chart.js** | Charts | ✔ | ◑ | — | — | ✘ (canvas, no built-in description) | ✔ MIT |
 
 The ratings for the third-party suites are a judgement from their documentation and from
 Backlog's evaluation. None was tried in Finance.
@@ -96,9 +93,7 @@ Backlog's evaluation. None was tried in Finance.
 | A first-party library inherits no accessibility work | Keyboard support, focus order, and announcements are all Finance's own work | Test them: Playwright with axe, per `accessibility.md#verification`. |
 | QuickGrid has no cell navigation | A keyboard user can tab to a row's controls but cannot move cell by cell | Add arrow-key navigation in the table component, or accept row-level navigation and record it. |
 | Chart libraries are canvas-based | A canvas exposes nothing to a screen reader | Every chart has the same figures as a table or text, per `accessibility.md#amount-announcements`. |
-| Assets fetched from a CDN | Breaks offline use, and tells a third party when Finance is used | Vendor every asset into `wwwroot`. Finance MUST NOT repeat Backlog's CDN gap. |
-| Two apps, two copies of one library | Backlog and Finance would each keep a near-identical set of components | `[TODO: clarify]` Whether Finance reuses Backlog's `Backlog.UI.Components` or keeps its own `Finance.UI`. |
+| Assets fetched from a CDN | Breaks offline use, and tells a third party when Finance is used | Vendor every asset into `wwwroot`. Backlog shipped Mermaid from a CDN and recorded it as a gap; Finance MUST NOT. |
+| Two apps, two copies of one library | Backlog and Finance would each keep a near-identical set of components | `[TODO: clarify]` Whether Finance reuses Backlog's `Backlog.UI.Components`, for example as a shared package with Finance's token values, or keeps its own `Finance.UI`. Sharing saves work, but Backlog is dark and Finance light, so only the components would be shared, not the stylesheet. It also couples Finance's releases to Backlog's. |
 | Number formatting spread across components | Two components format the same amount differently | One amount formatter in the UI library, per `typography-and-layout.md#amounts`. |
 
-- **Assets fetched from a CDN:** Backlog shipped Mermaid from a CDN and recorded it as a gap.
-- **Two apps, two copies of one library:** Reuse could be a shared package with Finance's token values. Sharing saves work, and both apps are dark only. It also couples Finance's releases to Backlog's.
