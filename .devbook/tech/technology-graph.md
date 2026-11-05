@@ -5,8 +5,8 @@ rating: candidate
 index: root
 ```
 
-Everything this repository builds with, one chapter per technology in the layer files; this
-file is the map. The stack is .NET with Aspire orchestration; nothing is registered until
+This file is the map of everything this repository builds with, and the layer files hold one
+chapter per technology. The stack is .NET with Aspire orchestration. Nothing is registered until
 the first project exists and `.devbook/_tools/devbook-tech/dotnet-packages.mjs` has an
 inventory to read.
 

@@ -48,13 +48,22 @@ flowchart LR
   class plans,tokens trial;
 ```
 
-Seven usages are recorded. Five are `candidate`: the 1.19 update on 2026-10-06 wired the
-delivery flows, the repository's procedures, and a schedule selection, the 1.25 update on
-2026-10-13 created the six routines that selection names, devbook ships the scenario page
-skills and their tools, refreshed by the 1.26 update on 2026-10-15, and the 1.28 update on
-2026-10-21 set up the OpenSpec change lane. Nobody works through any of them yet. Two are `trial`: since 2026-10-21 the `finance-setup` plan's entries are run here
-from the Backlog app, and one of them turned the Finance App Design artifact into `design/` tokens. `build`, `release`, and `deploy` are empty, and that is the finding, not a gap to fill
-with a tool name.
+Seven usages are recorded. Five are `candidate`, and nobody works through any of them yet:
+
+- The 1.19 update on 2026-10-06 wired the delivery flows, the repository's procedures, and a
+  schedule selection.
+- The 1.25 update on 2026-10-13 created the six routines that selection names.
+- devbook ships the scenario page skills and their tools, refreshed by the 1.26 update on
+  2026-10-15.
+- The 1.28 update on 2026-10-21 set up the OpenSpec change lane.
+
+Two are `trial`:
+
+- Since 2026-10-21 the `finance-setup` plan's entries are run here from the Backlog app.
+- One of those entries turned the Finance App Design artifact into `design/` tokens.
+
+`build`, `release`, and `deploy` are empty, and that is the finding, not a gap to fill with a
+tool name.
 
 ## Status ladder
 

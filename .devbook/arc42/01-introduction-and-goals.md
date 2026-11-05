@@ -46,7 +46,7 @@ The top quality goals, in priority order:
 | # | Quality goal | Motivation |
 | --- | --- | --- |
 | 1 | Local-first availability | Every workflow works offline. No network call stands between the user and their records. |
-| 2 | Data ownership and durability | The records are readable JSON in a folder the user controls. A crash or a failed write never corrupts them. |
+| 2 | Data ownership and durability | Records are readable JSON the user controls. A crash or failed write never corrupts them. |
 | 3 | Privacy | Financial data goes nowhere but the user's own disk and their own OneDrive. |
 | 4 | Testability | The whole application starts from one Aspire command and can be driven end to end by Playwright. |
 | 5 | Low operating cost | There is nothing to host, pay for, or keep running besides the desktop application. |
@@ -60,5 +60,5 @@ The top quality goals, in priority order:
 
 | Name | Concern |
 | --- | --- |
-| ME | The single user and owner of Finance. Wants a reliable, private overview of their own finances on their own PCs. |
+| ME | The single user and owner. Wants a reliable, private overview of their finances on their own PCs. |
 | Developer | The same person, working on Finance. Wants one command to start it and an end-to-end test path. |

@@ -3,7 +3,7 @@
 ```meta
 ```
 
-These concepts apply across every building block and are handled the same way everywhere.
+Every building block handles these concepts the same way.
 
 ## Persistence
 
@@ -60,8 +60,15 @@ related: [.devbook/arc42/adr/desktop-stack.md, .devbook/arc42/adr/styling.md, .d
 Finance's UI is Razor components in `Finance.UI`, rendered by Blazor Hybrid inside WebView2, as
 [the desktop stack record](adr/desktop-stack.md) sets out. These conventions follow the
 organization's
-[Blazor guidance](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/recommendations/blazor-frontend-framework-guidance.md),
-less everything about web APIs, server hosting, authentication, and HTTP caching.
+[Blazor guidance](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/recommendations/blazor-frontend-framework-guidance.md).
+Finance leaves out that guidance's parts on these topics:
+
+- web APIs
+- server hosting
+- authentication
+- HTTP caching
+
+The conventions are:
 
 - **Structure by feature.** `Finance.UI` groups its files per feature, not per technical type.
   A page is the composition root of its feature, and reusable visual parts sit in that
@@ -113,10 +120,9 @@ never depends on layout or wording.
 These conventions follow the organization's
 [shared testing guidance](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/recommendations/testing-shared.md):
 
-- **Layout.** Production projects sit under `src/` and tests under `tests/`:
-  `Finance.UnitTests`, `Finance.IntegrationTests`, `Finance.E2ETests`, and
-  `Finance.ArchitectureTests`. CI runs them in that order of cost: unit, integration,
-  architecture, then end to end.
+- **Layout.** Production projects sit under `src/` and tests under `tests/`. CI runs the test
+  projects by cost, cheapest first: `Finance.UnitTests` → `Finance.IntegrationTests` →
+  `Finance.ArchitectureTests` → `Finance.E2ETests`.
 - **Shape.** Every test marks its `// Arrange`, `// Act`, and `// Assert` sections, and acts
   once. A unit test is named `Should_ExpectedBehavior_When_StateUnderTest`, an integration
   test `Scenario_ShouldOutcome_WhenCondition`, and an architecture test

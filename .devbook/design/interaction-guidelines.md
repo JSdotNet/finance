@@ -4,11 +4,18 @@
 related: [.devbook/design/design-principles.md#no-save-buttons, .devbook/design/accessibility.md, .devbook/arc42/08-crosscutting-concepts.md#persistence]
 ```
 
-> Binding interaction rules for Finance: auto-save, undo, reordering with keyboard
-> equivalents, entering amounts, feedback, motion, focus and selection, and the empty,
-> loading, and error states. Adapted from Backlog's `interaction-guidelines.md`, which drew
-> on the JSdotNet design style guide. Token names are declared in `color-scheme.md` and
-> `typography-and-layout.md`.
+> Binding interaction rules for Finance, adapted from Backlog's `interaction-guidelines.md`,
+> which drew on the JSdotNet design style guide. They cover:
+>
+> - Auto-save.
+> - Undo.
+> - Reordering with keyboard equivalents.
+> - Entering amounts.
+> - Feedback and motion.
+> - Focus and selection.
+> - The empty, loading, and error states.
+>
+> Token names are declared in `color-scheme.md` and `typography-and-layout.md`.
 
 ## Auto-Save
 
@@ -41,11 +48,15 @@ shows each state in the vocabulary below.
 | Rule | Requirement |
 |---|---|
 | No save affordance | There MUST NOT be a Save button, menu item, or save-only keyboard gesture. |
-| Text debounce | Continuous text edits MUST save on a debounce of 500 to 1000 ms after the last keystroke. The default is 750 ms. |
+| Text debounce | Continuous text edits MUST save on a debounce of 500 to 1000 ms after the last keystroke. |
+| Debounce default | The default debounce is 750 ms. |
 | Blur flush | A pending save MUST be written at once on blur, on navigation away, and when the window closes. |
-| Discrete changes | A discrete change, such as a reorder, a toggle, or a picked value, MUST save at once with no debounce. |
-| No stuck state | A save that has not finished within about 5 seconds MUST move to `Failed` with a retry, rather than show `Saving` forever. |
+| Discrete changes | A discrete change MUST save at once with no debounce. |
+| No stuck state | A save unfinished after about 5 seconds MUST move to `Failed` with a retry. |
 | Order | The UI updates first, then the file is written. Editing MUST NOT wait for the write. |
+
+- **Discrete changes:** Examples are a reorder, a toggle, and a picked value.
+- **No stuck state:** `Saving` never stays on screen forever.
 
 ### Optimistic UI
 
@@ -56,7 +67,8 @@ shows each state in the vocabulary below.
 |---|---|
 | Immediate | The UI MUST show the change at once, before the file write completes. |
 | Non-blocking | A save MUST NOT block typing, navigation, or further edits. |
-| Failure | If a write fails, the change MUST be visibly flagged or rolled back, never dropped quietly, and the indicator MUST show `Failed`. |
+| Failure | If a write fails, the change MUST be visibly flagged or rolled back, never dropped quietly. |
+| Failure indicator | On a failed write the indicator MUST show `Failed`. |
 
 ### Save-State Indicator Vocabulary
 
@@ -89,7 +101,9 @@ Rules:
 |---|---|
 | Undo available | With no save gate, undo (Ctrl+Z) and redo (Ctrl+Y or Ctrl+Shift+Z) MUST be available for edits and reorders. |
 | Single steps | A reorder MUST be one undo step. Rapid keystrokes SHOULD coalesce into sensible steps. |
-| Destructive actions | Deleting a record MUST be undoable, at least for the session, and the toast that confirms it MUST offer Undo. A delete with no undo MUST ask for confirmation first. |
+| Destructive actions | Deleting a record MUST be undoable, at least for the session. |
+| Delete toast | The toast that confirms a delete MUST offer Undo. |
+| Delete without undo | A delete with no undo MUST ask for confirmation first. |
 | Longer history | Browsing older versions is a product feature. `[TODO: clarify]` Whether Finance offers it. Session-level undo is the minimum. |
 
 ### Changes from Another PC
@@ -105,7 +119,8 @@ is the one below.
 
 | Rule | Requirement |
 |---|---|
-| Never silent | When Finance reloads a record because its file changed on disk, the user MUST be told in a passive notice, never by a blocking dialog. |
+| Never silent | When Finance reloads a record because its file changed on disk, it MUST tell the user. |
+| Notice form | The notice MUST be passive, never a blocking dialog. |
 | No lost edit | An unsaved local edit MUST NOT be overwritten without the user seeing it. |
 
 ## Drag-and-Drop Reordering
@@ -124,7 +139,8 @@ drag has a keyboard equivalent.
 
 | Rule | Requirement |
 |---|---|
-| Visible handle | Each reorderable row MUST expose a drag handle, the `grip-vertical` icon at `icon-md`. On dense rows the handle MAY appear on hover or focus, but MUST be reachable by keyboard. |
+| Visible handle | Each reorderable row MUST expose a drag handle, the `grip-vertical` icon at `icon-md`. |
+| Dense rows | On dense rows the handle MAY appear on hover or focus, but MUST be reachable by keyboard. |
 | Cursor | A pointer over a handle shows a grab cursor, and grabbing while dragging. |
 | Lift | On drag start, the item lifts with `shadow-lg` and a `color-background-alt` tint. |
 | Handle target | The handle MUST meet the 44 × 44 px target. |
@@ -138,7 +154,9 @@ drag has a keyboard equivalent.
 |---|---|
 | Insertion line | During a drag, an insertion line MUST show the exact drop position, drawn in `color-primary` at `border-width-2`. |
 | Invalid targets | An invalid target MUST show a not-allowed cursor and no insertion line. |
-| Row-wide targets | While a drag runs, each row MUST expose a drop target across its full width, split into a "before" half and an "after" half. The handle starts the drag, and the whole row catches the drop. |
+| Row-wide targets | While a drag runs, each row MUST expose a drop target across its full width. |
+| Before and after | The drop target is split into a "before" half and an "after" half. |
+| Handle and row | The handle starts the drag, and the whole row catches the drop. |
 
 ### Keyboard-Accessible Reordering
 
@@ -149,8 +167,12 @@ Drag-and-drop alone is not accessible, so a keyboard path is mandatory.
 
 | Rule | Requirement |
 |---|---|
-| Grab and move | Focus the handle or row and press Space or Enter to pick it up, Arrow Up or Down to move it, Space or Enter to drop, and Escape to cancel. |
-| Direct moves | Alt+Arrow Up and Alt+Arrow Down move the focused row one place without picking it up. Move to top and Move to bottom are also in the row's context menu. |
+| Pick up | Focus the handle or row and press Space or Enter to pick it up. |
+| Move | Press Arrow Up or Down to move the picked-up row. |
+| Drop | Press Space or Enter to drop it. |
+| Cancel | Press Escape to cancel. |
+| Direct moves | Alt+Arrow Up and Alt+Arrow Down move the focused row one place without picking it up. |
+| Context menu | Move to top and Move to bottom are also in the row's context menu. |
 | Announcements | Every keyboard move MUST announce the new position through a live region. See `accessibility.md#reorder-announcements`. |
 | Focus | After a keyboard move, focus MUST stay on the moved row. |
 | Parity | Anything a drag can do, the keyboard MUST be able to do. |
@@ -162,7 +184,8 @@ Drag-and-drop alone is not accessible, so a keyboard path is mandatory.
 
 | Rule | Requirement |
 |---|---|
-| Edge autoscroll | Dragging near the top or bottom edge of a scrollable list MUST scroll it toward that edge at a bounded speed. |
+| Edge autoscroll | Dragging near the top or bottom edge of a scrollable list MUST scroll it toward that edge. |
+| Autoscroll speed | The autoscroll speed MUST be bounded. |
 | Keyboard scroll | A keyboard move MUST keep the moved row in view. |
 | Saves at once | A finished reorder is a discrete change and MUST save immediately. |
 | Failure | If the save fails, the order MUST visibly revert and the indicator MUST show `Failed`. |
@@ -178,13 +201,24 @@ amount format.
 
 | Rule | Requirement |
 |---|---|
-| Plain text input | An amount field MUST be a text input with `inputmode="decimal"`, not a number input with spinner buttons. Spinners change money by accident on a scroll. |
-| Both separators | The field MUST accept both a comma and a full stop as the decimal separator, and ignore thousands separators and spaces. |
-| Format on blur | On blur, the field MUST reformat its value to the format in `typography-and-layout.md#amounts`. While focused, it MUST NOT reformat under the caret. |
+| Plain text input | An amount field MUST be a text input with `inputmode="decimal"`, not a number input with spinner buttons. |
+| Both separators | The field MUST accept both a comma and a full stop as the decimal separator. |
+| Ignored characters | The field MUST ignore thousands separators and spaces. |
+| Format on blur | On blur, the field MUST reformat its value to the format in `typography-and-layout.md#amounts`. |
+| No reformat under the caret | While focused, the field MUST NOT reformat under the caret. |
 | Right-aligned | The value in an amount field MUST be right-aligned and use `font-variant-amount`. |
-| Direction is explicit | Where an amount has a direction, the field MUST make it a separate, labelled choice (money in or money out), not a minus sign the user must remember to type. |
-| Validation | An invalid value MUST show an inline error below the field, in `color-error-text` with the `x-circle` icon and text, linked through `aria-describedby`. The last valid value stays saved. |
-| Precision | The field MUST NOT accept more than two decimals. It MUST NOT round a typed value silently. It refuses the third decimal and says why. |
+| Direction is explicit | Where an amount has a direction, the field MUST make it a separate, labelled choice. |
+| Direction choices | The choice is money in or money out. |
+| No typed minus | The user MUST NOT have to remember to type a minus sign. |
+| Validation | An invalid value MUST show an inline error below the field. |
+| Error style | The error uses `color-error-text` with the `x-circle` icon and text. |
+| Error link | The error links to the field through `aria-describedby`. |
+| Last valid value | The last valid value stays saved. |
+| Precision | The field MUST NOT accept more than two decimals. |
+| No silent rounding | The field MUST NOT round a typed value silently. |
+| Third decimal | The field refuses the third decimal and says why. |
+
+- **Plain text input:** Spinners change money by accident on a scroll.
 
 ## Feedback and Toasts
 
@@ -247,12 +281,19 @@ related: [.devbook/design/accessibility.md#focus-visibility, .devbook/design/des
 
 | Rule | Requirement |
 |---|---|
-| Visible focus | Keyboard focus MUST use a `color-border-focus` outline at `border-width-2` with a 2 px offset. Use `outline`, which survives Windows contrast themes. |
-| Logical order | Focus order MUST follow reading order. Modals and drawers trap focus and return it to their trigger on close. |
-| Selection differs from focus | A selected row uses a `color-primary-subtle` background and a `color-primary` stripe at `border-width-4` on its leading edge. Selection MUST look different from hover and from focus. |
-| Multi-select | Bulk selection shows a bar with a live count ("3 selected") and a control to clear it. "Select all" shows the indeterminate state for a partial selection. |
-| Entering multi-select | A list MUST NOT show selection checkboxes until the user asks for them with a Select toggle. Hover or focus alone is not asking. |
-| Leaving multi-select | Escape leaves selection mode from the toggle, the bulk bar, or any row, unless a control in focus owns Escape for something of its own. |
+| Visible focus | Keyboard focus MUST use a `color-border-focus` outline at `border-width-2` with a 2 px offset. |
+| Outline property | Use `outline`, which survives Windows contrast themes. |
+| Logical order | Focus order MUST follow reading order. |
+| Modal focus | Modals and drawers trap focus and return it to their trigger on close. |
+| Selected row | A selected row uses a `color-primary-subtle` background. |
+| Selected stripe | A selected row has a `color-primary` stripe at `border-width-4` on its leading edge. |
+| Selection differs from focus | Selection MUST look different from hover and from focus. |
+| Multi-select | Bulk selection shows a bar with a live count ("3 selected") and a control to clear it. |
+| Select all | "Select all" shows the indeterminate state for a partial selection. |
+| Entering multi-select | A list MUST NOT show selection checkboxes until the user asks for them with a Select toggle. |
+| Hover is not asking | Hover or focus alone is not asking. |
+| Leaving multi-select | Escape leaves selection mode from the toggle, the bulk bar, or any row. |
+| Escape exception | A focused control that owns Escape for something of its own keeps it. |
 
 ## Group Shape Says Cardinality
 
@@ -265,11 +306,16 @@ many options can be on at once, before the user presses anything.
 
 | Rule | Requirement |
 |---|---|
-| Fused means several | A group whose options can be on together MUST draw its members flush inside one border, with hairlines between them. |
-| Loose means one | A group whose options are exclusive MUST draw its members as separate bordered controls with a gap between them. |
-| Alone means on or off | A control that is simply on or off and belongs to no set MUST stand alone, outside any fused group. |
+| Fused means several | A group whose options can be on together MUST draw its members flush inside one border. |
+| Fused hairlines | A fused group MUST draw hairlines between its members. |
+| Loose means one | A group whose options are exclusive MUST draw its members as separate bordered controls. |
+| Loose gap | A loose group MUST leave a gap between its members. |
+| Alone means on or off | A control that is simply on or off and belongs to no set MUST stand alone. |
+| Outside fused groups | A stand-alone control MUST sit outside any fused group. |
 | Still one group | A loose group is still one `role="group"` with one label and one tab sequence. Only the drawing changes. |
-| Selected state | A fused option shows its selected state as an underline on the shared bottom edge. A loose option shows it on its own border. Neither relies on colour alone. |
+| Fused selected state | A fused option shows its selected state as an underline on the shared bottom edge. |
+| Loose selected state | A loose option shows its selected state on its own border. |
+| Not colour alone | Neither shape relies on colour alone. |
 
 ## Empty, Loading, and Error States
 
@@ -285,7 +331,8 @@ many options can be on at once, before the user presses anything.
 |---|---|
 | Structure | An `icon-xl` illustration, a one-line explanation, and a primary action when the user can act. |
 | Variants | First use (an action to create), no results (Clear filters), error (Try again), and complete (no action needed). |
-| Title | The title is a short fragment with no full stop, such as "No records yet". A full sentence goes in the description. |
+| Title | The title is a short fragment with no full stop, such as "No records yet". |
+| Description | A full sentence goes in the description. |
 | Copy | Calm, plain copy with no dead ends. |
 
 ### Loading States
@@ -296,10 +343,15 @@ many options can be on at once, before the user presses anything.
 | Rule | Requirement |
 |---|---|
 | Local is fast | The data is local, so most views SHOULD render at once. A loading state is the exception. |
-| Skeletons | Use content-shaped skeletons for lists, cards, and tables. They pulse every 2 seconds, stop under reduced motion, and fall back to an error after about 10 seconds. |
+| Skeletons | Use content-shaped skeletons for lists, cards, and tables. |
+| Skeleton pulse | Skeletons pulse every 2 seconds and stop under reduced motion. |
+| Skeleton timeout | Skeletons fall back to an error after about 10 seconds. |
 | Spinner | Use a spinner for an action the user started, never as a placeholder where a skeleton fits. |
-| Refresh | When refreshing a view that already shows data, keep the data visible and show an `icon-sm` spinner in the header. |
-| No placeholder amounts | While loading, an amount MUST show a skeleton, never `€ 0,00`. A zero that is really "not loaded" is a wrong figure. |
+| Refresh | When refreshing a view that already shows data, keep the data visible. |
+| Refresh spinner | Show an `icon-sm` spinner in the header while refreshing. |
+| No placeholder amounts | While loading, an amount MUST show a skeleton, never `€ 0,00`. |
+
+- **No placeholder amounts:** A zero that is really "not loaded" is a wrong figure.
 
 ### Error States
 
@@ -312,4 +364,6 @@ many options can be on at once, before the user presses anything.
 | Section | One part fails | An inline error card in that section. |
 | Action | An action fails | An error toast, and the control returns to a state where the user can retry. |
 | Field | Validation | An inline error below the field, linked through `aria-describedby`, with colour, text, and an icon. |
-| Unreadable file | A data file cannot be read | A page or section error that names the file and says the data is untouched. Finance MUST NOT overwrite a file it could not read. |
+| Unreadable file | A data file cannot be read | A page or section error that names the file and says the data is untouched. |
+
+- **Unreadable file:** Finance MUST NOT overwrite a file it could not read.

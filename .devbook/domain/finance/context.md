@@ -39,7 +39,7 @@ Because there is only ever one user, the model does not record who made a change
 
 | Depends on (context/module) | DDD pattern | Integration mechanism | Contract | Why |
 |---|---|---|---|---|
-| External API (anticipated, not designed) | ACL | Not designed | None yet | The app is expected to call an external API at some point. Which API, and what Finance needs from it, is open. |
+| External API (anticipated, not designed) | ACL | Not designed | None yet | Finance expects to call one at some point. Which API, and what it needs, is open. |
 
 ### Inbound dependents (known)
 

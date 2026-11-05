@@ -23,16 +23,21 @@ toggle.
 | Rule | Requirement |
 |---|---|
 | Single theme | Finance MUST render only the dark palette defined in `color-scheme.md`. |
-| No toggle | There MUST NOT be a light or dark switch anywhere in settings or chrome. Finance does not follow the Windows app mode. |
-| No light assumptions | Components MUST NOT hard-code white fills, black text, or any other light-theme colour. They MUST reference palette token names. |
-| Media | Images and charts MUST be authored for dark surfaces, with no glaring white blocks. A chart takes its colours from `color-scheme.md#chart-roles`. |
+| No toggle | There MUST NOT be a light or dark switch anywhere in settings or chrome. |
+| Windows app mode | Finance does not follow the Windows app mode. |
+| No light assumptions | Components MUST NOT hard-code white fills, black text, or any other light-theme colour. |
+| Palette token names | Components MUST reference palette token names. |
+| Media | Images and charts MUST be authored for dark surfaces, with no glaring white blocks. |
+| Chart colours | A chart takes its colours from `color-scheme.md#chart-roles`. |
 | Elevation by colour | Elevation MUST be shown mainly by raised surface tokens, not heavy shadows. See `color-scheme.md#elevation-by-color`. |
 
-Rationale: one dark surface is easy on the eyes in long sessions, and a single theme removes
-a whole class of theming bugs. It also keeps Finance's design language identical to
-Backlog's, which was the user's brief. Windows contrast themes still apply, because they are
-an accessibility setting rather than a theme choice. See
-`accessibility.md#windows-contrast-themes`.
+**Why:** One dark surface is easy on the eyes in long sessions, and a single theme removes
+a whole class of theming bugs.
+
+- A single theme also keeps Finance's design language identical to Backlog's, which was the
+  user's brief.
+- Windows contrast themes still apply, because they are an accessibility setting rather than
+  a theme choice. See `accessibility.md#windows-contrast-themes`.
 
 ## Local-First UX
 
@@ -46,9 +51,11 @@ workflow needs a network.
 | Rule | Requirement |
 |---|---|
 | Never gate on network | Every workflow MUST work with no network connection. |
-| No sync state | Finance does not replicate data. OneDrive's own client does. Finance MUST NOT show a sync or online status of its own, because it would describe work Finance does not do. |
+| No sync state | Finance MUST NOT show a sync or online status of its own. |
 | Optimistic UI | An edit MUST show in the UI at once and be written to the local file straight after. |
 | No silent loss | A write that fails MUST be shown to the user and MUST NOT be dropped quietly. See `interaction-guidelines.md#optimistic-ui`. |
+
+- **No sync state:** Finance does not replicate data, and OneDrive's own client does. A sync status would describe work Finance does not do.
 
 ## No Save Buttons
 
@@ -90,7 +97,8 @@ The chrome recedes so the user's own figures are the main surface.
 
 | Rule | Requirement |
 |---|---|
-| Minimal persistent chrome | Toolbars and rails MUST be minimal. Prefer contextual and on-demand affordances over rows of buttons that are always visible. |
+| Minimal persistent chrome | Toolbars and rails MUST be minimal. |
+| Contextual affordances | Prefer contextual and on-demand affordances over always-visible rows of buttons. |
 | No redundant controls | Because there are no save buttons, toolbars MUST NOT bring back a save or commit affordance. |
 | Content contrast first | The highest-contrast text token, `color-text-primary`, is for content. Chrome uses `color-text-secondary`. |
 | Progressive disclosure | Advanced actions SHOULD appear on focus or through the command surface rather than permanently. |
@@ -107,7 +115,10 @@ the figures around it.
 
 | Rule | Requirement |
 |---|---|
-| Exact by default | An amount MUST be shown to the cent wherever it is the subject. A rounded figure, such as "€ 1.2k", MAY appear only where the exact one is one step away. |
-| Sign in text | Whether an amount is money in or money out MUST be readable from its sign alone. Colour adds to the sign and never replaces it. |
+| Exact by default | An amount MUST be shown to the cent wherever it is the subject. |
+| Rounded figure | A rounded figure, such as "€ 1.2k", MAY appear only where the exact one is one step away. |
+| Sign in text | Whether an amount is money in or money out MUST be readable from its sign alone. |
+| Colour | Colour adds to the sign and never replaces it. |
 | Comparable | Amounts in a column MUST line up digit under digit. See `typography-and-layout.md#amounts`. |
-| One format | Every amount in the product MUST use the one format in `typography-and-layout.md#amounts`. A component MUST NOT format money its own way. |
+| One format | Every amount in the product MUST use the one format in `typography-and-layout.md#amounts`. |
+| Own formatting | A component MUST NOT format money its own way. |
