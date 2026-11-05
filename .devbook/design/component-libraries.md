@@ -93,9 +93,7 @@ Backlog's evaluation. None was tried in Finance.
 | A first-party library inherits no accessibility work | Keyboard support, focus order, and announcements are all Finance's own work | Test them: Playwright with axe, per `accessibility.md#verification`. |
 | QuickGrid has no cell navigation | A keyboard user can tab to a row's controls but cannot move cell by cell | Add arrow-key navigation in the table component, or accept row-level navigation and record it. |
 | Chart libraries are canvas-based | A canvas exposes nothing to a screen reader | Every chart has the same figures as a table or text, per `accessibility.md#amount-announcements`. |
-| Assets fetched from a CDN | Breaks offline use, and tells a third party when Finance is used | Vendor every asset into `wwwroot`. Finance MUST NOT repeat Backlog's CDN gap. |
-| Two apps, two copies of one library | Backlog and Finance would each keep a near-identical set of components | `[TODO: clarify]` Whether Finance reuses Backlog's `Backlog.UI.Components` or keeps its own `Finance.UI`. |
+| Assets fetched from a CDN | Breaks offline use, and tells a third party when Finance is used | Vendor every asset into `wwwroot`. Backlog shipped Mermaid from a CDN and recorded it as a gap; Finance MUST NOT. |
+| Two apps, two copies of one library | Backlog and Finance would each keep a near-identical set of components | `[TODO: clarify]` Whether Finance reuses Backlog's `Backlog.UI.Components`, for example as a shared package with Finance's token values, or keeps its own `Finance.UI`. Sharing saves work, but Backlog is dark and Finance light, so only the components would be shared, not the stylesheet. It also couples Finance's releases to Backlog's. |
 | Number formatting spread across components | Two components format the same amount differently | One amount formatter in the UI library, per `typography-and-layout.md#amounts`. |
 
-- **Assets fetched from a CDN:** Backlog shipped Mermaid from a CDN and recorded it as a gap.
-- **Two apps, two copies of one library:** Reuse could be a shared package with Finance's token values. Sharing saves work, but Backlog is dark and Finance light, so only the components would be shared, not the stylesheet. It also couples Finance's releases to Backlog's.

@@ -12,7 +12,7 @@ Running the system and feeding what it shows back into planning: alerts, schedul
 ```meta
 rating: candidate
 type: workflow
-stage: [operate]
+layer: [upkeep]
 date: 2026-10-13
 ```
 

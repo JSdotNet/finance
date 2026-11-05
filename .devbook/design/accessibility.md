@@ -140,15 +140,13 @@ related: [.devbook/design/interaction-guidelines.md#focus-and-selection]
 | Rule | Requirement |
 |---|---|
 | Always visible | Keyboard focus MUST always be visible. `outline: none` without a compliant replacement is prohibited. |
-| Style | Focus uses a `color-border-focus` outline at `border-width-2` with a 2 px offset. Inside the navigation sidebar the outline is `color-nav-active`. |
-| Outline property | Use `outline`, not a shadow alone. |
+| Style | Focus uses a `color-border-focus` outline at `border-width-2` with a 2 px offset; inside the navigation sidebar the outline is `color-nav-active`. Use `outline`, not a shadow alone, so it survives Windows contrast themes. |
 | Contrast | The focus indicator MUST reach 3:1 against the surface beside it. |
 | Not obscured | A focused element MUST NOT be hidden behind a sticky header, a toast, or a drawer. |
 | Restore focus | Closing a modal or drawer MUST return focus to its trigger. |
 | Keyboard reorder focus | After a keyboard reorder, focus MUST stay on the moved item. |
 | Distinct states | Focus, hover, and selection MUST look different from each other. |
 
-- **Outline property:** A shadow alone does not survive Windows contrast themes.
 - **Not obscured:** This follows WCAG 2.2 criterion 2.4.11.
 
 ## Windows Contrast Themes
