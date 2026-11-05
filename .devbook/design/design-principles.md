@@ -11,33 +11,26 @@ related: [.devbook/arc42/04-solution-strategy.md#local-first-desktop-application
 Each principle lists testable rules. Treat every MUST and MUST NOT as a design review
 acceptance criterion.
 
-## Dark Mode Only
+## One Light Theme
 
 ```meta
-related: [.devbook/design/color-scheme.md#dark-palette, .devbook/design/color-scheme.md#per-stack-token-mapping]
+related: [.devbook/design/color-scheme.md#palette, .devbook/design/color-scheme.md#per-stack-token-mapping, .devbook/design/README.md#provenance]
 ```
-
-Finance ships a single dark theme, as Backlog does. There is no light theme and no theme
-toggle.
 
 | Rule | Requirement |
 |---|---|
-| Single theme | Finance MUST render only the dark palette defined in `color-scheme.md`. |
-| No toggle | There MUST NOT be a light or dark switch anywhere in settings or chrome. |
-| Windows app mode | Finance does not follow the Windows app mode. |
-| No light assumptions | Components MUST NOT hard-code white fills, black text, or any other light-theme colour. |
-| Palette token names | Components MUST reference palette token names. |
-| Media | Images and charts MUST be authored for dark surfaces, with no glaring white blocks. |
-| Chart colours | A chart takes its colours from `color-scheme.md#chart-roles`. |
-| Elevation by colour | Elevation MUST be shown mainly by raised surface tokens, not heavy shadows. See `color-scheme.md#elevation-by-color`. |
+| Single theme | Finance MUST render only the light palette defined in `color-scheme.md`, the Finance App Design's. |
+| No toggle | There MUST NOT be a light or dark switch anywhere in settings or chrome. Finance does not follow the Windows app mode. |
+| Dark sidebar | The navigation sidebar is the one dark surface. It MUST use the `color-nav-*` tokens and no others. |
+| No literals | Components MUST NOT hard-code a colour. They MUST reference palette token names. |
+| Media | Images and charts MUST be authored for the light ground and white cards. A chart takes its colours from `color-scheme.md#chart-roles`. |
+| Flat cards | A card is a white surface with a `color-divider` edge and no shadow. Only a surface floating above the page carries one. See `color-scheme.md#elevation-by-color`. |
 
-**Why:** One dark surface is easy on the eyes in long sessions, and a single theme removes
-a whole class of theming bugs.
-
-- A single theme also keeps Finance's design language identical to Backlog's, which was the
-  user's brief.
-- Windows contrast themes still apply, because they are an accessibility setting rather than
-  a theme choice. See `accessibility.md#windows-contrast-themes`.
+Rationale: the Finance App Design is drawn light, and on 2026-10-22 the user made the design
+leading over this folder, replacing the dark theme carried over from Backlog. A single theme
+still removes a whole class of theming bugs. Windows contrast themes still apply, because they
+are an accessibility setting rather than a theme choice. See
+`accessibility.md#windows-contrast-themes`.
 
 ## Local-First UX
 

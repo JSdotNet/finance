@@ -4,7 +4,7 @@
 related: [.devbook/design/color-scheme.md#contrast-rules, .devbook/design/interaction-guidelines.md, .devbook/design/design-principles.md#keyboard-first]
 ```
 
-> Finance targets **WCAG 2.2 Level AA** as a minimum. It is dark mode only, keyboard-first,
+> Finance targets **WCAG 2.2 Level AA** as a minimum. It has one light theme, is keyboard-first,
 > and has no save buttons. This file concentrates on:
 >
 > - Keyboard operation.
@@ -140,7 +140,7 @@ related: [.devbook/design/interaction-guidelines.md#focus-and-selection]
 | Rule | Requirement |
 |---|---|
 | Always visible | Keyboard focus MUST always be visible. `outline: none` without a compliant replacement is prohibited. |
-| Style | Focus uses a `color-border-focus` outline at `border-width-2` with a 2 px offset. |
+| Style | Focus uses a `color-border-focus` outline at `border-width-2` with a 2 px offset. Inside the navigation sidebar the outline is `color-nav-active`. |
 | Outline property | Use `outline`, not a shadow alone. |
 | Contrast | The focus indicator MUST reach 3:1 against the surface beside it. |
 | Not obscured | A focused element MUST NOT be hidden behind a sticky header, a toast, or a drawer. |
@@ -154,12 +154,12 @@ related: [.devbook/design/interaction-guidelines.md#focus-and-selection]
 ## Windows Contrast Themes
 
 ```meta
-related: [.devbook/design/design-principles.md#dark-mode-only]
+related: [.devbook/design/design-principles.md#one-light-theme]
 ```
 
-Windows contrast themes replace Finance's dark palette with the user's system colours, and
+Windows contrast themes replace Finance's light palette with the user's system colours, and
 WebView2 reports them through `forced-colors: active`. This is the one case where Finance
-does not render its own palette, and `design-principles.md#dark-mode-only` allows it: a
+does not render its own palette, and `design-principles.md#one-light-theme` allows it: a
 contrast theme is an accessibility setting, not a theme choice.
 
 | Rule | Requirement |
