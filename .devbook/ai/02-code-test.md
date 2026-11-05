@@ -78,7 +78,7 @@ The procedures `devbook` seeds and this repository owns: `run`, `capture`, `diag
 - **Limits** — `estimate` compares against the repository's own reference rows, so it is only
   as good as the examples in `.agents/skills/estimate.md`.
 
-## Scenario Pages
+## Scenario Journeys
 
 ```meta
 rating: candidate
@@ -88,15 +88,19 @@ related: [".devbook/ai/02-code-test.md#flow-skills"]
 date: 2026-10-15
 ```
 
-devbook's scenario page skills make an end-to-end journey, written as a page beside the chapter
-it demonstrates, the source of a Playwright spec and of the screenshots a reviewer opens.
+devbook's scenario skills make an end-to-end journey the source of a Playwright spec and of the
+screenshots a reviewer opens. A journey is a `##` of `.devbook/domain/<context>/scenarios.md`, in
+the context of the requirements it proves.
 
-- **Used for** — `devbook:scenario-write` writes a page, `devbook:scenario-derive` derives its
-  spec, and `devbook:scenario-run` runs it and writes `run.json` and one screenshot per shot.
-  The tools are vendored into `.devbook/_tools/scenarios/` and were refreshed by the 1.26 update
-  on 2026-10-15. No phase binds the skills, and `phase-verify` names no agent.
-- **Adopted by** — nobody yet. No scenario page is committed.
+- **Used for** — `devbook:scenario-write` writes a journey and points each requirement it proves
+  at its part with a `Proved by:` line; `devbook:scenario-derive` derives its spec;
+  `devbook:scenario-run` runs it and writes `run.json` and one screenshot per shot into the
+  journey's run folder beside its scenarios file. The tools are vendored into
+  `.devbook/_tools/scenarios/`, last refreshed by the 1.34 update on 2026-11-03. No phase binds
+  the skills, and `phase-verify` names no agent.
+- **Adopted by** — nobody yet. No journey is committed: `.devbook/domain/finance/` has no
+  `scenarios.md`.
 - **Evidence** — none yet.
-- **Moves up when** — a page and its committed run have landed.
-- **Limits** — a page runs only through a Playwright suite, and this repository has none yet,
+- **Moves up when** — a journey and its committed run have landed.
+- **Limits** — a journey runs only through a Playwright suite, and this repository has none yet,
   nor a setup hook or profile for the runner to call.
