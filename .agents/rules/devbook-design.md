@@ -14,7 +14,13 @@ guidelines — wireframes, user flows, prototypes, screenshots — are not store
 here. The agreed screens of a bounded context are its demos, in
 `.devbook/domain/<context>/*.demo.html`, per `devbook-domain.md`.
 
-The one HTML file `design/` holds is `demo-template.html`: the template every
+Finance's one exception is `finance-app.demo.html`: the whole product's design
+as a click demo, kept in `design/` until the domain is modelled and its screens
+move to the contexts' demos. It follows `devbook-domain.md`'s demo rules except
+that it may keep more than one variant, carries no personal data, and is named
+by the `demo` field of `README.md#provenance`.
+
+Beside it, the one HTML file `design/` holds is `demo-template.html`: the template every
 demo is built on, beside the tokens and guidelines it is built from. It changes
 through the same flow as any other `design/` file, carries no `meta` block, and
 has no reading position. The change that edits it runs
@@ -76,6 +82,7 @@ placeholders.
   accessibility.md
   component-libraries.md     (per-channel recommendation + rationale)
   demo-template.html         (optional: the template every demo is built on)
+  finance-app.demo.html      (Finance only: the product design as a click demo)
 ```
 
 Add a file only when a topic genuinely does not belong to an existing one, and
