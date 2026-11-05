@@ -161,6 +161,11 @@ rule here disagree, the rule changes. Where the artifact misses an accessibility
 ```
 
 Metadata follows `.agents/rules/devbook-chapter-metadata.md` and
-`.agents/rules/devbook-design.md`. A merged chapter is in force and carries no `status`. The
-empty `meta` fence under a heading stays, because it is what makes the heading an addressable
+`.agents/rules/devbook-design.md`. A merged chapter is in force and carries no `status`. A
+guideline still being written is an open change under `openspec/changes/`, not a chapter here.
+A guideline that no longer applies is removed by a change's `REMOVED` delta.
+
+The user agreed the light palette, the amount rules, and the app icon on 2026-11-05.
+
+The empty `meta` fence under a heading stays, because it makes the heading an addressable
 chapter.

@@ -23,8 +23,6 @@ related: [.devbook/design/design-principles.md#one-light-theme, .devbook/design/
 - **How the ratios were measured.** Every ratio in this file is computed with the WCAG 2.2
   relative-luminance formula from the hex values below.
 
-The palette is `draft` until the user has reviewed it as a whole.
-
 ## Brand Ramp
 
 ```meta
