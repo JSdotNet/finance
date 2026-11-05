@@ -13,27 +13,7 @@ part of Finance is deployed to a server or a cloud subscription.
 related: [.devbook/arc42/adr/storage.md, .devbook/arc42/06-runtime-view.md#continue-on-another-pc]
 ```
 
-```mermaid
-architecture-beta
-    group pca(server)[Windows PC A]
-    service appa(server)[Finance desktop app] in pca
-    service foldera(disk)[Data folder] in pca
-    service clienta(cloud)[OneDrive client] in pca
-
-    service onedrive(cloud)[OneDrive]
-
-    group pcb(server)[Windows PC B]
-    service clientb(cloud)[OneDrive client] in pcb
-    service folderb(disk)[Data folder] in pcb
-    service appb(server)[Finance desktop app] in pcb
-
-    appa:R --> L:foldera
-    clienta:T -- B:foldera
-    clienta:R -- L:onedrive
-    onedrive:R -- L:clientb
-    clientb:T -- B:folderb
-    appb:L --> R:folderb
-```
+![Production](c4:production)
 
 | Node | Runs | Notes |
 | --- | --- | --- |
@@ -52,25 +32,7 @@ telemetry ServiceDefaults wires has no collector to send to.
 related: [.devbook/arc42/05-building-block-view.md#development-harness, .devbook/arc42/06-runtime-view.md#development-run-with-playwright]
 ```
 
-```mermaid
-flowchart LR
-    subgraph dev["Developer PC"]
-        apphost["Finance.AppHost"]
-        dash["Aspire dashboard"]
-        desktop["Finance.Desktop"]
-        web["Finance.Web<br/>optional"]
-        testdata[("Test data folder")]
-        pw["Playwright"]
-    end
-
-    apphost --> desktop
-    apphost -.-> web
-    desktop -->|OTLP| dash
-    desktop --> testdata
-    web -.-> testdata
-    pw -->|CDP| desktop
-    pw -.->|HTTP| web
-```
+![Development](c4:development)
 
 Everything runs on the developer's PC. The AppHost starts the application against a test data
 folder outside OneDrive, so development and test runs never touch the real records. CI runs the

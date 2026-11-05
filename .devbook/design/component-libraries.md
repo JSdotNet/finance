@@ -50,11 +50,15 @@ related: [.devbook/design/color-scheme.md#chart-roles, .devbook/design/interacti
 | Layer | Recommendation | Rationale |
 |---|---|---|
 | Base controls | **A first-party Razor class library**, the UI project `Finance.UI`, styled only by the tokens | Same choice and same reasons as Backlog. Nothing to override, and every component reviewable in one place. |
-| Data tables | **QuickGrid** (`Microsoft.AspNetCore.Components.QuickGrid`), styled by the tokens | First-party from the ASP.NET Core team, MIT, unstyled, with sorting and virtualization. It renders a real `<table>`. Cell-level arrow-key navigation is not built in and has to be added. |
-| Charts | **Apache ECharts**, vendored into `Finance.UI`'s `wwwroot` | Backlog's recommendation. Broad chart coverage, Apache-2.0, and a theme object that can take the chart-role tokens. Its `aria` option can generate a text description. |
-| Reorder | **Hand-rolled on pointer events** in the UI library, with the keyboard path built in | Backlog measured that WebView2 in the MAUI desktop head aborts a native HTML5 drag a few milliseconds after it starts, so no `dragover` or `drop` event arrives. A library built on drag events has nothing to hook. Finance runs on the same stack. |
+| Data tables | **QuickGrid** (`Microsoft.AspNetCore.Components.QuickGrid`), styled by the tokens | First-party from the ASP.NET Core team, MIT, unstyled, with sorting and virtualization. |
+| Charts | **Apache ECharts**, vendored into `Finance.UI`'s `wwwroot` | Backlog's recommendation. Broad chart coverage, Apache-2.0, and a theme object that can take the chart-role tokens. |
+| Reorder | **Hand-rolled on pointer events** in the UI library, with the keyboard path built in | WebView2 in the MAUI desktop head aborts a native HTML5 drag, per Backlog's measurement. |
 | Icons | **Lucide** SVGs, vendored into the UI library | See `typography-and-layout.md#iconography`. |
 | Fonts | Hanken Grotesk and IBM Plex Mono as `woff2` files in the UI library | See `typography-and-layout.md#font-families`. |
+
+- **Data tables:** QuickGrid renders a real `<table>`. Finance has to add cell-level arrow-key navigation, which QuickGrid does not include.
+- **Charts:** The `aria` option of ECharts can generate a text description.
+- **Reorder:** The abort comes a few milliseconds after the drag starts, so no `dragover` or `drop` event arrives. A library built on drag events has nothing to hook. Finance runs on the same stack.
 
 Every asset MUST ship inside the app. A CDN is acceptable only during development, and only
 with a visible fallback when it fails.
@@ -92,3 +96,4 @@ Backlog's evaluation. None was tried in Finance.
 | Assets fetched from a CDN | Breaks offline use, and tells a third party when Finance is used | Vendor every asset into `wwwroot`. Backlog shipped Mermaid from a CDN and recorded it as a gap; Finance MUST NOT. |
 | Two apps, two copies of one library | Backlog and Finance would each keep a near-identical set of components | `[TODO: clarify]` Whether Finance reuses Backlog's `Backlog.UI.Components`, for example as a shared package with Finance's token values, or keeps its own `Finance.UI`. Sharing saves work, but Backlog is dark and Finance light, so only the components would be shared, not the stylesheet. It also couples Finance's releases to Backlog's. |
 | Number formatting spread across components | Two components format the same amount differently | One amount formatter in the UI library, per `typography-and-layout.md#amounts`. |
+

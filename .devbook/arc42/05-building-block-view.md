@@ -16,33 +16,12 @@ project without restating its contents.
 related: [.devbook/arc42/03-context-and-scope.md#business-context, .devbook/arc42/adr/desktop-stack.md, .devbook/arc42/adr/storage.md]
 ```
 
-```mermaid
-flowchart TB
-    me(["ME"])
-    subgraph app["Finance desktop application"]
-        desktop["Finance.Desktop<br/>MAUI shell, composition"]
-        ui["Finance.UI<br/>Razor components"]
-        domain["Finance.Domain<br/>finance model"]
-        storage["Finance.Storage<br/>JSON file store"]
-        adapter["Integration adapter<br/>anticipated"]
-    end
-    folder[("Data folder<br/>JSON files under OneDrive")]
-    ext["External finance API<br/>anticipated"]
-
-    me --> desktop
-    desktop --> ui
-    ui --> domain
-    storage --> domain
-    desktop --> storage
-    storage --> folder
-    adapter -.-> domain
-    adapter -.-> ext
-```
+![Building Blocks: Finance desktop application](c4:level-1)
 
 | Block | Responsibility |
 | --- | --- |
 | `Finance.Desktop` | The .NET MAUI Blazor Hybrid executable. It opens the window, hosts WebView2, and wires the other projects together. |
-| `Finance.UI` | A Razor class library with every page and component. It holds no file access, so another host can render it. |
+| `Finance.UI` | A Razor class library with every page and component. With no file access, another host can render it. |
 | `Finance.Domain` | The `finance` model and the store interface it needs. It references no UI, file, or network library. |
 | `Finance.Storage` | Implements the store interface against JSON files in the data folder, per [the storage record](adr/storage.md). |
 | Integration adapter | Not built. See [Integration Seam](#integration-seam). |
@@ -56,30 +35,13 @@ model, never the reverse, so the file format can change without touching a rule.
 related: [.devbook/arc42/07-deployment-view.md#development, .devbook/arc42/08-crosscutting-concepts.md#testability]
 ```
 
-```mermaid
-flowchart LR
-    apphost["Finance.AppHost<br/>Aspire"]
-    defaults["Finance.ServiceDefaults<br/>telemetry, health"]
-    desktop["Finance.Desktop"]
-    web["Finance.Web<br/>browser host, optional"]
-    ui["Finance.UI"]
-    pw["Playwright tests"]
-
-    apphost --> desktop
-    apphost -.-> web
-    desktop --> defaults
-    web -.-> defaults
-    desktop --> ui
-    web -.-> ui
-    pw --> desktop
-    pw -.-> web
-```
+![Development Harness](c4:development-harness)
 
 These projects exist only for development and never ship to the user.
 
-- `Finance.AppHost` is the Aspire entry point that starts the application and its dashboard.
-- `Finance.ServiceDefaults` adds OpenTelemetry and health checks to every project that references it.
-- `Finance.Web` is optional. It hosts `Finance.UI` in an ordinary browser over a throwaway data folder, so Playwright can run without the MAUI shell. It is a test harness, not a second channel, and whether to build it is open in [11. Risks and Technical Debt](11-risks-and-technical-debt.md#open-questions).
+- `Finance.AppHost` is the Aspire entry point that starts the application and its dashboard. It also starts `Finance.Web` when that is built.
+- `Finance.ServiceDefaults` adds OpenTelemetry and health checks to every project that references it: `Finance.Desktop`, and `Finance.Web` when that is built.
+- `Finance.Web` is optional. It hosts `Finance.UI` in an ordinary browser over a throwaway data folder, so Playwright can run without the MAUI shell. It is a test harness, not a second channel. [11. Risks and Technical Debt](11-risks-and-technical-debt.md#open-questions) keeps open whether to build it.
 
 ## Integration Seam
 

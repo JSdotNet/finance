@@ -12,7 +12,7 @@ Running the system and feeding what it shows back into planning: alerts, schedul
 ```meta
 rating: candidate
 type: workflow
-stage: [operate]
+layer: [upkeep]
 date: 2026-10-13
 ```
 
@@ -27,8 +27,8 @@ message.
   and created all six as local routines on the maintainer's machine, titled
   `JSdotNet/finance · <title>` and working from the main checkout. None has run yet, and each
   still needs its worktree option switched on in the host's own page.
-- **Evidence** — none yet. Promote to `trial` once a routine has published a pull request or a
-  report here.
+- **Evidence** — none yet.
+- **Moves up when** — a routine has published a pull request or a report here.
 - **Limits** — a local routine runs only while the desktop app is open on the machine that
   created it. A routine's tools are approved on its first run, so that run is fired by hand. No
   schedule fires a flow.

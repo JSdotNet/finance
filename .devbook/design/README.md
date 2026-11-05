@@ -102,10 +102,20 @@ guide. The user's brief was that Finance looks the same as Backlog, with three c
 - The app icon is the euro sign.
 
 Everything else is Backlog's system, with what Finance does not have taken out. Finance has
-one channel, so the mobile, IDE, and cloud guidance went. Backlog's Markdown editing,
-entries, tasks, roadmaps, AI surfaces, repository colours, sync states, and code theme are
-specific to Backlog, so they went too. Backlog's `content-editing.md` had nothing left once
-its Markdown editor was removed, so Finance has no such file.
+one channel, so the mobile, IDE, and cloud guidance went. These features are specific to
+Backlog, so they went too:
+
+- Markdown editing.
+- Entries.
+- Tasks.
+- Roadmaps.
+- AI surfaces.
+- Repository colours.
+- Sync states.
+- The code theme.
+
+Backlog's `content-editing.md` had nothing left once its Markdown editor was removed, so
+Finance has no such file.
 
 Finance started dark mode only, like Backlog, by the user's decision of 2026-10-06. On
 2026-10-22 the user made the Finance App Design leading, and its light theme replaced the dark
@@ -115,11 +125,23 @@ There is no sync back to Backlog. A change here is a change to Finance's design 
 alone.
 
 **The Finance App Design.** The second source is the Finance App Design artifact,
-<https://claude.ai/artifact/S2W8WmGhUZxLkAq2Yhg8WQ>, dated 2026-10-08: eleven screen boards
-of the product (Overview, Income and expenses, Inflation, Subscriptions, Debts and loans,
-Pension, Savings goals, Investments, Crypto, Bruto to netto, Energy and EV charging). Each
-board carries its own inline CSS and no token set. On 2026-10-21 that CSS was compared with
-the tokens here, and every value the boards use was given a token:
+<https://claude.ai/artifact/S2W8WmGhUZxLkAq2Yhg8WQ>, dated 2026-10-08. It holds eleven screen
+boards of the product:
+
+- Overview.
+- Income and expenses.
+- Inflation.
+- Subscriptions.
+- Debts and loans.
+- Pension.
+- Savings goals.
+- Investments.
+- Crypto.
+- Bruto to netto.
+- Energy and EV charging.
+
+Each board carries its own inline CSS and no token set. On 2026-10-21 that CSS was compared
+with the tokens here, and every value the boards use was given a token:
 
 - **Type** follows the artifact: Hanken Grotesk and IBM Plex Mono replace Backlog's fonts,
   and the heading ramp is the artifact's compact one.
