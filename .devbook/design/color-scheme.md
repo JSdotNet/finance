@@ -35,8 +35,6 @@ related: [.devbook/design/design-principles.md#dark-mode-only, .devbook/design/a
   comparison added `color-info-text`, `color-warning-text`, three chart ramp steps, and four
   chart roles.
 
-The palette is `draft` until the user has reviewed the green.
-
 ## Primary Ramp
 
 ```meta

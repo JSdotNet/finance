@@ -152,18 +152,18 @@ Each value and the token it lands on is listed in `color-scheme.md#finance-app-d
 and `typography-and-layout.md#finance-app-design-mapping`. The artifact wins on type, spacing,
 radius, and which roles exist; this folder wins on the theme.
 
-## Status Vocabulary
+## Metadata
 
 ```meta
 ```
 
-Files and chapters here use `status: draft | active | deprecated`. `draft` means written but
-not yet agreed. `active` means current and binding. `deprecated` means superseded and kept
-for history. Metadata follows `.agents/rules/devbook-chapter-metadata.md` and
-`.agents/rules/devbook-design.md`.
+Metadata follows `.agents/rules/devbook-chapter-metadata.md` and
+`.agents/rules/devbook-design.md`. A block here carries no `status`, because a merged
+guideline is agreed and binding. A guideline still being written is an open change under
+`openspec/changes/`, not a chapter here. A guideline that no longer applies is removed by a
+change's `REMOVED` delta.
 
-`active` is the resting value, so an agreed chapter leaves the `status` field out. The rules
-carried over from Backlog are written that way. Everything new to Finance carries
-`status: draft` until the user has reviewed it: the palette, the amount rules, and the app
-icon. The dark-mode rule is Backlog's and the user's decision, so it is not a draft. The empty `meta` fence under a heading stays, because it is what
-makes the heading an addressable chapter.
+The user agreed the palette, the amount rules, and the app icon on 2026-11-05.
+
+The empty `meta` fence under a heading stays, because it makes the heading an addressable
+chapter.
