@@ -1,7 +1,6 @@
 # Features
 
 ```meta
-status: draft
 type: features
 ```
 

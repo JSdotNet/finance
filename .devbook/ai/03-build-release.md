@@ -1,7 +1,7 @@
 # 3. Build and Release
 
 ```meta
-status: candidate
+rating: candidate
 type: stage
 ```
 

@@ -1,7 +1,6 @@
 # 09. Architecture Decisions
 
 ```meta
-status: draft
 related: [.devbook/arc42/adr/README.md]
 ```
 

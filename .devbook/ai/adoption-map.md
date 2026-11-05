@@ -1,7 +1,7 @@
 # AI Adoption Map
 
 ```meta
-status: candidate
+rating: candidate
 index: root
 type: adoption-map
 ```

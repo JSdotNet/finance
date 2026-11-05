@@ -1,18 +1,8 @@
 # Finance
 
 ```meta
-status: draft
 index: root
 type: context
-```
-
-```annotation
-kind: question
-author: claude/domain-architect
-date: 2026-10-06
-body: |
-  Two of the out-of-scope lines are proposals, not stated facts: no business bookkeeping or tax reports, and never moving money (no payments, transfers, or trades). Confirm both, or say which belongs inside the boundary.
-  
 ```
 
 Finance keeps the record of one person's own money and lets that person work with it. The
@@ -35,15 +25,7 @@ Outside it: several things are deliberately left out, and no other context answe
 ## User
 
 ```meta
-status: draft
 type: user
-```
-
-```annotation
-kind: question
-author: claude/domain-architect
-date: 2026-10-06
-body: Does the app need any protection on open, such as a password or encryption of the OneDrive files, or is the operating system login enough?
 ```
 
 The one person whose finances the app records. That person installs the desktop app, owns
@@ -52,13 +34,6 @@ the files in their own OneDrive folder, and is the only one who reads or changes
 Because there is only ever one user, the model does not record who made a change.
 
 ## Dependencies
-
-```annotation
-kind: question
-author: claude/domain-architect
-date: 2026-10-06
-body: Which external API is anticipated (a bank through PSD2 or open banking, a market-price feed, exchange rates, something else), and what would Finance take from it?
-```
 
 ### Outbound dependencies
 

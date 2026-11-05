@@ -1,24 +1,13 @@
 # 08. Cross-cutting Concepts
 
 ```meta
-status: draft
 ```
 
 These concepts apply across every building block and are handled the same way everywhere.
 
-```annotation
-kind: suggestion
-author: "claude/prose-check"
-date: 2026-10-21
-quote: "These concepts apply across every building block"
-body: |
-  [minor] Prose (restated heading): The sentence paraphrases the chapter title; cut it and start with the next section.
-```
-
 ## Persistence
 
 ```meta
-status: draft
 related: [.devbook/arc42/adr/storage.md, .devbook/arc42/06-runtime-view.md#save-a-change]
 ```
 
@@ -32,15 +21,6 @@ the conventions every file in the data folder follows.
 - `Finance.Storage` is the only code that touches the data folder.
 - The data folder holds records only. Settings, caches, and logs stay on the local machine.
 
-```annotation
-kind: question
-author: "claude/chapter-review"
-date: 2026-10-21
-quote: "A write goes to a temporary file in the same folder, which then replaces the original."
-body: |
-  [major] The atomic replace protects one file, but a change may touch more than one file depending on how O1 splits the records (for example, a transfer between two accounts stored one file per aggregate). A crash between the two replaces leaves files that each parse but disagree. Q2 in chapter 10 and the glossary entry "Atomic write" promise no corruption without covering this case. Two smaller gaps sit beside it: OneDrive may upload the temporary file, and the section has no rule for a leftover temporary file found on load. Settle: either constrain O1 so one change rewrites exactly one file, or state the cross-file consistency rule, and name the temporary-file naming and cleanup.
-```
-
 How the records split across files is not decided yet. The rule for choosing is that a typical
 edit rewrites one small file, so OneDrive uploads little and two PCs seldom touch the same file.
 [11. Risks and Technical Debt](11-risks-and-technical-debt.md#open-questions) tracks the choice.
@@ -48,7 +28,6 @@ edit rewrites one small file, so OneDrive uploads little and two PCs seldom touc
 ## Configuration
 
 ```meta
-status: draft
 related: [.devbook/arc42/06-runtime-view.md#start-and-load]
 ```
 
@@ -61,19 +40,9 @@ object that it validates at start, as the organization's
 sets out. A missing path opens the first-start prompt rather than failing the start; an invalid
 one fails it.
 
-```annotation
-kind: question
-author: "claude/chapter-review"
-date: 2026-10-21
-quote: "an invalid one fails it."
-body: |
-  [minor] What counts as invalid, and how does the user recover? A typical case is PC B before OneDrive has created or downloaded the folder, or an online-only placeholder (R2). Under this rule that blocks start with no way out, while 06#start-and-load draws only the missing-path branch. A typed options object validated at start (ADR 0018) also has no obvious place for a value the first-start prompt supplies after start. Settle: define invalid (folder does not exist? not writable? holds a newer schemaVersion?), say whether it re-opens the prompt, and add the branch to 06.
-```
-
 ## Domain Model
 
 ```meta
-status: draft
 related: [.devbook/domain/finance/context.md, .devbook/domain/finance/domain.md]
 ```
 
@@ -85,7 +54,6 @@ chapters use that language and do not define terms of their own.
 ## User Interface
 
 ```meta
-status: draft
 related: [.devbook/arc42/adr/desktop-stack.md, .devbook/arc42/adr/styling.md, .devbook/arc42/05-building-block-view.md#level-1, .devbook/design/README.md]
 ```
 
@@ -126,7 +94,6 @@ never through styling. [Testability](#testability) sets out the levels.
 ## Testability
 
 ```meta
-status: draft
 related: [.devbook/arc42/adr/test-stack.md, .devbook/arc42/adr/modularity.md, .devbook/arc42/adr/desktop-stack.md, .devbook/arc42/06-runtime-view.md#development-run-with-playwright]
 ```
 
@@ -179,7 +146,6 @@ Each level has its own conventions:
 ## Observability
 
 ```meta
-status: draft
 related: [.devbook/arc42/07-deployment-view.md, .devbook/arc42/adr/observability.md]
 ```
 
@@ -190,7 +156,6 @@ carry. Whether production errors go to a local log file is still open.
 ## Privacy and Security
 
 ```meta
-status: draft
 related: [.devbook/arc42/11-risks-and-technical-debt.md#risks]
 ```
 
@@ -199,19 +164,9 @@ data. The files are not encrypted by Finance, and OneDrive's own encryption at r
 transit is the protection. A future credential, such as an API key, never goes into the data
 folder, because that folder is replicated.
 
-```annotation
-kind: flag
-author: "claude/chapter-review"
-date: 2026-10-21
-quote: "The files are not encrypted by Finance"
-body: |
-  [major] The section states as settled ("no login", "not encrypted") a question that is still open in the domain: domain/finance/context.md#user asks "Does the app need any protection on open, such as a password or encryption of the OneDrive files, or is the operating system login enough?" Adding encryption later would also mean migrating every data file, so by the devbook-arc42 test the choice belongs in a decision record. adr/storage.md is silent on encryption, and 11 R4 marks it "Accepted for now". Settle: answer the domain question, record the choice and its rejected alternative (encryption at rest, an app password) in adr/storage.md or a new security record, and keep this section as the convention that links to it.
-```
-
 ## External Integration
 
 ```meta
-status: draft
 related: [.devbook/arc42/05-building-block-view.md#integration-seam]
 ```
 

@@ -1,7 +1,7 @@
 # 1. Plan
 
 ```meta
-status: candidate
+rating: candidate
 type: stage
 ```
 
@@ -10,9 +10,9 @@ Specifying work: devbook chapters, backlog items, and their approval before anyt
 ## Backlog Plan Entries
 
 ```meta
-status: trial
+rating: trial
 type: workflow
-stage: [plan]
+stage: [specify]
 related: [".devbook/ai/02-code-test.md#flow-skills"]
 date: 2026-10-21
 ```
@@ -38,9 +38,9 @@ request back to the entry.
 ## OpenSpec Change Lane
 
 ```meta
-status: candidate
+rating: candidate
 type: workflow
-stage: [plan]
+stage: [specify]
 related: [".devbook/ai/02-code-test.md#flow-skills", ".devbook/ai/01-plan.md#backlog-plan-entries"]
 date: 2026-10-21
 ```
@@ -64,9 +64,9 @@ drafted against the `devbook` schema, and merged into the chapters once approved
 ## Design Artifacts as Token Source
 
 ```meta
-status: trial
+rating: trial
 type: workflow
-stage: [plan]
+stage: [specify]
 related: [".devbook/design/README.md#provenance", ".devbook/ai/01-plan.md#backlog-plan-entries"]
 date: 2026-10-21
 ```

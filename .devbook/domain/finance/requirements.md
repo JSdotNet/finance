@@ -1,7 +1,6 @@
 # Requirements
 
 ```meta
-status: draft
 type: requirements
 ```
 

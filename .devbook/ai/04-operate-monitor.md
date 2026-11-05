@@ -1,7 +1,7 @@
 # 4. Operate and Monitor
 
 ```meta
-status: candidate
+rating: candidate
 type: stage
 ```
 
@@ -10,9 +10,9 @@ Running the system and feeding what it shows back into planning: alerts, schedul
 ## Scheduled Routines
 
 ```meta
-status: candidate
+rating: candidate
 type: workflow
-stage: [operate, monitor]
+stage: [operate]
 date: 2026-10-13
 ```
 

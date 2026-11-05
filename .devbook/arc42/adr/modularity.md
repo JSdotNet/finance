@@ -1,7 +1,6 @@
 # Modularity
 
 ```meta
-status: proposed
 date: 2026-10-08
 related: [.devbook/arc42/05-building-block-view.md#level-1, .devbook/arc42/08-crosscutting-concepts.md#persistence, .devbook/arc42/adr/storage.md, .devbook/domain/finance/context.md]
 ```
@@ -27,15 +26,6 @@ that interface, and architecture tests check the boundaries.
 - Architecture tests check the project references, so a boundary holds even when a change is
   reviewed in a hurry.
 
-```annotation
-kind: suggestion
-author: "claude/chapter-review"
-date: 2026-10-21
-quote: "Architecture tests check the project references"
-body: |
-  [minor] The record states rules only for Finance.Domain and Finance.Storage, yet the architecture tests will need the whole allowed-reference set: may Finance.UI reference Finance.Storage (05 implies not), is Finance.Desktop the only composition root, where does the anticipated integration adapter sit and what may it reference. List the allowed references per project, so the NetArchTest suite has one place to derive from.
-```
-
 ## Rejected
 
 ```meta
@@ -57,12 +47,3 @@ body: |
 | Date | Change |
 | --- | --- |
 | 2026-10-08 | Proposed: one project per responsibility around the `finance` context, with the store port in `Finance.Domain` and no `.Abstractions` project until a second context exists, adopted from the organization's [ADR 0005](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/adrs/0005-modular-monolith-structure.md) and [ADR 0014](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/adrs/0014-persistence-strategy-and-repository-boundaries.md), as Backlog applies them. |
-
-```annotation
-kind: suggestion
-author: "claude/chapter-review"
-date: 2026-10-21
-quote: "| Date | Change |"
-body: |
-  [minor] The History table is headed Date | Change, but devbook-arc42.md fixes the header as Date | Change | Why, and build.mjs --check warns on it. Split the row's reason into its own Why column (here: adopted from the organization's ADR 0005 and 0014 as Backlog applies them is the why).
-```
