@@ -9,6 +9,11 @@ name: Auto-merge
 # ready for review starts it. Converting a pull request back to a draft cancels
 # a waiting run and turns off GitHub auto-merge if it was on.
 #
+# Pull requests into a plan/<slug> branch are merged too: marking one ready is
+# the merge signal whatever the base. GitHub auto-merge needs a protected base,
+# so the Merge step merges directly when the base has neither branch protection
+# nor a ruleset (today every base, main included) and uses --auto otherwise.
+#
 # A merge made with the default GITHUB_TOKEN does not trigger the push
 # workflows on the base branch, so the merge uses the AUTO_MERGE_TOKEN secret
 # (a fine-grained token with Contents and Pull requests read/write) when the
@@ -80,14 +85,46 @@ jobs:
         run: |
           # The pull request may have become a draft or moved on while this
           # run waited; merge only the commit that was checked.
-          state=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isDraft,headRefOid --jq '"\(.isDraft) \(.headRefOid)"')
-          if [ "$state" != "false $SHA" ]; then
+          info=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json isDraft,headRefOid,baseRefName --jq '"\(.isDraft) \(.headRefOid) \(.baseRefName)"')
+          if [ "${info% *}" != "false $SHA" ]; then
             echo "Pull request is a draft or has a newer commit; not merging."
             exit 0
           fi
-          # --auto defers to the branch's own required checks when it has any
-          # and merges straight away when nothing is left to wait for.
-          gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --auto --merge --match-head-commit "$SHA"
+          base=${info##* }
+
+          # GitHub auto-merge needs a protected base: classic branch protection
+          # or a ruleset. With one, --auto defers to the base's own required
+          # checks and merges at once when nothing is left to wait for.
+          base_path=$(jq -rn --arg b "$base" '$b | @uri')
+          classic=$(gh api "repos/$GITHUB_REPOSITORY/branches/$base_path" --jq .protected)
+          rules=$(gh api "repos/$GITHUB_REPOSITORY/rules/branches/$base_path" --jq length)
+          if [ "$classic" = "true" ] || [ "$rules" -gt 0 ]; then
+            echo "$base is protected; merging with --auto."
+            gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --auto --merge --match-head-commit "$SHA"
+            exit 0
+          fi
+
+          # Without protection, --auto fails unless the merge state is already
+          # CLEAN, HAS_HOOKS or UNSTABLE, so merge directly: the previous step
+          # saw every check pass. When a sibling pull request into the same base
+          # merges first, GitHub reports UNKNOWN while it recomputes, and may
+          # refuse with "Base branch was modified"; wait, then try again.
+          echo "$base has no protection rules; merging directly."
+          for attempt in 1 2 3; do
+            for _ in $(seq 1 20); do
+              merge_state=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json mergeStateStatus --jq .mergeStateStatus)
+              [ "$merge_state" != "UNKNOWN" ] && break
+              sleep 6
+            done
+            if [ "$merge_state" = "UNKNOWN" ]; then
+              echo "::warning::Merge state still UNKNOWN after two minutes; merging anyway."
+            fi
+            gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --merge --match-head-commit "$SHA" && exit 0
+            echo "Merge attempt $attempt (state $merge_state) failed."
+            sleep 10
+          done
+          echo "::error::Not merged after three attempts."
+          exit 1
 
   back-to-draft:
     name: Turn off auto-merge for a draft
