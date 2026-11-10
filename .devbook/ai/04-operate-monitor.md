@@ -22,7 +22,9 @@ message.
 
 - **Used for** — six schedules selected under `components.schedule` in `.devbook/config.json`:
   `devbook-validate`, `merge-review`, `package-update`, `tech-update`, `prose-check`, and
-  `weekly-update`, with cron overrides on `package-update` and `tech-update`.
+  `weekly-update`, with cron overrides on `package-update` and `tech-update`, and on
+  `devbook-validate`, which runs weekly on Sunday instead of daily while the `devbook-meta.yml`
+  pull-request check covers the days between.
 - **Adopted by** — nobody yet. The 1.25 update on 2026-10-13 stamped the selection at 1.25.0
   and created all six as local routines on the maintainer's machine, titled
   `JSdotNet/finance · <title>` and working from the main checkout. None has run yet, and each

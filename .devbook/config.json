@@ -473,6 +473,9 @@
         },
         "tech-update": {
           "cron": "0 4 * * 0"
+        },
+        "devbook-validate": {
+          "cron": "0 3 * * 0"
         }
       }
     },
