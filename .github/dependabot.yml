@@ -1,0 +1,50 @@
+version: 2
+
+# Dependabot takes the routine minor and patch bumps, one grouped pull request per ecosystem,
+# every Saturday morning. A major version is never opened here: it stays with the package
+# update job in the Saturday code-health bundle, where a person reviews the move. The groups
+# apply to version updates only, so security updates stay separate pull requests.
+updates:
+  - package-ecosystem: github-actions
+    directories:
+      - /
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "04:00"
+      timezone: Europe/Amsterdam
+    labels:
+      - dependencies
+      - github-actions
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
+
+  # One directory per committed package.json (git ls-files -- '*package.json').
+  - package-ecosystem: npm
+    directories:
+      - /.devbook/_tools/scenarios
+    schedule:
+      interval: weekly
+      day: saturday
+      time: "04:00"
+      timezone: Europe/Amsterdam
+    labels:
+      - enhancement
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-major
