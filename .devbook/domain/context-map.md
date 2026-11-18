@@ -40,7 +40,7 @@ flowchart LR
     External -. "ACL (anticipated)" .-> Finance
 ```
 
-The map has one bounded context. The dashed edge marks an external API that the app is
+The dashed edge marks an external API that the app is
 expected to use at some point. Nobody has chosen which API, or what Finance would take from
 it, so the relationship is anticipated and not designed.
 
