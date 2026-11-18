@@ -31,8 +31,8 @@ edit rewrites one small file, so OneDrive uploads little and two PCs seldom touc
 related: [.devbook/arc42/06-runtime-view.md#start-and-load]
 ```
 
-The path of the data folder is a per-machine setting, stored in the user's local application
-data rather than in the data folder itself, because Finance needs it to find that folder. On
+The path of the data folder is a per-machine setting in the user's local application data,
+because Finance needs it to find that folder. On
 first start Finance asks for the folder and suggests one under the user's OneDrive. The AppHost
 overrides the path for development and test runs. Finance reads the path through a typed options
 object that it validates at start, as the organization's
