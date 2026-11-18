@@ -56,7 +56,7 @@ workflow needs a network.
 related: [.devbook/design/interaction-guidelines.md#auto-save]
 ```
 
-Every change is saved automatically. There is no manual save.
+Every change is saved automatically.
 
 | Rule | Requirement |
 |---|---|
@@ -70,8 +70,7 @@ Every change is saved automatically. There is no manual save.
 related: [.devbook/design/accessibility.md#keyboard-navigation, .devbook/design/interaction-guidelines.md#keyboard-accessible-reordering]
 ```
 
-Finance is built to be driven from the keyboard. The pointer is an accelerator, not a
-requirement.
+The pointer is an accelerator, not a requirement.
 
 | Rule | Requirement |
 |---|---|

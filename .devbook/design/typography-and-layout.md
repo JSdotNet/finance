@@ -36,7 +36,7 @@ Rules:
   font fails to load. Finance runs on Windows only, so the fallbacks name Windows fonts
   rather than Backlog's cross-platform chain.
 - The fonts MUST ship as `woff2` files in the UI library's own `wwwroot`, loaded with
-  `@font-face`. Finance is offline-first, so a web font service is not an option. Backlog
+  `@font-face`. Finance is local-first, so a web font service is not an option. Backlog
   declared its fonts and never loaded them; Finance MUST NOT repeat that.
 - Hanken Grotesk is bundled at weights 400, 500, 600, and 700, and IBM Plex Mono at 400 and
   500: the weights the Finance App Design loads.
@@ -349,8 +349,8 @@ Colours are mapped in `color-scheme.md#finance-app-design-mapping`.
 
 A board value within one step of a token maps to the nearest token, a step being the gap
 between the two tokens either side of it. A value halfway between two tokens takes the
-larger for a font size, so no text drops below a minimum, and the smaller for spacing and
-radius, to keep the density compact. Spacing never rounds to zero. Twelve pixels of spacing,
+larger for a font size, so no text drops below a minimum. It takes the smaller for spacing
+and radius, to keep the density compact. Spacing never rounds to zero. Twelve pixels of spacing,
 used on almost every board, is the one value that got a token of its own: `spacing-ms`.
 
 **Font families**
