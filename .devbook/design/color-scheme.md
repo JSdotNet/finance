@@ -319,7 +319,7 @@ Rules:
 - On a `color-primary` fill, label text uses `color-text-inverse`.
 
 **The control-edge gap.** The boards draw control edges in `#CBD2CC`, which measures 1.54:1
-on a card and 1.41:1 on the ground, under the 3:1 WCAG 1.4.11 asks of a boundary that
+on a card and 1.41:1 on the ground. That is under the 3:1 WCAG 1.4.11 asks of a boundary that
 identifies a control. `[TODO: clarify]` Keep the boards' edge and accept the gap, or move
 `color-border` to `color-border-strong` (`#8A948E`, 3.13:1 on a card) and give up a little of
 the boards' lightness. Until then a text field MUST also carry a visible label above it.
@@ -502,7 +502,7 @@ their own because the boards draw them and no palette token holds them.
 related: [.devbook/design/README.md#provenance, .devbook/design/design-principles.md#one-light-theme]
 ```
 
-This table lists every colour the boards use and the token that now holds it. Since the design
+Since the design
 leads, each token's value is the board value itself. A value with two jobs has a row per job.
 
 | Board value | Its job on the boards | Token |
