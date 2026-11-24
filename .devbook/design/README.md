@@ -147,7 +147,7 @@ with the tokens here, and every value the boards use was given a token:
   and the heading ramp is the artifact's compact one.
 - **Spacing and radius** map onto the existing scales, with one added step, `spacing-ms`.
 - **Colour** is the boards' own. Since 2026-10-22 every token holds the board value it maps
-  to, the dark navigation sidebar has tokens of its own, and the pills keep their fills and
+  to. The dark navigation sidebar has tokens of its own, and the pills keep their fills and
   inks.
 
 Each value and the token it lands on is listed in `color-scheme.md#finance-app-design-mapping`
