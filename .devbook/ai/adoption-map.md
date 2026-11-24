@@ -60,7 +60,10 @@ Seven usages are recorded. Five are `candidate`, and nobody works through any of
 
 - The 1.19 update on 2026-10-06 wired the delivery flows, the repository's procedures, and a
   schedule selection.
-- The 1.25 update on 2026-10-13 created the six routines that selection names.
+- The 1.25 update on 2026-10-13 created the six routines that selection names. In November 2026
+  five of them moved into two machine-level bundles, a Sunday devbook review and a Saturday code
+  health run; `merge-review` stayed a per-repository routine. Dependabot took the minor and patch
+  updates for npm and GitHub Actions beside them.
 - devbook ships the scenario journey skills and their tools, last refreshed by the 1.34 update on
   2026-11-03.
 - The 1.28 update on 2026-10-21 set up the OpenSpec change lane.
