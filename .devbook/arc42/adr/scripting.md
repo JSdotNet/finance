@@ -1,20 +1,22 @@
 # Scripting
 
 ```meta
-date: 2026-10-08
+date: 2026-11-24
 related: [.devbook/arc42/adr/runtime.md, .devbook/arc42/adr/package-management.md]
 ```
 
-Finance writes its repository automation as .NET 10 file-based apps. Each script is one `.cs`
+Finance writes its repository automation as .NET 11 file-based apps. Each script is one `.cs`
 file under `scripts/`, declares its packages with `#:` directives, has no `.csproj`, and runs
-with `dotnet run scripts/<name>.cs`.
+with `dotnet run scripts/<name>.cs`, as the organization's
+[ADR 0001: Platform and Build](https://github.com/JSdotNet/app-defaults/blob/main/defaults/arc42/adr/0001-platform-and-build.md)
+prescribes.
 
 ## Why
 
 ```meta
 ```
 
-- A developer needs only the .NET 10 SDK the application already requires, as
+- A developer needs only the .NET 11 SDK the application already requires, as
   [the runtime record](runtime.md) sets out. No Python, Bash, or Node.js runtime has to be
   installed.
 - A script is written in the same C# as the application, with typing, NuGet packages, and the
@@ -42,6 +44,7 @@ with `dotnet run scripts/<name>.cs`.
 ```meta
 ```
 
-| Date | Change |
-| --- | --- |
-| 2026-10-08 | Proposed: .NET 10 file-based apps under `scripts/`, run with `dotnet run`, adopted from the organization's [ADR 0019](https://github.com/JSdotNet/Project-Guidelines-MCP/blob/main/guide/adrs/0019-csharp-script-files.md). |
+| Date | Change | Why |
+| --- | --- | --- |
+| 2026-11-24 | Proposed: the scripts run on the .NET 11 SDK. | The runtime moved to .NET 11. |
+| 2026-10-08 | Proposed: .NET 10 file-based apps under `scripts/`, run with `dotnet run`. | Adopted from the organization's former ADR 0019 (C# standalone script files). |
