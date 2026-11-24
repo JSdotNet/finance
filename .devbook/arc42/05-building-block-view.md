@@ -39,7 +39,7 @@ related: [.devbook/arc42/07-deployment-view.md#development, .devbook/arc42/08-cr
 
 These projects exist only for development and never ship to the user.
 
-- `Finance.AppHost` is the Aspire entry point that starts the application and its dashboard. It also starts `Finance.Web` when that is built.
+- `Finance.AppHost` is the Aspire 17 entry point that starts the application and its dashboard. It is a `Microsoft.NET.Sdk` project that adds the others by path with `AddDotnetProject`, per [orchestration](adr/orchestration.md). It also starts `Finance.Web` when that is built.
 - `Finance.ServiceDefaults` adds OpenTelemetry and health checks to every project that references it: `Finance.Desktop`, and `Finance.Web` when that is built.
 - `Finance.Web` is optional. It hosts `Finance.UI` in an ordinary browser over a throwaway data folder, so Playwright can run without the MAUI shell. It is a test harness, not a second channel. [11. Risks and Technical Debt](11-risks-and-technical-debt.md#open-questions) keeps open whether to build it.
 

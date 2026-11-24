@@ -6,7 +6,8 @@ index: root
 ```
 
 This file is the map of everything this repository builds with, and the layer files hold one
-chapter per technology. The stack is .NET with Aspire orchestration. Nothing is registered until
+chapter per technology. The stack is .NET 11 with Aspire 17 orchestration, per
+[the runtime record](../arc42/adr/runtime.md) and [the orchestration record](../arc42/adr/orchestration.md). Nothing is registered until
 the first project exists and `.devbook/_tools/devbook-tech/dotnet-packages.mjs` has an
 inventory to read.
 
